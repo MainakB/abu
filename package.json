@@ -1,0 +1,25 @@
+{
+  "name": "playwright-recorder-ui",
+  "version": "1.0.0",
+  "type": "module",
+  "main": "recorder.js",
+  "scripts": {
+    "build-ui:panel": "vite build --config ui-src/vite.panel.config.js",
+    "build-ui:assert": "vite build --config ui-src/vite.assert.config.js",
+    "build-ui": "npm run build-ui:panel && npm run build-ui:assert",
+    "start-server": "node server/server.js",
+    "record-only": "node recorder.js",
+    "record": "concurrently -n server,recorder -c green,blue \"npm run start-server\" \"npm run record-only\""
+  },
+  "dependencies": {
+    "concurrently": "^9.1.2",
+    "express": "^5.1.0",
+    "playwright": "^1.40.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "^4.0.0",
+    "vite": "^5.0.0"
+  }
+}

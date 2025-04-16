@@ -1,0 +1,83 @@
+.recorder-panel {
+  position: fixed;
+  top: 10px;
+  /* closer to top */
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 999999;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 10px;
+  background: rgba(240, 240, 240, 0.3);
+  /* frosted look */
+  backdrop-filter: blur(3px);
+  -webkit-backdrop-filter: blur(3px);
+  border-radius: 12px;
+  box-shadow: 0 1px 5px rgba(0, 0, 0, 0.2);
+  user-select: none;
+}
+
+/* Drag handle only shows grab */
+.recorder-drag-handle {
+  cursor: grab;
+  padding: 4px 6px;
+  font-size: 16px;
+  user-select: none;
+}
+
+.recorder-drag-handle:active {
+  cursor: grabbing;
+}
+
+/* .recorder-panel:active {
+  cursor: grabbing;
+} */
+
+/* Icon Buttons */
+.recorder-panel button {
+  background: none;
+  border: none;
+  font-size: 16px;
+  padding: 6px;
+  min-width: 28px;
+  min-height: 28px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.2s ease;
+  cursor: pointer;
+}
+
+.recorder-panel button:hover {
+  background-color: #69474765;
+}
+
+.recorder-panel button:focus {
+  outline: none;
+  background-color: #d4d4d491;
+}
+
+.recorder-panel button:active {
+  background-color: #d4d4d443;
+}
+
+@keyframes blinker {
+  50% {
+    opacity: 0.4;
+  }
+}
+
+
+/* .recorder-buttons {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+button {
+  cursor: pointer;
+  font-size: 12px;
+  padding: 4px 8px;
+} */
