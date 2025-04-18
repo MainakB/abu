@@ -1,5 +1,5 @@
 (() => {
-  window.getSelectors = (el) => {
+  window.__getSelectors = (el) => {
     const selectors = {};
     const attributes = {};
 

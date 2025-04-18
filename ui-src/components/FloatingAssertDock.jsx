@@ -36,7 +36,8 @@ export default function FloatingAssertDock({ el, mode, onConfirm, onCancel }) {
     >
       <div style={{ marginBottom: "6px" }}>
         <strong>
-          Assert that element {mode === "text" ? "text equals" : "value equals"}
+          Assert that element{" "}
+          {mode === "text" ? "text equals " : "value equals "}
         </strong>
       </div>
       <textarea

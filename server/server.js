@@ -4,6 +4,7 @@ const app = express();
 const PORT = 3111;
 
 let liveActions = [];
+let currentActiveTabId = null;
 
 app.use(express.json());
 app.use((req, res, next) => {

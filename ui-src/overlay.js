@@ -19,7 +19,8 @@
 
     document.body.appendChild(highlightBox);
 
-    document.addEventListener("mousemove", (e) => {
+    document.addEventListener("mousemove", async (e) => {
+      if (await window.__isPaused()) return;
       const target = e.target;
 
       if (
@@ -41,7 +42,8 @@
       highlightBox.style.display = "block";
     });
 
-    document.addEventListener("mouseout", () => {
+    document.addEventListener("mouseout", async (e) => {
+      if (await window.__isPaused()) return;
       highlightBox.style.display = "none";
     });
 

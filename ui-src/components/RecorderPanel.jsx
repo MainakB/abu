@@ -2,9 +2,15 @@ import React, { useState, useEffect, useRef } from "react";
 
 export default function RecorderPanel() {
   const panelRef = useRef(null);
-  const [recording, setRecording] = useState(true);
+  // const [recording, setRecording] = useState(true);
   const [steps, setSteps] = useState([]);
   const [mode, setMode] = useState(window.__recorderStore.getMode());
+  const [tickMap, setTickMap] = useState({
+    text: false,
+    value: false,
+    visibility: false,
+  });
+  const previousMode = useRef(window.__recorderStore.getMode());
 
   useEffect(() => {
     const unsubscribe = window.__recorderStore.subscribeToActions((updated) => {
@@ -24,12 +30,36 @@ export default function RecorderPanel() {
       setSteps(withIds);
     });
 
-    const unsubMode = window.__recorderStore.subscribeToMode(setMode);
+    // const unsubMode = window.__recorderStore.subscribeToMode(setMode);
+    const unsubMode = window.__recorderStore.subscribeToMode((newMode) => {
+      const prev = previousMode.current;
+
+      if (
+        ["text", "value", "visibility"].includes(prev) &&
+        newMode === "record"
+      ) {
+        // ✅ Show tick for the previous assertion mode
+        setTickMap((prevMap) => ({
+          ...prevMap,
+          [prev]: true,
+        }));
+
+        setTimeout(() => {
+          setTickMap((prevMap) => ({
+            ...prevMap,
+            [prev]: false,
+          }));
+        }, 1000);
+      }
+      setMode(newMode);
+      previousMode.current = newMode;
+    });
+
     return () => {
       unsubscribe();
       unsubMode();
     };
-  }, []);
+  });
 
   useEffect(() => {
     const dragHandle = document.querySelector(".recorder-drag-handle");
@@ -68,19 +98,31 @@ export default function RecorderPanel() {
     };
   }, []);
 
-  const toggleRecording = () => {
-    window.toggleRecording();
-    setRecording(!recording);
+  const dispatchEvent = () => {
+    const evt = new MouseEvent("mousemove", { bubbles: true });
+    document.dispatchEvent(evt);
+  };
+
+  const toggleRecording = async () => {
+    const recorderState = await window.__toggleRecording();
+    await window.__recorderStore.setMode(recorderState, false);
+    dispatchEvent();
   };
 
   const stop = () => {
     window.stopRecording();
   };
 
-  const toggleMode = (nextMode) => {
+  const getClassNameForAssert = (savedMode, selecetMode) => {
+    return `recorder-button${
+      savedMode === selecetMode ? " active blinking" : ""
+    }`;
+  };
+
+  const toggleMode = async (nextMode) => {
     const isSame = mode === nextMode;
     const newMode = isSame ? "record" : nextMode;
-    window.__recorderStore.setMode(newMode);
+    await window.__recorderStore.setMode(newMode);
     const evt = new MouseEvent("mousemove", { bubbles: true });
     document.dispatchEvent(evt);
   };
@@ -90,40 +132,41 @@ export default function RecorderPanel() {
       <div className="recorder-drag-handle" title="Drag toolbar">
         ⠿
       </div>
-      <button onClick={toggleRecording}>{recording ? "⏸" : "▶️"}</button>
+      <button onClick={async () => await toggleRecording()}>
+        {mode === "pause" ? "▶️" : "⏸"}
+        {/* {mode !== "pause" ? "⏸" : "▶️"} */}
+      </button>
       <button onClick={stop} title="Stop Recording">
         ❌
       </button>
 
       <button
         title="Inspect element"
-        className={mode === "inspect" ? "active" : ""}
-        onClick={() => toggleMode("inspect")}
+        className={getClassNameForAssert(mode, "inspect")}
+        onClick={async () => await toggleMode("inspect")}
       >
         🖱️
       </button>
       <button
         title="Assert visibility"
-        className={mode === "visibility" ? "active" : ""}
-        onClick={() => toggleMode("visibility")}
-        // onMouseDown={(e) => e.preventDefault()}
+        className={getClassNameForAssert(mode, "visibility")}
+        onClick={async () => await toggleMode("visibility")}
       >
-        👁️
+        {tickMap.visibility ? "✅" : "👁️"}
       </button>
       <button
         title="Assert text"
-        className={mode === "text" ? "active" : ""}
-        onClick={() => toggleMode("text")}
+        className={getClassNameForAssert(mode, "text")}
+        onClick={async () => await toggleMode("text")}
       >
-        🆎
+        {tickMap.text ? "✅" : "🆎"}
       </button>
       <button
         title="Assert value"
-        className={mode === "value" ? "active" : ""}
-        onClick={() => toggleMode("value")}
-        // onMouseDown={(e) => e.preventDefault()}
+        className={getClassNameForAssert(mode, "value")}
+        onClick={async () => await toggleMode("value")}
       >
-        📝
+        {tickMap.value ? "✅" : "📝"}
       </button>
 
       <button

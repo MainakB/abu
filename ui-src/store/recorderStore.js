@@ -1,21 +1,39 @@
 if (!window.__recorderStore) {
-  let assertMode = "record";
-  const assertListeners = [];
+  const MODE_KEY = "recorderMode";
+  const listeners = [];
   const actionListeners = [];
   const actions = [];
+  let mode = "record";
+
+  const socket = new WebSocket("ws://localhost:8787");
+
+  socket.addEventListener("message", (event) => {
+    try {
+      const data = JSON.parse(event.data);
+      if (data.type === "mode") {
+        mode = data.mode;
+        localStorage.setItem(MODE_KEY, mode);
+        listeners.forEach((fn) => fn(mode));
+      }
+    } catch {}
+  });
 
   window.__recorderStore = {
-    // MODE PUB-SUB
-    getMode: () => assertMode,
-    setMode: (newMode) => {
-      assertMode = newMode;
-      assertListeners.forEach((fn) => fn(newMode));
+    getMode: () => mode,
+    setMode: async (newMode, callToggle = true) => {
+      mode = newMode;
+      callToggle && (await window.__toggleRecording());
+      // localStorage.setItem(MODE_KEY, newMode);
+      socket.readyState === WebSocket.OPEN &&
+        socket.send(JSON.stringify({ type: "mode", mode: newMode }));
+      listeners.forEach((fn) => fn(newMode));
     },
     subscribeToMode: (fn) => {
-      assertListeners.push(fn);
+      listeners.push(fn);
+      fn(mode);
       return () => {
-        const idx = assertListeners.indexOf(fn);
-        if (idx !== -1) assertListeners.splice(idx, 1);
+        const idx = listeners.indexOf(fn);
+        if (idx !== -1) listeners.splice(idx, 1);
       };
     },
 
@@ -61,5 +79,5 @@ if (!window.__recorderStore) {
     },
   };
 
-  console.log("✅ recorderStore initialized");
+  console.log("✅ recorderStore (WebSocket version) initialized");
 }

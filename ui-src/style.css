@@ -54,13 +54,16 @@
   background-color: #69474765;
 }
 
-.recorder-panel button:focus {
+.recorder-panel button.blinking {
   outline: none;
-  background-color: #d4d4d491;
+  animation-name: blinker;
+  animation-duration: 2s;
+  animation-iteration-count: infinite;
+  background-color: #857979;
 }
 
 .recorder-panel button:active {
-  background-color: #d4d4d443;
+  background-color: #d4d4d448;
 }
 
 @keyframes blinker {

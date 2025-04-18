@@ -1,6 +1,6 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
-import RecorderPanel from "./components/RecorderPanel-backup";
+import RecorderPanel from "./components/RecorderPanel";
 import "./style.css";
 
 let root; // Persist root for potential reuse
@@ -23,47 +23,76 @@ const initializeRecorderPanel = () => {
     }
   }
 
-  // const root = ReactDOM.createRoot(rootEl);
-  if (!root) {
-    root = ReactDOM.createRoot(rootEl);
-  }
+  if (!rootEl.hasChildNodes()) {
+    if (!root) {
+      root = ReactDOM.createRoot(rootEl);
+    }
 
-  console.log("✅ React panel injected");
-  root.render(<RecorderPanel />);
+    root.render(<RecorderPanel />);
+    console.log("✅ React panel injected");
+  } else {
+    console.log("⚠️ Recorder panel already rendered");
+  }
 };
 
-const setupDomObserver = () => {
-  const target = document.body;
-  if (!target) {
-    console.warn(
-      "❗ document.body not ready for MutationObserver. Retrying..."
-    );
-    setTimeout(setupDomObserver, 100); // Retry after 100ms
-    return;
-  }
+const observeDOMAndRoute = () => {
+  console.log("🔍 DOM + Route observer initialized");
 
-  const observer = new MutationObserver(() => {
+  const reinjectIfMissing = () => {
     const exists = document.getElementById("recorder-panel-root");
     if (!exists) {
-      console.warn("⚠️ Recorder panel missing. Reinjecting...");
+      console.warn("⚠️ Panel missing after route change. Reinserting...");
       initializeRecorderPanel();
     }
-  });
+  };
+  const target = document.body;
+  if (target instanceof Node) {
+    const mo = new MutationObserver(reinjectIfMissing);
+    mo.observe(document.body, { childList: true, subtree: true });
+  } else {
+    console.warn(
+      "⚠️ DOM observer not initialized: document.body not available."
+    );
+  }
+  const wrap = (fn) => {
+    return function (...args) {
+      const result = fn.apply(this, args);
+      setTimeout(reinjectIfMissing, 50);
+      return result;
+    };
+  };
 
-  observer.observe(target, { childList: true, subtree: true });
+  history.pushState = wrap(history.pushState);
+  history.replaceState = wrap(history.replaceState);
+  window.addEventListener("popstate", () => {
+    console.log("🔁 Detected popstate route change");
+    setTimeout(reinjectIfMissing, 50);
+  });
 };
 
-// Ensure script runs when DOM is fully loaded
-if (document.readyState === "loading") {
-  // document.addEventListener("DOMContentLoaded", initializeRecorderPanel);
-  document.addEventListener("DOMContentLoaded", () => {
-    initializeRecorderPanel();
-    setupDomObserver();
-  });
-} else {
-  // requestIdleCallback(initializeRecorderPanel);
-  requestIdleCallback(() => {
-    initializeRecorderPanel();
-    setupDomObserver();
-  });
-}
+window.__bootRecorderUI = () => {
+  const tryBoot = () => {
+    if (window.__recorderStore) {
+      initializeRecorderPanel();
+      observeDOMAndRoute();
+      // window.__setupDomObserver();
+    } else {
+      console.warn("⏳ Waiting for __recorderStore...");
+      setTimeout(tryBoot, 50);
+    }
+  };
+
+  tryBoot(); // Don't delay – we’re already injected via script tag
+
+  if (
+    document.readyState === "complete" ||
+    document.readyState === "interactive"
+  ) {
+    requestIdleCallback(tryBoot);
+  } else {
+    document.addEventListener("DOMContentLoaded", tryBoot);
+  }
+};
+
+// ✅ Auto-run it on main page
+window.__bootRecorderUI();
