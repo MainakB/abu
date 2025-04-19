@@ -43,7 +43,8 @@
       if (isIgnorable(el)) return;
       if (!shouldUpdateInput)
         await window.__maybeRecordTabSwitch?.("recorder", "click");
-      console.log("done clicking ", e.preventDefault());
+
+      if (el.tagName && el.tagName.toLowerCase() === "select") return;
       await window.__recordAction(
         window.__buildData({
           action: "click",
@@ -82,28 +83,32 @@
     });
 
     document.addEventListener("change", async (e) => {
-      if (window.__isPaused()) return;
+      if (await window.__isPaused()) return;
       const el = e.target;
       if (isIgnorable(el)) return;
-
       const tag = el.tagName.toLowerCase();
       let value = null;
-
+      let selectOptionIndex = null;
       if (el.type === "checkbox" || el.type === "radio") {
         value = el.checked;
       } else if (tag === "select") {
-        value = el.value;
+        const selectedOption = el.options[el.selectedIndex];
+        const selectedValue = selectedOption.value;
+        const selectedText = selectedOption.textContent.trim();
+        value = selectedText;
+        selectOptionIndex = selectedValue;
       } else {
         return;
       }
 
       await window.__maybeRecordTabSwitch?.("recorder", "change");
-      record(
-        buildData({
+      await window.__recordAction(
+        window.__buildData({
           action: "select",
           el,
           e,
           value,
+          selectOptionIndex,
         })
       );
     });

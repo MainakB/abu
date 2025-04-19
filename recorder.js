@@ -95,6 +95,14 @@ async function updateInitialRecorderState(page, initialPage = false) {
   }, globalRecorderMode);
 }
 
+const allowPopups = (page) => {
+  page.on("dialog", async (dialog) => {
+    console.log("🔔 Dialog shown:", dialog.message());
+    // Do NOT accept/dismiss. Let the user handle it manually.
+    // Just log or notify if needed.
+  });
+};
+
 async function injectScripts(page, tabId, initialPage, recoderModeValue) {
   await page.waitForLoadState("domcontentloaded");
   if (!initialPage) {
@@ -165,6 +173,8 @@ async function injectScripts(page, tabId, initialPage, recoderModeValue) {
       });
     });
   }
+
+  await allowPopups(page);
 }
 
 // Handle first page
@@ -286,4 +296,4 @@ async function exposeRecorderControls(page) {
 }
 
 // await firstPage.goto("about:blank");
-await firstPage.goto("https://the-internet.herokuapp.com/javascript_alerts");
+await firstPage.goto("https://the-internet.herokuapp.com/");

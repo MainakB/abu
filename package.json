@@ -7,8 +7,10 @@
     "build-ui:panel": "vite build --config ui-src/vite.panel.config.js",
     "build-ui:assert": "vite build --config ui-src/vite.assert.config.js",
     "build-ui": "npm run build-ui:panel && npm run build-ui:assert",
-    "start-server": "node server/server.js",
+    "start-server": "node servers/api-server.js",
+    "start-ws": "node servers/ws-server.js",
     "record-only": "node recorder.js",
+    "start-servers": "concurrently -n server,ws -c green,blue \"npm run start-server\" \"npm run start-ws\"",
     "record": "concurrently -n server,recorder -c green,blue \"npm run start-server\" \"npm run record-only\""
   },
   "dependencies": {

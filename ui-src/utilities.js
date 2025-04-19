@@ -5,6 +5,27 @@
     return labelEl?.innerText?.trim() || null;
   };
 
+  const getCheckboxStatus = (el) => {
+    if (!el) return null;
+    try {
+      return el.checked;
+    } catch (err) {
+      return null;
+    }
+  };
+
+  const getCheckboxIndex = (el) => {
+    if (!el) return -1;
+    try {
+      const idx = Array.from(el.parentElement.childNodes)
+        .filter((v) => v.type === "checkbox")
+        .findIndex((node) => node.isSameNode(el));
+      return idx >= 0 ? idx + 1 : idx;
+    } catch (err) {
+      return -1;
+    }
+  };
+
   window.__buildData = ({
     action,
     assertion,
@@ -13,6 +34,7 @@
     e,
     value = null,
     text = null,
+    selectOptionIndex = null,
   }) => {
     const { selectors, attributes } = window.__getSelectors(el);
     return {
@@ -24,10 +46,19 @@
       attributes: {
         ...(attributes || {}),
         associatedLabel: getAssociatedLabel(el),
+        ...(attributes.type &&
+        attributes.type === "checkbox" &&
+        getCheckboxStatus(el) !== null
+          ? {
+              checked: getCheckboxStatus(el),
+              checkboxIndex: getCheckboxIndex(el),
+            }
+          : {}),
       },
       position: e ? { x: e.pageX, y: e.pageY } : null,
       value,
       text,
+      selectOptionIndex,
     };
   };
 
