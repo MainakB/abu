@@ -35,18 +35,6 @@ export default function FloatingAssertDock({ el, mode, onConfirm, onCancel }) {
       id="floating-assert-dock-root"
       onClick={(e) => e.stopPropagation()}
       onMouseDown={(e) => e.stopPropagation()}
-      // style={{
-      //   position: "fixed",
-      //   bottom: "20px",
-      //   left: "20px",
-      //   padding: "10px",
-      //   background: "#fff",
-      //   border: "1px solid #ccc",
-      //   boxShadow: "0 2px 8px rgba(0,0,0,0.3)",
-      //   zIndex: 999999,
-      //   minWidth: "320px",
-      //   fontSize: "14px",
-      // }}
     >
       <div style={{ marginBottom: "6px" }}>
         <strong>

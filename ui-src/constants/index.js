@@ -8,6 +8,8 @@ export const ASSERTIONMODES = {
   NETREQUEST: "networkRequest",
   ENABLED: "enabled",
   DISABLED: "disabled",
+  ADDCOOKIES: "addCookies",
+  DELETECOOKIES: "deleteCookies",
 };
 
 export const ASSERTIONNAMES = {
@@ -20,15 +22,13 @@ export const ASSERTIONNAMES = {
   ENABLED: "isEnabled",
   DISABLED: "isDisabled",
   PRSENECE: "isPresent",
+  ADDCOOKIES: "addCookies",
+  DELETECOOKIES: "deleteCookies",
 };
 
 export const NONDOCKASSERTIONNAMES = {
-  VISIBILITY: "isVisible",
-  ENABLED: "isEnabled",
-  DISABLED: "isDisabled",
-  PRSENECE: "isPresent",
-  VISIBILITY: "isVisibleSoftAssert",
-  ENABLED: "isEnabledSoftAssert",
-  DISABLED: "isDisabledSoftAssert",
-  PRSENECE: "presenceSoftAssert",
+  // VISIBILITY: "isVisible",
+  // ENABLED: "isEnabled",
+  // DISABLED: "isDisabled",
+  // PRSENECE: "isPresent",
 };

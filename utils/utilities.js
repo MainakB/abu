@@ -36,7 +36,14 @@
     text = null,
     selectOptionIndex = null,
     isSoftAssert = false,
+    cookies,
   }) => {
+    if (action === "addCookies" || action === "deleteCookies") {
+      return {
+        action,
+        cookies,
+      };
+    }
     const { selectors, attributes } = window.__getSelectors(el);
     return {
       action,

@@ -13,7 +13,6 @@
     document.addEventListener("click", async (e) => {
       const el = e.target;
       const mode = window.__recorderStore?.getMode?.() || "record";
-      console.log("mode is : ", mode);
       let shouldUpdateInput = false;
       if (await window.__isPaused()) return;
       // 🛑 Finalize any pending input before handling click
@@ -35,7 +34,6 @@
         initialValue = null;
       }
 
-      // if (["text", "value", "visibility"].includes(mode)) {
       if (Object.values(assertionModes).includes(mode)) {
         e.preventDefault();
         e.stopPropagation();

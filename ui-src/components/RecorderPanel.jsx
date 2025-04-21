@@ -38,12 +38,10 @@ export default function RecorderPanel() {
       setSteps(withIds);
     });
 
-    // const unsubMode = window.__recorderStore.subscribeToMode(setMode);
     const unsubMode = window.__recorderStore.subscribeToMode((newMode) => {
       const prev = previousMode.current;
 
       if (
-        // ["text", "value", "visibility"].includes(prev) &&
         Object.values(ASSERTIONMODES).includes(prev) &&
         newMode === "record"
       ) {
@@ -140,7 +138,7 @@ export default function RecorderPanel() {
   };
 
   const stop = () => {
-    window.stopRecording();
+    window.__stopRecording();
   };
 
   const getClassNameForAssert = (savedMode, selecetMode) => {
@@ -155,6 +153,16 @@ export default function RecorderPanel() {
     await window.__recorderStore.setMode(newMode);
     const evt = new MouseEvent("mousemove", { bubbles: true });
     document.dispatchEvent(evt);
+  };
+
+  const toggleModeLaunchDock = async (nextMode) => {
+    const isSame = mode === nextMode;
+    const newMode = isSame ? "record" : nextMode;
+    await window.__recorderStore.setMode(newMode);
+    const evt = new MouseEvent("mousemove", { bubbles: true });
+    document.dispatchEvent(evt);
+    await window.showFloatingAssert(newMode, undefined, undefined, newMode);
+    setDrawerOpen(false);
   };
 
   const toggleDrawer = () => setDrawerOpen(!isDrawerOpen);
@@ -191,8 +199,6 @@ export default function RecorderPanel() {
         </button>
         <button
           title="Assert text"
-          // className={getClassNameForAssert(mode, "text")}
-          // onClick={async () => await toggleMode("text")}
           className={getClassNameForAssert(mode, ASSERTIONMODES.TEXT)}
           onClick={async () => await toggleMode(ASSERTIONMODES.TEXT)}
         >
@@ -211,12 +217,12 @@ export default function RecorderPanel() {
         </button>
         {isDrawerOpen && (
           <div className="drawer-anchor">
-            {/* <div className="drawer-backdrop"></div> */}
             <MoreOptionsDrawer
               isOpen={isDrawerOpen}
               onClose={toggleDrawer}
               expanded={expanded}
               onToggleSection={toggleSection}
+              onMenuSelectionLaunchDock={toggleModeLaunchDock}
               onMenuSelection={toggleMode}
               getClassName={getClassNameForAssert}
               currentMode={mode}

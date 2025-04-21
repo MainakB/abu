@@ -1,5 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { ASSERTIONMODES } from "../constants/index.js";
+import Cookie from "./svg-icons/Cookie.jsx";
+import CookieBin from "./svg-icons/CookieBin.jsx";
+import NetworkGlobe from "./svg-icons/NetworkGlobe.jsx";
+import Camera from "./svg-icons/Camera.jsx";
+import Stopwatch from "./svg-icons/Stopwatch.jsx";
 
 export default function MoreOptionsDrawer({
   isOpen,
@@ -9,6 +14,7 @@ export default function MoreOptionsDrawer({
   onMenuSelection,
   getClassName,
   currentMode,
+  onMenuSelectionLaunchDock,
 }) {
   if (!isOpen) return null;
 
@@ -97,9 +103,32 @@ export default function MoreOptionsDrawer({
             <li>⏱ Wait For Element To Be Clickable</li>
             <li>⏱ Wait For Element To Be Enabled</li>
             <li>⏱ Wait For Element To Be Disabled</li>
-            <li>📷 Take Screenshot</li>
             <li>🌐 Wait For Network Request</li>
-            <li>🍪 Add Cookies</li>
+            <li>📷 Take Screenshot</li>
+            <li
+              className={getClassName(currentMode, ASSERTIONMODES.ADDCOOKIES)}
+              onClick={async () =>
+                await onMenuSelectionLaunchDock(ASSERTIONMODES.ADDCOOKIES)
+              }
+            >
+              🍪 Add Cookies
+            </li>
+            <li
+              className={getClassName(
+                currentMode,
+                ASSERTIONMODES.DELETECOOKIES
+              )}
+              onClick={async () =>
+                await onMenuSelectionLaunchDock(ASSERTIONMODES.DELETECOOKIES)
+              }
+            >
+              {/* // onClick={handleDeleteCookies}> */}
+              {/* <span clasName="icon-svg-container">
+                <CookieBin />
+                Delete Cookies
+              </span> */}
+              🗑️ Delete Cookies
+            </li>
           </ul>
         )}
       </div>
