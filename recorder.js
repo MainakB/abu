@@ -42,7 +42,7 @@ const cssContent = await fs.promises.readFile(cssPath, "utf8");
 // Inject React UI and element highlighter
 // ✅ Inject in correct order
 const scriptPaths = {
-  utilities: "ui-src/utilities.js",
+  utilities: "utils/utilities.js",
   store: "ui-src/store/recorderStore.js",
   selector: "ui-src/selectorStrategy.js",
   overlay: "ui-src/overlay.js",

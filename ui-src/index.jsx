@@ -71,6 +71,25 @@ const observeDOMAndRoute = () => {
 };
 
 window.__bootRecorderUI = () => {
+  // If this is the top frame AND it contains a frameset, do NOT inject UI here
+  // if (
+  //   window === window.top &&
+  //   document.documentElement &&
+  //   document.documentElement.tagName.toLowerCase() === "frameset"
+  // ) {
+  //   console.warn("⚠️ Skipping panel injection in <frameset> document.");
+  //   return;
+  // }
+
+  // // If we're in an iframe/frame but NOT the first one, skip (optional)
+  // if (window !== window.top) {
+  //   const isFirstFrame = window.parent.frames[0] === window;
+  //   if (!isFirstFrame) {
+  //     console.warn("❌ Skipping panel in non-primary frame.");
+  //     return;
+  //   }
+  // }
+
   const tryBoot = () => {
     if (window.__recorderStore) {
       initializeRecorderPanel();

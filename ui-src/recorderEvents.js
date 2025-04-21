@@ -47,10 +47,10 @@
       if (el.tagName && el.tagName.toLowerCase() === "select") return;
       await window.__recordAction(
         window.__buildData({
-          action: "click",
-          el,
-          e,
-          text: el.innerText?.trim() || null,
+        action: "click",
+        el,
+        e,
+        text: el.innerText?.trim() || null,
         })
       );
     });

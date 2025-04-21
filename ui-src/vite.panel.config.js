@@ -40,6 +40,6 @@ export default defineConfig({
     },
     outDir: resolve(__dirname, "../injected"),
     emptyOutDir: false,
-    // cssCodeSplit: false,
+    // cssCodeSplit: false, //seperate css file generation is required in recorder.js
   },
 });

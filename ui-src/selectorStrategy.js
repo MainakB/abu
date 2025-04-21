@@ -34,6 +34,11 @@
     selectors.css = getCssSelector(el);
     selectors.xpath = generateXPath(el); // Last resort
 
+    const iFramesPath = getIframePath(el);
+    selectors.iframes = iFramesPath;
+    selectors.iframeDepth =
+      iFramesPath && Array.isArray(iFramesPath) ? iFramesPath.length : -1;
+
     return { selectors, attributes };
   };
 
@@ -69,4 +74,82 @@
       siblings.length > 1 ? `[${siblings.indexOf(el) + 1}]` : ""
     }`;
   };
+
+  const getShadowRoot = (el) => {
+    let rootMainNode = el.getRootNode();
+    console.log("RootNode type:", rootMainNode.toString());
+    console.log("RootNode instance of:", rootMainNode instanceof ShadowRoot);
+    if (
+      rootMainNode instanceof ShadowRoot ||
+      rootMainNode.toString() === "[object HTMLDocument]"
+    ) {
+      let rootMain = el;
+      while (
+        rootMain.host &&
+        (rootMain instanceof ShadowRoot ||
+          rootMain.toString() === "[object HTMLDocument]")
+      ) {
+        rootMain = rootMain.host.getRootNode();
+      }
+      console.log("rootMain :", rootMainNode);
+    }
+
+    console.log("Top-level root:", rootMainNode);
+  };
+
+  function getIframePathFromTop(targetWin = window) {
+    const path = [];
+
+    function find(win, root = window.top, trail = []) {
+      const frames = root.document.querySelectorAll("iframe, frame");
+
+      for (let i = 0; i < frames.length; i++) {
+        const frame = frames[i];
+
+        try {
+          if (frame.contentWindow === win) {
+            trail.push(frame);
+            path.push(...trail);
+            return true;
+          }
+
+          // Recurse into nested frames
+          if (find(win, frame.contentWindow, [...trail, frame])) {
+            return true;
+          }
+        } catch (e) {
+          // Cross-origin access — ignore
+        }
+      }
+
+      return false;
+    }
+
+    try {
+      if (targetWin !== window.top) {
+        find(targetWin);
+      }
+    } catch (err) {
+      console.warn("Error tracing frame path:", err.message);
+    }
+
+    return path.map((f) => ({
+      src: f.getAttribute("src") || null,
+      name: f.getAttribute("name") || null,
+      id: f.getAttribute("id") || null,
+      className: f.getAttribute("className") || null,
+    }));
+  }
+
+  function getIframePath(element) {
+    try {
+      let win = element.ownerDocument.defaultView;
+      const frames = getIframePathFromTop(win);
+      return frames;
+      // frames.map((iframe) => iframe.getAttribute("src") || "[iframe]");
+    } catch (err) {
+      console.warn("⚠️ Failed to get iframe path:", err.message);
+      return [];
+    }
+  }
 })();
