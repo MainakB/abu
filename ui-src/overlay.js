@@ -1,7 +1,7 @@
 (() => {
   const initializeOverlay = () => {
-    if (!document.body) {
-      console.warn("document.body not ready, retrying...");
+    if (!document.documentElement) {
+      console.warn("document.documentElement not ready, retrying...");
       requestIdleCallback(initializeOverlay);
       return;
     }
@@ -17,7 +17,7 @@
     highlightBox.style.transition = "all 0.1s ease";
     highlightBox.style.boxSizing = "border-box";
 
-    document.body.appendChild(highlightBox);
+    document.documentElement.appendChild(highlightBox);
 
     document.addEventListener("mousemove", async (e) => {
       if (await window.__isPaused()) return;

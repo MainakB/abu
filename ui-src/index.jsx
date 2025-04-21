@@ -14,13 +14,20 @@ const initializeRecorderPanel = () => {
     rootEl.id = "recorder-panel-root";
 
     // Ensure document.body exists before appending
-    if (document.body) {
-      document.body.appendChild(rootEl);
+    if (document.documentElement) {
+      document.documentElement.appendChild(rootEl);
     } else {
-      console.warn("document.body not ready. Retrying...");
+      console.warn("document.documentElement not ready. Retrying...");
       requestIdleCallback(initializeRecorderPanel);
       return;
     }
+    // if (document.body) {
+    //   document.body.appendChild(rootEl);
+    // } else {
+    //   console.warn("document.body not ready. Retrying...");
+    //   requestIdleCallback(initializeRecorderPanel);
+    //   return;
+    // }
   }
 
   if (!rootEl.hasChildNodes()) {
@@ -45,13 +52,13 @@ const observeDOMAndRoute = () => {
       initializeRecorderPanel();
     }
   };
-  const target = document.body;
+  const target = document.documentElement;
   if (target instanceof Node) {
     const mo = new MutationObserver(reinjectIfMissing);
-    mo.observe(document.body, { childList: true, subtree: true });
+    mo.observe(document.documentElement, { childList: true, subtree: true });
   } else {
     console.warn(
-      "⚠️ DOM observer not initialized: document.body not available."
+      "⚠️ DOM observer not initialized: document.documentElement not available."
     );
   }
   const wrap = (fn) => {
@@ -72,23 +79,24 @@ const observeDOMAndRoute = () => {
 
 window.__bootRecorderUI = () => {
   // If this is the top frame AND it contains a frameset, do NOT inject UI here
-  // if (
-  //   window === window.top &&
-  //   document.documentElement &&
-  //   document.documentElement.tagName.toLowerCase() === "frameset"
-  // ) {
-  //   console.warn("⚠️ Skipping panel injection in <frameset> document.");
-  //   return;
-  // }
+  if (
+    window === window.top &&
+    document.documentElement &&
+    document.documentElement.tagName.toLowerCase() === "frameset"
+  ) {
+    console.warn("⚠️ Skipping panel injection in <frameset> document.");
+    return;
+  }
 
-  // // If we're in an iframe/frame but NOT the first one, skip (optional)
-  // if (window !== window.top) {
-  //   const isFirstFrame = window.parent.frames[0] === window;
-  //   if (!isFirstFrame) {
-  //     console.warn("❌ Skipping panel in non-primary frame.");
-  //     return;
-  //   }
-  // }
+  // If we're in an iframe/frame but NOT the first one, skip (optional)
+  if (window !== window.top) {
+    // const isFirstFrame = window.parent.frames[0] === window;
+    // if (!isFirstFrame) {
+    //   console.warn("❌ Skipping panel in non-primary frame.");
+    //   return;
+    // }
+    return;
+  }
 
   const tryBoot = () => {
     if (window.__recorderStore) {

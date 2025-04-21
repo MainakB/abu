@@ -6,7 +6,8 @@
   "scripts": {
     "build-ui:panel": "vite build --config ui-src/vite.panel.config.js",
     "build-ui:assert": "vite build --config ui-src/vite.assert.config.js",
-    "build-ui": "npm run build-ui:panel && npm run build-ui:assert",
+    "build-ui:constants": "vite build --config ui-src/vite.constants.config.js",
+    "build-ui": "npm run build-ui:constants && npm run build-ui:panel && npm run build-ui:assert",
     "start-server": "node servers/api-server.js",
     "start-ws": "node servers/ws-server.js",
     "record-only": "node recorder.js",

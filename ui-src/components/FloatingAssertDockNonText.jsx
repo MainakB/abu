@@ -9,25 +9,16 @@ function getOwnText(el) {
     .trim();
 }
 
-export default function FloatingAssertDock({ el, mode, onConfirm, onCancel }) {
-  const [expected, setExpected] = useState(() => {
-    if (mode === ASSERTIONMODES.TEXT) return getOwnText(el);
-    if (mode === ASSERTIONMODES.VALUE)
-      return el?.value || el?.getAttribute("value") || "";
-    return "";
-  });
-
+export default function FloatingAssertDockNonText({
+  el,
+  mode,
+  onConfirm,
+  onCancel,
+}) {
   const [softAssert, setSofAssert] = useState(false);
 
   useEffect(() => {
     if (!el) return;
-    // if (mode === "text") {
-    if (mode === ASSERTIONMODES.TEXT) {
-      setExpected(el.innerText?.trim() || "");
-    } else if (mode === ASSERTIONMODES.VALUE) {
-      // else if (mode === "value") {
-      setExpected(el.value || el.getAttribute("value") || "");
-    }
   }, [el, mode]);
 
   return (
@@ -35,31 +26,13 @@ export default function FloatingAssertDock({ el, mode, onConfirm, onCancel }) {
       id="floating-assert-dock-root"
       onClick={(e) => e.stopPropagation()}
       onMouseDown={(e) => e.stopPropagation()}
-      // style={{
-      //   position: "fixed",
-      //   bottom: "20px",
-      //   left: "20px",
-      //   padding: "10px",
-      //   background: "#fff",
-      //   border: "1px solid #ccc",
-      //   boxShadow: "0 2px 8px rgba(0,0,0,0.3)",
-      //   zIndex: 999999,
-      //   minWidth: "320px",
-      //   fontSize: "14px",
-      // }}
     >
       <div style={{ marginBottom: "6px" }}>
         <strong>
           Assert that element{" "}
           {mode === ASSERTIONMODES.TEXT ? "text equals " : "value equals "}
-          {/* {mode === "text" ? "text equals " : "value equals "} */}
         </strong>
       </div>
-      <textarea
-        style={{ width: "100%", minHeight: "60px" }}
-        value={expected}
-        onChange={(e) => setExpected(e.target.value)}
-      />
       <div className="docked-pane-footer-container">
         <div className="docked-pane-footer-assert-container">
           <input
@@ -81,10 +54,9 @@ export default function FloatingAssertDock({ el, mode, onConfirm, onCancel }) {
           </button>
           <button
             onClick={() => {
-              onConfirm(expected, softAssert);
+              onConfirm(softAssert);
               setSofAssert(false);
             }}
-            disabled={!expected}
           >
             ✅
           </button>

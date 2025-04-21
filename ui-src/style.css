@@ -9,13 +9,22 @@
   align-items: center;
   gap: 8px;
   padding: 5px 10px;
-  background: rgba(240, 240, 240, 0.3);
+  background: rgba(240, 240, 240, 1);
   /* frosted look */
   backdrop-filter: blur(3px);
   -webkit-backdrop-filter: blur(3px);
   border-radius: 12px;
   box-shadow: 0 1px 5px rgba(0, 0, 0, 0.2);
   user-select: none;
+  width: max-content;
+}
+
+.recorder-panel-inner {
+  position: relative;
+  display: flex;
+  /* Fix: horizontal layout */
+  align-items: center;
+  gap: 8px;
 }
 
 /* Drag handle only shows grab */
@@ -66,11 +75,127 @@
   background-color: #d4d4d448;
 }
 
+.docked-pane-footer-container {
+  display: flex;
+  margin-top: 5px;
+  flex-direction: column;
+}
+
+.docked-pane-footer-assert-container {
+  display: flex;
+  gap: 8px;
+  flex-direction: row;
+}
+
+#floating-assert-dock-root {
+  position: fixed;
+  bottom: 20px;
+  left: 20px;
+  padding: 10px;
+  background: #fff;
+  border: 1px solid #ccc;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  z-index: 999999;
+  min-width: 320px;
+  font-size: 14px;
+}
+
 @keyframes blinker {
   50% {
     opacity: 0.4;
   }
 }
+
+/* Drawers */
+.drawer {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  margin-top: 8px;
+  background: rgba(240, 240, 240, 1);
+  box-shadow: 0 1px 5px rgba(0, 0, 0, 0.2);
+  padding: 15px 10px;
+  border-radius: 12px;
+  transition: all 0.2s ease;
+  /* max-width: 400px; */
+  width: max-content;
+  max-width: none;
+  min-width: 220px;
+  display: flex;
+  flex-direction: column;
+  z-index: 999999;
+  backdrop-filter: blur(6px) !important;
+  -webkit-backdrop-filter: blur(6px) !important;
+  will-change: transform;
+  transform: translateZ(0);
+}
+
+
+.drawer-anchor {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  left: 0;
+  margin-top: 8px;
+  z-index: 999999;
+}
+
+
+/* .drawer-backdrop {
+  position: absolute;
+  inset: 0;
+  background: inherit;
+  filter: blur(6px);
+  z-index: -1;
+  border-radius: 12px;
+} */
+
+
+.drawer-header {
+  display: flex;
+  justify-content: space-between;
+  /* font-weight: bold; */
+  border-bottom: 1px solid #ddd;
+  padding-bottom: 8px;
+  margin-bottom: 12px;
+}
+
+.drawer-section {
+  margin-bottom: 20px;
+}
+
+.drawer-title {
+  font-weight: 600;
+  cursor: pointer;
+  margin-bottom: 6px;
+}
+
+.drawer-list {
+  list-style: none;
+  padding-left: 10px;
+}
+
+.drawer-list li {
+  padding: 4px 0;
+  cursor: pointer;
+}
+
+.drawer-list li:hover {
+  background-color: #69474765;
+}
+
+.drawer-list li.blinking {
+  outline: none;
+  animation-name: blinker;
+  animation-duration: 2s;
+  animation-iteration-count: infinite;
+  background-color: #857979;
+}
+
+.drawer-list li:active {
+  background-color: #d4d4d448;
+}
+
 
 
 /* .recorder-buttons {

@@ -25,15 +25,26 @@ ensureChromiumInstalled();
 const browser = await chromium.launch({
   headless: false,
   args: [
+    "--disable-http2",
+    "--no-sandbox",
     "--start-maximized",
+    "--disable-web-security",
+    "--disable-blink-features=AutomationControlled",
+    "--ignore-certificate-errors",
     "--disable-site-isolation-trials", // 👈 disables process isolation
     "--disable-features=IsolateOrigins,site-per-process",
   ],
 });
+// const windowsUserAgent =  "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36";
+const windowsUserAgent =
+  "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36";
+const macUserAgent =
+  "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.4 Safari/605.1.15";
+
 const context = await browser.newContext({
   viewport: null, // allow full window
-  userAgent:
-    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+  ignoreHTTPSErrors: true,
+  userAgent: process.platform === "win32" ? windowsUserAgent : macUserAgent,
 });
 
 const cssPath = path.join(__dirname, "injected", "style.css");
@@ -42,6 +53,7 @@ const cssContent = await fs.promises.readFile(cssPath, "utf8");
 // Inject React UI and element highlighter
 // ✅ Inject in correct order
 const scriptPaths = {
+  constants: "injected/constants-global.bundle.js",
   utilities: "utils/utilities.js",
   store: "ui-src/store/recorderStore.js",
   selector: "ui-src/selectorStrategy.js",

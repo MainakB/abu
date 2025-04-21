@@ -7,12 +7,13 @@
 
   let currentInput = null;
   let initialValue = null;
+  const assertionModes = window.__ASSERTIONMODES;
 
   const addListeners = () => {
     document.addEventListener("click", async (e) => {
       const el = e.target;
       const mode = window.__recorderStore?.getMode?.() || "record";
-
+      console.log("mode is : ", mode);
       let shouldUpdateInput = false;
       if (await window.__isPaused()) return;
       // 🛑 Finalize any pending input before handling click
@@ -34,7 +35,8 @@
         initialValue = null;
       }
 
-      if (["text", "value", "visibility"].includes(mode)) {
+      // if (["text", "value", "visibility"].includes(mode)) {
+      if (Object.values(assertionModes).includes(mode)) {
         e.preventDefault();
         e.stopPropagation();
         e.stopImmediatePropagation();
@@ -47,10 +49,10 @@
       if (el.tagName && el.tagName.toLowerCase() === "select") return;
       await window.__recordAction(
         window.__buildData({
-        action: "click",
-        el,
-        e,
-        text: el.innerText?.trim() || null,
+          action: "click",
+          el,
+          e,
+          text: el.innerText?.trim() || null,
         })
       );
     });

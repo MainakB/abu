@@ -1,12 +1,21 @@
 (() => {
   const initAssertPicker = () => {
-    if (!document.body || !window.__getSelectors) {
+    if (!document.documentElement || !window.__getSelectors) {
       requestIdleCallback(initAssertPicker);
       return;
     }
 
     if (!window.__recorderStore) return;
+    const assertionModes = window.__ASSERTIONMODES;
+    const assertionNames = window.__ASSERTIONNAMES;
+    const nonDockAsserts = window.__NONDOCKASSERTIONNAMES;
 
+    console.log(
+      "assertionModes: ",
+      assertionModes,
+      assertionNames,
+      nonDockAsserts
+    );
     const assertBox = document.createElement("div");
     assertBox.style.position = "absolute";
     assertBox.style.border = "2px dashed #f00";
@@ -14,14 +23,15 @@
     assertBox.style.pointerEvents = "none";
     assertBox.style.zIndex = "999998";
     assertBox.style.display = "none";
-    document.body.appendChild(assertBox);
+    document.documentElement.appendChild(assertBox);
 
     let hoverTarget = null;
 
     document.addEventListener("mousemove", async (e) => {
       if (await window.__isPaused()) return;
       const mode = window.__recorderStore.getMode();
-      if (!["text", "value", "visibility"].includes(mode)) return;
+      // if (!["text", "value", "visibility"].includes(mode)) return;
+      if (!Object.values(assertionModes).includes(mode)) return;
 
       const el = e.target;
       if (!el || !(el instanceof Element)) return;
@@ -41,6 +51,14 @@
       assertBox.style.border = "2px dashed green";
     });
 
+    document.addEventListener("mouseout", (e) => {
+      const mode = window.__recorderStore.getMode();
+      // if (["text", "value", "visibility"].includes(mode)) {
+      if (Object.values(assertionModes).includes(mode)) {
+        assertBox.style.display = "none";
+      }
+    });
+
     // An sync click listener to guardrail the next click listener which is async.
     // Because of being async the preventdefault does not run on time and hence we
     // have a sync click listener before to apply preventdefault and flags.
@@ -48,7 +66,8 @@
       "click",
       (e) => {
         const mode = window.__recorderStore.getMode();
-        if (!["text", "value", "visibility"].includes(mode)) return;
+        // if (!["text", "value", "visibility"].includes(mode)) return;
+        if (!Object.values(assertionModes).includes(mode)) return;
         if (!(e.target instanceof Element)) return;
         if (
           e.target.closest("#floating-assert-dock-root") ||
@@ -68,7 +87,8 @@
       async (e) => {
         if (await window.__isPaused()) return;
         const mode = window.__recorderStore.getMode();
-        if (!["text", "value", "visibility"].includes(mode)) return;
+        // if (!["text", "value", "visibility"].includes(mode)) return;
+        if (!Object.values(assertionModes).includes(mode)) return;
         if (!(e.target instanceof Element)) return;
         if (
           e.target.closest("#floating-assert-dock-root") ||
@@ -83,27 +103,25 @@
         const el = hoverTarget;
         if (!el || typeof window.__getSelectors !== "function") return;
         await window.__maybeRecordTabSwitch?.(`assert`, "click");
-        const text = el.innerText?.trim() || "";
-
-        if (mode === "visibility") {
-          await window.__recordAction(
-            window.__buildData({
-              action: "assert",
-              assertion: "toBeVisible",
-              el,
-              e,
-              text,
-            })
-          );
-        } else {
-          window.showFloatingAssert(mode, el);
+        console.log("Show floating asserts");
+        let assertType = "text";
+        if (
+          mode === assertionModes.VISIBILITY ||
+          mode === assertionModes.PRSENECE ||
+          mode === assertionModes.ENABLED ||
+          mode === assertionModes.DISABLED
+        ) {
+          assertType = "nonText";
         }
 
+        window.showFloatingAssert(mode, el, e, assertType);
         assertBox.style.display = "none";
         hoverTarget = null;
+
         // For text and value mode, do not reset from click listener,
         // as this will be done from docked pane on confirm/cancel
-        if (!["text", "value"].includes(mode)) {
+        // if (!["text", "value"].includes(mode)) {
+        if (!Object.values(nonDockAsserts).includes(mode)) {
           await window.__recorderStore.setMode("record");
         }
       },
@@ -116,7 +134,7 @@
         async (e) => {
           if (await window.__isPaused()) return;
           const mode = window.__recorderStore?.getMode?.();
-          if (["text", "value", "visibility"].includes(mode)) {
+          if (Object.values(assertionModes).includes(mode)) {
             if (!(e.target instanceof Element)) return;
             if (
               e.target.closest("#floating-assert-dock-root") ||

@@ -35,6 +35,7 @@
     value = null,
     text = null,
     selectOptionIndex = null,
+    isSoftAssert = false,
   }) => {
     const { selectors, attributes } = window.__getSelectors(el);
     return {
@@ -59,6 +60,7 @@
       value,
       text,
       selectOptionIndex,
+      isSoftAssert,
     };
   };
 
@@ -117,10 +119,10 @@
   };
 
   window.__setupDomObserver = () => {
-    const target = document.body;
+    const target = document.documentElement;
     if (!target) {
       console.warn(
-        "❗ document.body not ready for MutationObserver. Retrying..."
+        "❗ document.documentElement not ready for MutationObserver. Retrying..."
       );
       setTimeout(setupDomObserver, 100); // Retry after 100ms
       return;

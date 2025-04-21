@@ -137,7 +137,8 @@
       src: f.getAttribute("src") || null,
       name: f.getAttribute("name") || null,
       id: f.getAttribute("id") || null,
-      className: f.getAttribute("className") || null,
+      className: f.className || null,
+      title: f.getAttribute("title") || null,
     }));
   }
 

@@ -1,4 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
+import MoreOptionsDrawer from "./MoreOptionsDrawer";
+import { ASSERTIONMODES } from "../constants/index.js";
 
 export default function RecorderPanel() {
   const panelRef = useRef(null);
@@ -10,6 +12,12 @@ export default function RecorderPanel() {
     value: false,
     visibility: false,
   });
+  const [isDrawerOpen, setDrawerOpen] = useState(false);
+  const [expanded, setExpanded] = useState({
+    assertions: false,
+    actions: false,
+  });
+
   const previousMode = useRef(window.__recorderStore.getMode());
 
   useEffect(() => {
@@ -35,7 +43,8 @@ export default function RecorderPanel() {
       const prev = previousMode.current;
 
       if (
-        ["text", "value", "visibility"].includes(prev) &&
+        // ["text", "value", "visibility"].includes(prev) &&
+        Object.values(ASSERTIONMODES).includes(prev) &&
         newMode === "record"
       ) {
         // ✅ Show tick for the previous assertion mode
@@ -98,6 +107,27 @@ export default function RecorderPanel() {
     };
   }, []);
 
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      const panel = panelRef.current;
+      const drawer = document.querySelector(".drawer");
+
+      if (
+        panel &&
+        !panel.contains(e.target) &&
+        drawer &&
+        !drawer.contains(e.target)
+      ) {
+        setDrawerOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
+
   const dispatchEvent = () => {
     const evt = new MouseEvent("mousemove", { bubbles: true });
     document.dispatchEvent(evt);
@@ -127,54 +157,73 @@ export default function RecorderPanel() {
     document.dispatchEvent(evt);
   };
 
+  const toggleDrawer = () => setDrawerOpen(!isDrawerOpen);
+  const toggleSection = (section) =>
+    setExpanded((prev) => ({ ...prev, [section]: !prev[section] }));
+
   return (
     <div className="recorder-panel" ref={panelRef}>
-      <div className="recorder-drag-handle" title="Drag toolbar">
-        ⠿
+      <div className="recorder-panel-inner">
+        <div className="recorder-drag-handle" title="Drag toolbar">
+          ⠿
+        </div>
+        <button onClick={async () => await toggleRecording()}>
+          {mode === "pause" ? "▶️" : "⏸"}
+          {/* {mode !== "pause" ? "⏸" : "▶️"} */}
+        </button>
+        <button onClick={stop} title="Stop Recording">
+          ❌
+        </button>
+
+        <button
+          title="Inspect element"
+          className={getClassNameForAssert(mode, "inspect")}
+          onClick={async () => await toggleMode("inspect")}
+        >
+          🖱️
+        </button>
+        <button
+          title="Assert visibility"
+          className={getClassNameForAssert(mode, ASSERTIONMODES.VISIBILITY)}
+          onClick={async () => await toggleMode(ASSERTIONMODES.VISIBILITY)}
+        >
+          {tickMap.visibility ? "✅" : "👁️"}
+        </button>
+        <button
+          title="Assert text"
+          // className={getClassNameForAssert(mode, "text")}
+          // onClick={async () => await toggleMode("text")}
+          className={getClassNameForAssert(mode, ASSERTIONMODES.TEXT)}
+          onClick={async () => await toggleMode(ASSERTIONMODES.TEXT)}
+        >
+          {tickMap.text ? "✅" : "🆎"}
+        </button>
+        <button
+          title="Assert value"
+          className={getClassNameForAssert(mode, "value")}
+          onClick={async () => await toggleMode("value")}
+        >
+          {tickMap.value ? "✅" : "📝"}
+        </button>
+
+        <button title="More assertions" onClick={toggleDrawer}>
+          ⋮
+        </button>
+        {isDrawerOpen && (
+          <div className="drawer-anchor">
+            {/* <div className="drawer-backdrop"></div> */}
+            <MoreOptionsDrawer
+              isOpen={isDrawerOpen}
+              onClose={toggleDrawer}
+              expanded={expanded}
+              onToggleSection={toggleSection}
+              onMenuSelection={toggleMode}
+              getClassName={getClassNameForAssert}
+              currentMode={mode}
+            />
+          </div>
+        )}
       </div>
-      <button onClick={async () => await toggleRecording()}>
-        {mode === "pause" ? "▶️" : "⏸"}
-        {/* {mode !== "pause" ? "⏸" : "▶️"} */}
-      </button>
-      <button onClick={stop} title="Stop Recording">
-        ❌
-      </button>
-
-      <button
-        title="Inspect element"
-        className={getClassNameForAssert(mode, "inspect")}
-        onClick={async () => await toggleMode("inspect")}
-      >
-        🖱️
-      </button>
-      <button
-        title="Assert visibility"
-        className={getClassNameForAssert(mode, "visibility")}
-        onClick={async () => await toggleMode("visibility")}
-      >
-        {tickMap.visibility ? "✅" : "👁️"}
-      </button>
-      <button
-        title="Assert text"
-        className={getClassNameForAssert(mode, "text")}
-        onClick={async () => await toggleMode("text")}
-      >
-        {tickMap.text ? "✅" : "🆎"}
-      </button>
-      <button
-        title="Assert value"
-        className={getClassNameForAssert(mode, "value")}
-        onClick={async () => await toggleMode("value")}
-      >
-        {tickMap.value ? "✅" : "📝"}
-      </button>
-
-      <button
-        title="More assertions"
-        onClick={() => alert("More coming soon!")}
-      >
-        ⋮
-      </button>
     </div>
   );
 }
