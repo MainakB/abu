@@ -1,9 +1,10 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
-import FloatingAssertDock from "./components/FloatingAssertDock";
-import FloatingAssertDockNonText from "./components/FloatingAssertDockNonText";
-import FloatingCookieListDock from "./components/FloatingCookieListDock";
-import FloatingDeleteCookieDock from "./components/FloatingDeleteCookieDock";
+import FloatingAssertDock from "./components/docked-panes/text-dock/FloatingAssertDock.jsx";
+import FloatingAssertDockNonText from "./components/docked-panes/non-text-dock/FloatingAssertDockNonText.jsx";
+import FloatingCookieListDock from "./components/docked-panes/cookie-dock/FloatingCookieListDock.jsx";
+import FloatingDeleteCookieDock from "./components/docked-panes/cookie-dock/FloatingDeleteCookieDock.jsx";
+import AssertAttributeValueDock from "./components/docked-panes/attributes-dock/AssertAttributeValueDock.jsx";
 
 import { ASSERTIONMODES, ASSERTIONNAMES } from "./constants/index.js";
 
@@ -26,7 +27,6 @@ const getModeSelected = (val) => {
 };
 
 window.showFloatingAssert = (mode, el, e, type) => {
-  console.log("Called in mode: ", mode);
   if (window !== window.top) {
     if (typeof window.top.showFloatingAssert === "function") {
       window.top.showFloatingAssert(mode, el);
@@ -54,6 +54,11 @@ window.showFloatingAssert = (mode, el, e, type) => {
     floatingAssertRoot = ReactDOM.createRoot(rootEl);
   }
 
+  let textValue = "";
+  if (!(type === "addCookies" || type === "deleteCookies")) {
+    textValue = el.innerText?.trim() || "";
+  }
+
   const closeDock = async () => {
     if (floatingAssertRoot) {
       floatingAssertRoot.unmount();
@@ -62,12 +67,59 @@ window.showFloatingAssert = (mode, el, e, type) => {
     doc.getElementById("floating-assert-dock-root")?.remove();
     await window.__recorderStore.setMode("record");
   };
-  let textValue = "";
-  if (!(type === "addCookies" || type === "deleteCookies")) {
-    el.innerText?.trim() || "";
-  }
 
-  console.log("Show dock for ", type);
+  const getElementAttributes = async (el) => {
+    const attrList = await el.getAttributeNames();
+    const attributes = {};
+
+    for (let i = 0; i < attrList.length; i++) {
+      const attr = attrList[i];
+      const attrValue = await el.getAttribute(attr);
+      attributes[attr] = attrValue;
+    }
+
+    return attributes;
+  };
+
+  const getRecordAttributeAssertionMode = (isNegative, isSubstringMatch) => {
+    if (isNegative) {
+      if (isSubstringMatch) {
+        return ASSERTIONNAMES.NOTATTRIBUTEVALUECONTAINS;
+      } else {
+        return ASSERTIONNAMES.NOTATTRIBUTEVALUEEQUALS;
+      }
+    } else {
+      if (isSubstringMatch) {
+        return ASSERTIONNAMES.ATTRIBUTEVALUECONTAINS;
+      } else {
+        return ASSERTIONNAMES.ATTRIBUTEVALUEEQUALS;
+      }
+    }
+  };
+
+  const recordAttributesAssert = async (selectedAssertions, isSoftAssert) => {
+    for (let i = 0; i < selectedAssertions.length; i++) {
+      const attrObj = selectedAssertions[i];
+      const attrMode = getRecordAttributeAssertionMode(
+        attrObj.isNegative,
+        attrObj.isSubstringMatch
+      );
+      await window.__recordAction(
+        window.__buildData({
+          action: "assert",
+          isSoftAssert,
+          assertion: attrMode,
+          attributeAssertPropName: attrObj.attributeName,
+          expected: attrObj.value,
+          el,
+          e,
+        })
+      );
+    }
+
+    await closeDock();
+  };
+
   if (type === "text") {
     floatingAssertRoot.render(
       <FloatingAssertDock
@@ -92,6 +144,18 @@ window.showFloatingAssert = (mode, el, e, type) => {
           await closeDock();
           // await window.__recorderStore.setMode("record");
         }}
+      />
+    );
+  } else if (type === "attrValue") {
+    floatingAssertRoot.render(
+      <AssertAttributeValueDock
+        getAttributes={getElementAttributes}
+        mode={mode}
+        el={el}
+        onCancel={async () => closeDock()}
+        onConfirm={async (selectedAssertions, isSoftAssert) =>
+          recordAttributesAssert(selectedAssertions, isSoftAssert)
+        }
       />
     );
   } else if (type === "nonText") {

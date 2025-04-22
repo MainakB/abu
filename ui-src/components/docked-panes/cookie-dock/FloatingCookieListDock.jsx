@@ -167,31 +167,33 @@ export default function FloatingCookieListDock({ onConfirm, onCancel }) {
         </div>
       </div>
 
-      <div className="cookie-footer">
-        <button
-          className="cookie-cancel-button"
-          onClick={() => {
-            reset();
-            onCancel();
-          }}
-        >
-          ❌
-        </button>
-        <button
-          className="cookie-confirm-button"
-          onClick={() => {
-            onConfirm(
-              cookies.map(({ sessionOnly, ...c }) => ({
-                ...c,
-                ...(sessionOnly ? {} : { expires: Date.now() + 86400000 }),
-              }))
-            );
-            reset();
-          }}
-          disabled={!isValid}
-        >
-          ✅
-        </button>
+      <div className="docked-pane-footer-confirm-cancel">
+        <div className="docked-pane-footer-buttons">
+          <button
+            className="docked-pane-footer-cancel-button"
+            onClick={() => {
+              reset();
+              onCancel();
+            }}
+          >
+            ❌
+          </button>
+          <button
+            className="docked-pane-footer-confirm-button"
+            onClick={() => {
+              onConfirm(
+                cookies.map(({ sessionOnly, ...c }) => ({
+                  ...c,
+                  ...(sessionOnly ? {} : { expires: Date.now() + 86400000 }),
+                }))
+              );
+              reset();
+            }}
+            disabled={!isValid}
+          >
+            ✅
+          </button>
+        </div>
       </div>
     </div>
   );

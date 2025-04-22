@@ -167,8 +167,8 @@
 // }
 
 import React, { useState, useEffect } from "react";
-import { ASSERTIONMODES } from "../constants/index.js";
-import Cookie from "./svg-icons/Cookie.jsx";
+import { ASSERTIONMODES } from "../../constants/index.js";
+import Cookie from "../svg-icons/Cookie.jsx";
 
 export default function MoreOptionsDrawer({
   isOpen,
@@ -220,7 +220,7 @@ export default function MoreOptionsDrawer({
                   await onMenuSelection(ASSERTIONMODES.NETREQUEST)
                 }
               >
-                ✓ Assert Network Request
+                ✓ Assert Network Request URL
               </li>
               <li
                 className={getClassName(currentMode, ASSERTIONMODES.PRSENECE)}
@@ -246,6 +246,17 @@ export default function MoreOptionsDrawer({
               >
                 ✓ Assert Element Disabled
               </li>
+              <li>✓ Assert Element Count</li>
+              <li>✓ Assert Radio Checked/Unchecked</li>
+              <li>✓ Assert Checkbox Checked/Unchecked</li>
+              <li>✓ Assert Dropdown Selected</li>
+              <li>✓ Assert Dropdown Count</li>
+              <li>✓ Assert Dropdown Contains</li>
+              <li>✓ Assert Dropdown Duplicate Count</li>
+              <li>✓ Assert Cookie Value</li>
+              <li>✓ Assert Text Box Value</li>
+              <li>✓ Assert Current Url</li>
+              <li>✓ Assert Text In Page Source</li>
             </ul>
           )}
         </div>
@@ -315,18 +326,6 @@ export default function MoreOptionsDrawer({
               >
                 <span className="icon">🗑️</span> Delete Cookies
               </li>
-              <li>⏱ Wait For Element To Be Present</li>
-              <li>⏱ Wait For Element To Be Visible</li>
-              <li>⏱ Wait For Element To Be Clickable</li>
-              <li>⏱ Wait For Element To Be Enabled</li>
-              <li>⏱ Wait For Element To Be Disabled</li>
-              <li>🌐 Wait For Network Request</li>
-              <li>⏱ Wait For Element To Be Present</li>
-              <li>⏱ Wait For Element To Be Visible</li>
-              <li>⏱ Wait For Element To Be Clickable</li>
-              <li>⏱ Wait For Element To Be Enabled</li>
-              <li>⏱ Wait For Element To Be Disabled</li>
-              <li>🌐 Wait For Network Request</li>
             </ul>
           )}
         </div>

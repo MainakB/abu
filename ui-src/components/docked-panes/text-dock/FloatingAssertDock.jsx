@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { ASSERTIONMODES } from "../constants/index.js";
+import { ASSERTIONMODES } from "../../../constants/index.js";
 
 function getOwnText(el) {
   return [...el.childNodes]
@@ -51,7 +51,7 @@ export default function FloatingAssertDock({ el, mode, onConfirm, onCancel }) {
         onChange={(e) => setExpected(e.target.value)}
         placeholder="Enter expected value..."
       />
-      <div className="docked-pane-footer-container">
+      <div className="docked-pane-footer-confirm-cancel">
         <div className="docked-pane-footer-assert-container">
           <input
             type="checkbox"

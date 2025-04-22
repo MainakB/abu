@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import MoreOptionsDrawer from "./MoreOptionsDrawer";
+import MoreOptionsDrawer from "./recorder-expanded/MoreOptionsDrawer.jsx";
 import { ASSERTIONMODES } from "../constants/index.js";
 
 export default function RecorderPanel() {

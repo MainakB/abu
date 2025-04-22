@@ -37,6 +37,7 @@
     selectOptionIndex = null,
     isSoftAssert = false,
     cookies,
+    attributeAssertPropName,
   }) => {
     if (
       action === "addCookies" ||
@@ -50,12 +51,14 @@
       };
     }
     const { selectors, attributes } = window.__getSelectors(el);
+
     return {
       action,
       ...(assertion ? { assertion } : {}),
       ...(expected ? { expected } : {}),
       tagName: el.tagName.toLowerCase(),
       selectors,
+      ...(attributeAssertPropName ? { attributeAssertPropName } : {}),
       attributes: {
         ...(attributes || {}),
         associatedLabel: getAssociatedLabel(el),
@@ -70,7 +73,7 @@
       },
       position: e ? { x: e.pageX, y: e.pageY } : null,
       value,
-      text,
+      text: text || el.innerText?.trim() || "",
       selectOptionIndex,
       isSoftAssert,
     };

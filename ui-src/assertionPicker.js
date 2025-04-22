@@ -90,7 +90,6 @@
         )
           return;
 
-        console.log("mode--> ", mode);
         if (
           mode === assertionModes.ADDCOOKIES ||
           mode === assertionModes.DELETECOOKIES ||
@@ -109,7 +108,7 @@
         const el = hoverTarget;
         if (!el || typeof window.__getSelectors !== "function") return;
         await window.__maybeRecordTabSwitch?.(`assert`, "click");
-        console.log("Show floating asserts");
+
         let assertType = "text";
         if (
           mode === assertionModes.VISIBILITY ||
@@ -118,6 +117,8 @@
           mode === assertionModes.DISABLED
         ) {
           assertType = "nonText";
+        } else if (mode === assertionModes.ATTRIBUTEVALUE) {
+          assertType = mode;
         }
 
         window.showFloatingAssert(mode, el, e, assertType);

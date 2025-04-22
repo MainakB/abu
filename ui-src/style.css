@@ -8,7 +8,9 @@
 #floating-cookie-delete-dock,
 #floating-cookie-delete-dock *,
 #floating-assert-dock-root,
-#floating-assert-dock-root * {
+#floating-assert-dock-root *,
+#floating-assert-attribute-dock,
+#floating-assert-attribute-dock * {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
   font-size: 14px;
   line-height: 1.5;
@@ -125,7 +127,7 @@
 }
 
 /* Compact footer */
-#floating-assert-dock-root .docked-pane-footer-container {
+#floating-assert-dock-root .docked-pane-footer-confirm-cancel {
   border-top: 1px solid #eee !important;
   background: #fafafa !important;
   padding: 10px 16px !important;
@@ -135,6 +137,18 @@
   justify-content: space-between !important;
   align-items: center !important;
   gap: 12px !important;
+}
+
+/* Cookie footer specific as it will not have soft assert checkbox in footer */
+#floating-cookie-list-dock .docked-pane-footer-confirm-cancel,
+#floating-cookie-delete-dock .docked-pane-footer-confirm-cancel {
+  border-top: 1px solid #ddd !important;
+  padding: 10px 12px !important;
+  background: #fafafa !important;
+  display: flex !important;
+  justify-content: flex-end !important;
+  gap: 10px !important;
+  border-radius: 0 0 10px 10px !important;
 }
 
 /* Ensure proper checkbox and label styling */
@@ -190,17 +204,6 @@
   margin-right: 0 !important;
 }
 
-.docked-pane-footer-container {
-  /* display: flex;
-  margin-top: 5px;
-  flex-direction: column; */
-  display: flex !important;
-  flex-direction: column !important;
-  gap: 8px !important;
-  padding: 10px 12px !important;
-  border-top: 1px solid #ddd !important;
-  background: #fafafa !important;
-}
 
 .docked-pane-footer-assert-container {
   /* display: flex;
@@ -210,6 +213,18 @@
   align-items: center !important;
   gap: 8px !important;
 }
+
+.docked-pane-footer-confirm-cancel {
+  border-top: 1px solid #ddd !important;
+  padding: 10px 12px !important;
+  background: #fafafa !important;
+  display: flex !important;
+  justify-content: flex-end !important;
+  gap: 10px !important;
+
+}
+
+
 
 .docked-pane-footer-assert-container input[type="checkbox"] {
   margin: 0 !important;
@@ -280,6 +295,8 @@
 
 .assert-dock-content {
   padding: 12px 16px !important;
+  /* overflow-y: auto !important;
+  flex: 1 !important; */
 }
 
 .assert-dock-header {
@@ -611,21 +628,7 @@
 }
 
 /* Fix footer buttons */
-.cookie-footer,
-.delete-cookie-footer {
-  border-top: 1px solid #ddd !important;
-  padding: 10px 12px !important;
-  background: #fafafa !important;
-  display: flex !important;
-  justify-content: flex-end !important;
-  gap: 10px !important;
-  border-radius: 0 0 10px 10px !important;
-}
-
-.cookie-cancel-button,
-.cookie-confirm-button,
-.delete-cookie-cancel-button,
-.delete-cookie-confirm-button {
+.docked-pane-footer-cancel-button {
   border: none !important;
   background: #f0f0f0 !important;
   padding: 8px 16px !important;
@@ -723,18 +726,15 @@
 }
 
 /* Fix button hover states */
-.cookie-cancel-button:hover,
-.cookie-confirm-button:hover,
-.delete-cookie-cancel-button:hover,
-.delete-cookie-confirm-button:hover,
+.docked-pane-footer-confirm-button:hover,
+.docked-pane-footer-cancel-button:hover,
 .cookie-add-button:hover,
 .delete-cookie-add-button:hover {
   background: #e0e0e0 !important;
 }
 
 /* Fix disabled states */
-.cookie-confirm-button:disabled,
-.delete-cookie-confirm-button:disabled,
+.docked-pane-footer-confirm-button:disabled,
 .delete-cookie-add-button:disabled {
   opacity: 0.5 !important;
   cursor: not-allowed !important;
@@ -756,4 +756,163 @@
   appearance: auto !important;
   -webkit-appearance: auto !important;
   -moz-appearance: auto !important;
+}
+
+/* Attribute Dock */
+#floating-assert-attribute-dock {
+  position: fixed !important;
+  bottom: 20px !important;
+  left: 20px !important;
+  padding: 0 !important;
+  background: #fff !important;
+  border: 1px solid #ccc !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3) !important;
+  z-index: 999999 !important;
+  min-width: 600px !important;
+  max-height: 80vh !important;
+  font-size: 14px !important;
+  border-radius: 10px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  box-sizing: border-box !important;
+}
+
+.assert-attributes-container {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 12px !important;
+}
+
+.assert-attribute-row {
+  display: flex !important;
+  align-items: center !important;
+  gap: 10px !important;
+  padding: 8px !important;
+  background: #f9f9f9 !important;
+  border-radius: 6px !important;
+}
+
+.assert-checkbox-container {
+  display: flex !important;
+  align-items: center !important;
+  cursor: pointer !important;
+}
+
+.assert-checkbox {
+  margin: 0 !important;
+  cursor: pointer !important;
+}
+
+.assert-input {
+  padding: 6px 10px !important;
+  border: 1px solid #ccc !important;
+  border-radius: 4px !important;
+  font-size: 14px !important;
+  font-family: inherit !important;
+  box-sizing: border-box !important;
+}
+
+.assert-input:focus {
+  outline: none !important;
+  border-color: #666 !important;
+  box-shadow: 0 0 0 2px rgba(102, 102, 102, 0.1) !important;
+}
+
+.assert-attribute-name {
+  width: 150px !important;
+  background: #f0f0f0 !important;
+  color: #666 !important;
+}
+
+.assert-attribute-value {
+  flex: 1 !important;
+}
+
+.assert-toggle {
+  display: flex !important;
+  align-items: center !important;
+  gap: 4px !important;
+  padding: 4px 8px !important;
+  background: #f0f0f0 !important;
+  border-radius: 4px !important;
+  min-width: 40px !important;
+  justify-content: center !important;
+  transition: background-color 0.2s ease !important;
+}
+
+.assert-toggle:hover {
+  background: #e0e0e0 !important;
+}
+
+.assert-toggle-label {
+  font-size: 16px !important;
+  font-weight: 600 !important;
+  color: #444 !important;
+  user-select: none !important;
+}
+
+
+.docked-pane-footer-confirm-cancel {
+  border-top: 1px solid #ddd !important;
+  padding: 10px 12px !important;
+  background: #fafafa !important;
+  display: flex !important;
+  justify-content: flex-end !important;
+  gap: 10px !important;
+  border-radius: 0 0 10px 10px !important;
+}
+
+.assert-attribute-row:has(.assert-checkbox:checked) {
+  background: #e8f5e9 !important;
+  border: 1px solid #c8e6c9 !important;
+}
+
+.assert-toggle-button-neg-pos {
+  padding: 6px 12px !important;
+  background: #f0f0f0 !important;
+  border: 1px solid #ccc !important;
+  border-radius: 4px !important;
+  min-width: 80px !important;
+  cursor: pointer !important;
+  font-size: 14px !important;
+  font-weight: 600 !important;
+  color: #444 !important;
+  transition: all 0.2s ease !important;
+  text-align: center !important;
+  user-select: none !important;
+}
+
+
+.assert-toggle-button-neg-pos:hover {
+  background: #e0e0e0 !important;
+  border-color: #999 !important;
+}
+
+.assert-toggle-button-neg-pos:active {
+  background: #d0d0d0 !important;
+  transform: translateY(1px) !important;
+}
+
+/* Visual feedback for negative assertions */
+.assert-toggle-button-neg-pos[title*="not"] {
+  background: #ffebee !important;
+  border-color: #ffcdd2 !important;
+  color: #d32f2f !important;
+}
+
+.assert-toggle-button-neg-pos[title*="not"]:hover {
+  background: #ffcdd2 !important;
+  border-color: #ef9a9a !important;
+}
+
+/* Visual feedback for substring match */
+.assert-toggle-button-neg-pos[title*="Substring"] {
+  background: #e3f2fd !important;
+  border-color: #bbdefb !important;
+  color: #1976d2 !important;
+}
+
+.assert-toggle-button-neg-pos[title*="Substring"]:hover {
+  background: #bbdefb !important;
+  border-color: #90caf9 !important;
 }

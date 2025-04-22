@@ -107,26 +107,28 @@ export default function FloatingDeleteCookieDock({ onConfirm, onCancel }) {
         )}
       </div>
 
-      <div className="delete-cookie-footer">
-        <button
-          className="delete-cookie-cancel-button"
-          onClick={() => {
-            reset();
-            onCancel();
-          }}
-        >
-          ❌
-        </button>
-        <button
-          className="delete-cookie-confirm-button"
-          onClick={() => {
-            onConfirm(deleteAll ? [] : names);
-            reset();
-          }}
-          disabled={!isValid}
-        >
-          ✅
-        </button>
+      <div className="docked-pane-footer-confirm-cancel">
+        <div className="docked-pane-footer-buttons">
+          <button
+            className="docked-pane-footer-cancel-button"
+            onClick={() => {
+              reset();
+              onCancel();
+            }}
+          >
+            ❌
+          </button>
+          <button
+            className="docked-pane-footer-confirm-button"
+            onClick={() => {
+              onConfirm(deleteAll ? [] : names);
+              reset();
+            }}
+            disabled={!isValid}
+          >
+            ✅
+          </button>
+        </div>
       </div>
     </div>
   );

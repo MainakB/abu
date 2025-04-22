@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { ASSERTIONMODES } from "../constants/index.js";
+import { ASSERTIONMODES } from "../../../constants/index.js";
 
 function getOwnText(el) {
   return [...el.childNodes]
@@ -33,7 +33,7 @@ export default function FloatingAssertDockNonText({
           {mode === ASSERTIONMODES.TEXT ? "text equals " : "value equals "}
         </strong>
       </div>
-      <div className="docked-pane-footer-container">
+      <div className="docked-pane-footer-confirm-cancel">
         <div className="docked-pane-footer-assert-container">
           <input
             type="checkbox"
@@ -42,8 +42,9 @@ export default function FloatingAssertDockNonText({
           ></input>
           <label>Soft Assert</label>
         </div>
-        <div style={{ marginTop: "8px", textAlign: "right" }}>
+        <div className="docked-pane-footer-buttons">
           <button
+            className="docked-pane-footer-cancel-button"
             onClick={() => {
               setSofAssert(false);
               onCancel();
@@ -53,6 +54,7 @@ export default function FloatingAssertDockNonText({
             ❌
           </button>
           <button
+            className="docked-pane-footer-confirm-button"
             onClick={() => {
               onConfirm(softAssert);
               setSofAssert(false);

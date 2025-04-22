@@ -17,7 +17,13 @@ export const ASSERTIONMODES = {
 export const ASSERTIONNAMES = {
   TEXT: "toHaveText",
   VALUE: "toHaveValue",
-  ATTRIBUTEVALUE: "toHaveAttrValue",
+  ATTRIBUTEVALUE: "attrValue",
+
+  ATTRIBUTEVALUEEQUALS: "isAttrValueEquals",
+  ATTRIBUTEVALUECONTAINS: "isAttrValueContains",
+  NOTATTRIBUTEVALUEEQUALS: "isNotAttrValueEquals",
+  NOTATTRIBUTEVALUECONTAINS: "isNotAttrValueContains",
+
   NETPAYLOAD: "toHaveNetPayload",
   NETREQUEST: "toHaveValue",
   VISIBILITY: "isVisible",
