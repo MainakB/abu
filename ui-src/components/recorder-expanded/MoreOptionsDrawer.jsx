@@ -247,8 +247,8 @@ export default function MoreOptionsDrawer({
                 ✓ Assert Element Disabled
               </li>
               <li>✓ Assert Element Count</li>
-              <li>✓ Assert Radio Checked/Unchecked</li>
-              <li>✓ Assert Checkbox Checked/Unchecked</li>
+              <li>✓ Assert Radio State</li>
+              <li>✓ Assert Checkbox State</li>
               <li>✓ Assert Dropdown Selected</li>
               <li>✓ Assert Dropdown Count</li>
               <li>✓ Assert Dropdown Contains</li>
