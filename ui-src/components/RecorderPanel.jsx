@@ -165,9 +165,53 @@ export default function RecorderPanel() {
     setDrawerOpen(false);
   };
 
+  const toggleModeOnMonoStep = async (nextMode) => {
+    const isSame = mode === nextMode;
+    const newMode = isSame ? "record" : nextMode;
+    await window.__recorderStore.setMode(newMode);
+    const evt = new MouseEvent("mousemove", { bubbles: true });
+    document.dispatchEvent(evt);
+    if (newMode === ASSERTIONMODES.TAKESCREENSHOT) {
+      await Promise.all([
+        window.__recordAction(
+          window.__buildData({
+            action: "takeScreenshot",
+          })
+        ),
+        window.__recorderStore.setMode("record"),
+      ]);
+    } else if (newMode === ASSERTIONMODES.PAGERELOAD) {
+      await Promise.all([
+        window.__recordAction(
+          window.__buildData({
+            action: "pageReload",
+          })
+        ),
+        window.__recorderStore.setMode("record"),
+      ]);
+      await window.__pageReload();
+    }
+
+    setDrawerOpen(false);
+  };
+
   const toggleDrawer = () => setDrawerOpen(!isDrawerOpen);
-  const toggleSection = (section) =>
-    setExpanded((prev) => ({ ...prev, [section]: !prev[section] }));
+  const toggleSection = (section) => {
+    setExpanded((prev) => {
+      // If the clicked section is already open, just close it
+      if (prev[section]) {
+        return { ...prev, [section]: false };
+      }
+
+      // Otherwise, close all sections and open the clicked one
+      return {
+        assertions: section === "assertions",
+        actions: section === "actions",
+      };
+    });
+  };
+  // const toggleSection = (section) =>
+  //   setExpanded((prev) => ({ ...prev, [section]: !prev[section] }));
 
   return (
     <div className="recorder-panel" ref={panelRef}>
@@ -226,6 +270,7 @@ export default function RecorderPanel() {
               onMenuSelection={toggleMode}
               getClassName={getClassNameForAssert}
               currentMode={mode}
+              onMenuSelectionMonoStep={toggleModeOnMonoStep}
             />
           </div>
         )}

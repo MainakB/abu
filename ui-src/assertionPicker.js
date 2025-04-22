@@ -90,9 +90,12 @@
         )
           return;
 
+        console.log("mode--> ", mode);
         if (
-          mode === assertionModes.ADDCOOKIES &&
-          mode === assertionModes.DELETECOOKIES
+          mode === assertionModes.ADDCOOKIES ||
+          mode === assertionModes.DELETECOOKIES ||
+          mode === assertionModes.TAKESCREENSHOT ||
+          mode === assertionModes.PAGERELOAD
         ) {
           assertBox.style.display = "none";
           hoverTarget = null;

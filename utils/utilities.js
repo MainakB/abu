@@ -38,10 +38,15 @@
     isSoftAssert = false,
     cookies,
   }) => {
-    if (action === "addCookies" || action === "deleteCookies") {
+    if (
+      action === "addCookies" ||
+      action === "deleteCookies" ||
+      action === "takeScreenshot" ||
+      action === "pageReload"
+    ) {
       return {
         action,
-        cookies,
+        ...(cookies ? { cookies } : {}),
       };
     }
     const { selectors, attributes } = window.__getSelectors(el);

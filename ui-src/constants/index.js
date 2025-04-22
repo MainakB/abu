@@ -10,6 +10,8 @@ export const ASSERTIONMODES = {
   DISABLED: "disabled",
   ADDCOOKIES: "addCookies",
   DELETECOOKIES: "deleteCookies",
+  TAKESCREENSHOT: "takeScreenshot",
+  PAGERELOAD: "pageReload",
 };
 
 export const ASSERTIONNAMES = {
@@ -24,6 +26,8 @@ export const ASSERTIONNAMES = {
   PRSENECE: "isPresent",
   ADDCOOKIES: "addCookies",
   DELETECOOKIES: "deleteCookies",
+  TAKESCREENSHOT: "takeScreenshot",
+  PAGERELOAD: "pageReload",
 };
 
 export const NONDOCKASSERTIONNAMES = {

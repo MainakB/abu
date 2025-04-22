@@ -36,17 +36,20 @@ export default function FloatingAssertDock({ el, mode, onConfirm, onCancel }) {
       onClick={(e) => e.stopPropagation()}
       onMouseDown={(e) => e.stopPropagation()}
     >
-      <div style={{ marginBottom: "6px" }}>
-        <strong>
-          Assert that element{" "}
-          {mode === ASSERTIONMODES.TEXT ? "text equals " : "value equals "}
-          {/* {mode === "text" ? "text equals " : "value equals "} */}
-        </strong>
+      <div className="assert-dock-content">
+        <div className="assert-dock-header">
+          <strong>
+            Assert that element
+            {mode === ASSERTIONMODES.TEXT ? " text" : " value"} equals
+            {/* {mode === "text" ? "text equals " : "value equals "} */}
+          </strong>
+        </div>
       </div>
       <textarea
-        style={{ width: "100%", minHeight: "60px" }}
+        className="assert-dock-textarea"
         value={expected}
         onChange={(e) => setExpected(e.target.value)}
+        placeholder="Enter expected value..."
       />
       <div className="docked-pane-footer-container">
         <div className="docked-pane-footer-assert-container">
@@ -57,7 +60,7 @@ export default function FloatingAssertDock({ el, mode, onConfirm, onCancel }) {
           ></input>
           <label>Soft Assert</label>
         </div>
-        <div style={{ marginTop: "8px", textAlign: "right" }}>
+        <div className="docked-pane-footer-buttons">
           <button
             onClick={() => {
               setSofAssert(false);

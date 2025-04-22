@@ -199,11 +199,15 @@ export const exposeRecorderControls = async (
     await browser.close();
     process.exit(0);
   });
+
+  await page.exposeBinding("__pageReload", async () => {
+    // await new Promise((resolve) => setTimeout(resolve, 250));
+    await page.reload({ waitUntil: "domcontentloaded" });
+  });
 };
 
 export const exposeContextBindings = async (ctx) => {
   await ctx.exposeBinding("__addCookies", async ({ page }, cookies) => {
-    console.log("Received in __addCookies: ", cookies);
     const formatted = cookies.map((cookie) => ({
       name: cookie.name,
       value: cookie.value,
@@ -213,7 +217,6 @@ export const exposeContextBindings = async (ctx) => {
       secure: cookie.secure,
       sameSite: cookie.sameSite || "Strict",
     }));
-    console.log("Adding in __addCookies: ", formatted);
     await ctx.addCookies(formatted);
   });
 
@@ -222,12 +225,13 @@ export const exposeContextBindings = async (ctx) => {
     if (cookies && Array.isArray(cookies) && cookies.length) {
       const cookiePromise = [];
       for (let cookie of cookies) {
-        if (cookie.name) {
-          cookiePromise.push(ctx.clearCookies({ name: cookie.name }));
+        if (cookie) {
+          cookiePromise.push(ctx.clearCookies({ name: cookie }));
         }
       }
+      await Promise.all(cookiePromise);
     } else {
-      ctx.clearCookies();
+      await ctx.clearCookies();
     }
   });
 };

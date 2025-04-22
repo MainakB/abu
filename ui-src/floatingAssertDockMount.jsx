@@ -26,6 +26,7 @@ const getModeSelected = (val) => {
 };
 
 window.showFloatingAssert = (mode, el, e, type) => {
+  console.log("Called in mode: ", mode);
   if (window !== window.top) {
     if (typeof window.top.showFloatingAssert === "function") {
       window.top.showFloatingAssert(mode, el);

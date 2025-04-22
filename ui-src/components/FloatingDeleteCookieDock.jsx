@@ -67,7 +67,10 @@ export default function FloatingDeleteCookieDock({ onConfirm, onCancel }) {
           names.map((name, index) => (
             <div key={index} className="delete-cookie-row">
               <label className="delete-cookie-input-label">
-                Cookie Name <span className="delete-cookie-required">*</span>
+                {/* Cookie Name <span className="delete-cookie-required">*</span> */}
+                <span className="label-text">
+                  Cookie Name<span className="delete-cookie-required">*</span>
+                </span>
                 <input
                   type="text"
                   className="delete-cookie-input"
