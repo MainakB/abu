@@ -1,21 +1,67 @@
 if (!window.__recorderStore) {
-  let assertMode = "record";
-  const assertListeners = [];
+  const MODE_KEY = "recorderMode";
+  const listeners = [];
   const actionListeners = [];
   const actions = [];
+  let mode = "record";
+
+  // 🔹 Track active tab ID broadcast by server
+  // let activeTabId = tabId; // default to self if not received yet
+  let activeTabId = null;
+
+  const socket = new WebSocket("ws://localhost:8787");
+
+  socket.addEventListener("message", (event) => {
+    try {
+      const data = JSON.parse(event.data);
+      if (data.type === "mode") {
+        mode = data.mode;
+        localStorage.setItem(MODE_KEY, mode);
+        listeners.forEach((fn) => fn(mode));
+      }
+
+      if (data.type === "set-active-tab") {
+        activeTabId = data.tabId;
+      }
+    } catch {}
+  });
 
   window.__recorderStore = {
-    // MODE PUB-SUB
-    getMode: () => assertMode,
-    setMode: (newMode) => {
-      assertMode = newMode;
-      assertListeners.forEach((fn) => fn(newMode));
+    getActiveTabId: () => activeTabId,
+    setActiveTabId: (currentTabId) => {
+      if (socket.readyState === WebSocket.OPEN) {
+        socket.send(
+          JSON.stringify({
+            type: "set-active-tab",
+            tabId: currentTabId,
+          })
+        );
+      }
+    },
+    maybeUpdateActiveTabId: (tabId) => {
+      if (activeTabId !== tabId) {
+        window.__recorderStore.setActiveTabId(tabId);
+        return true;
+      }
+      return false;
+    },
+
+    // //////////
+    getMode: () => mode,
+    setMode: async (newMode, callToggle = true) => {
+      mode = newMode;
+      callToggle && (await window.__toggleRecording());
+      // localStorage.setItem(MODE_KEY, newMode);
+      socket.readyState === WebSocket.OPEN &&
+        socket.send(JSON.stringify({ type: "mode", mode: newMode }));
+      listeners.forEach((fn) => fn(newMode));
     },
     subscribeToMode: (fn) => {
-      assertListeners.push(fn);
+      listeners.push(fn);
+      fn(mode);
       return () => {
-        const idx = assertListeners.indexOf(fn);
-        if (idx !== -1) assertListeners.splice(idx, 1);
+        const idx = listeners.indexOf(fn);
+        if (idx !== -1) listeners.splice(idx, 1);
       };
     },
 
@@ -61,5 +107,5 @@ if (!window.__recorderStore) {
     },
   };
 
-  console.log("✅ recorderStore initialized");
+  console.log("✅ recorderStore (WebSocket version) initialized");
 }

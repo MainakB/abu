@@ -6,20 +6,27 @@
   "scripts": {
     "build-ui:panel": "vite build --config ui-src/vite.panel.config.js",
     "build-ui:assert": "vite build --config ui-src/vite.assert.config.js",
-    "build-ui": "npm run build-ui:panel && npm run build-ui:assert",
-    "start-server": "node server/server.js",
+    "build-ui:constants": "vite build --config ui-src/vite.constants.config.js",
+    "build-ui": "npm run build-ui:constants && npm run build-ui:panel && npm run build-ui:assert",
+    "start-server": "node servers/api-server.js",
+    "start-ws": "node servers/ws-server.js",
     "record-only": "node recorder.js",
-    "record": "concurrently -n server,recorder -c green,blue \"npm run start-server\" \"npm run record-only\""
+    "start-servers": "concurrently -n server,ws -c green,blue \"npm run start-server\" \"npm run start-ws\"",
+    "record": "concurrently -n server,recorder -c green,blue \"npm run start-server\" \"npm run record-only\"",
+    "record-all": "npm run build-ui && concurrently -n server,ws,recorder -c green,blue,magenta \"npm run start-server\" \"npm run start-ws\" \"npm run record-only\""
   },
   "dependencies": {
     "concurrently": "^9.1.2",
     "express": "^5.1.0",
     "playwright": "^1.40.0",
     "react": "^18.2.0",
-    "react-dom": "^18.2.0"
+    "react-dom": "^18.2.0",
+    "uuid": "^11.1.0",
+    "ws": "^8.18.1"
   },
   "devDependencies": {
     "@vitejs/plugin-react": "^4.0.0",
+    "directory-tree": "^3.5.2",
     "vite": "^5.0.0"
   }
 }

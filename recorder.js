@@ -4,176 +4,159 @@ import { chromium } from "playwright";
 import { fileURLToPath } from "url";
 import { dirname } from "path";
 import { execSync } from "child_process";
+import { v4 as uuidv4 } from "uuid";
+import {
+  ensureChromiumInstalled,
+  injectToLocalStorage,
+  injectToSessionStorage,
+  updateInitialRecorderState,
+  allowPopups,
+  injectScripts,
+  exposeRecorderControls,
+  exposeContextBindings,
+} from "./utils/lib.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
-
-const ensureChromiumInstalled = () => {
-  const executablePath = chromium.executablePath();
-  if (!fs.existsSync(executablePath)) {
-    console.log("🔧 Chromium not found. Installing...");
-    execSync("npx playwright install chromium", { stdio: "inherit" });
-  } else {
-    console.log("✅ Chromium is already installed");
-  }
+const globalRecorderMode = {
+  value: "record",
 };
 
-ensureChromiumInstalled();
+ensureChromiumInstalled(chromium);
 
 const browser = await chromium.launch({
   headless: false,
-  args: ["--start-maximized"],
+  args: [
+    "--disable-http2",
+    "--no-sandbox",
+    "--start-maximized",
+    "--disable-web-security",
+    "--disable-blink-features=AutomationControlled",
+    "--ignore-certificate-errors",
+    "--disable-site-isolation-trials", // 👈 disables process isolation
+    "--disable-features=IsolateOrigins,site-per-process",
+  ],
 });
+// const windowsUserAgent =  "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36";
+const windowsUserAgent =
+  "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36";
+const macUserAgent =
+  "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.4 Safari/605.1.15";
+
 const context = await browser.newContext({
   viewport: null, // allow full window
-  userAgent:
-    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+  ignoreHTTPSErrors: true,
+  userAgent: process.platform === "win32" ? windowsUserAgent : macUserAgent,
 });
-const page = await context.newPage();
+
+await exposeContextBindings(context);
 
 const cssPath = path.join(__dirname, "injected", "style.css");
 const cssContent = await fs.promises.readFile(cssPath, "utf8");
 
-// Inject style into page
-await page.addInitScript(`
-  (() => {
-    const css = ${JSON.stringify(cssContent)};
-    const inject = () => {
-      const style = document.createElement('style');
-      style.textContent = css;
-      document.head.appendChild(style);
-    };
-    if (document.readyState === 'loading') {
-      document.addEventListener('DOMContentLoaded', inject);
-    } else {
-      inject();
-    }
-  })();
-`);
-
-// Inject React UI and element highlighter
-// File paths
-// const uiBundlePath = path.join(__dirname, "injected", "ui.bundle.js");
-// const panelBundlePath = path.join(__dirname, "injected", "panel.bundle.js");
-// const floatingAssertPath = path.join(
-//   __dirname,
-//   "injected",
-//   "floatingAssert.bundle.js"
-// );
-// const overlayPath = path.join(__dirname, "ui-src", "overlay.js");
-// const eventScriptPath = path.join(__dirname, "ui-src", "recorderEvents.js");
-// const selectorScriptPath = path.join(
-//   __dirname,
-//   "ui-src",
-//   "selectorStrategy.js"
-// );
-// const assertionScriptPath = path.join(
-//   __dirname,
-//   "ui-src",
-//   "assertionPicker.js"
-// );
-// const storePath = path.join(__dirname, "ui-src", "store", "recorderStore.js");
-
-// // File content
-// // const uiBundleContent = await fs.promises.readFile(uiBundlePath, "utf8");
-// const panelScript = await fs.promises.readFile(panelBundlePath, "utf8");
-// const floatingAssertScript = await fs.promises.readFile(
-//   floatingAssertPath,
-//   "utf8"
-// );
-// const overlayContent = await fs.promises.readFile(overlayPath, "utf8");
-// const selectorScript = await fs.promises.readFile(selectorScriptPath, "utf8");
-// const assertionScript = await fs.promises.readFile(assertionScriptPath, "utf8");
-// const eventScript = await fs.promises.readFile(eventScriptPath, "utf8");
-// const storeScript = await fs.promises.readFile(storePath, "utf8");
-
-// // ✅ Inject in correct order
-// // await page.addInitScript(uiBundleContent); // React UI
-// await page.addInitScript(storeScript);
-// await page.addInitScript(selectorScript); // getSelectors (MUST be before recorder)
-// await page.addInitScript(panelScript); // React UI
-// await page.addInitScript(overlayContent); // Red box overlay
-// await page.addInitScript(floatingAssertScript);
-// await page.addInitScript(assertionScript);
-// await page.addInitScript(eventScript); // recorderEvents (uses getSelectors)
-
 // Inject React UI and element highlighter
 // ✅ Inject in correct order
 const scriptPaths = {
-  panel: "injected/panel.bundle.js",
-  floatingAssert: "injected/floatingAssert.bundle.js",
-  overlay: "ui-src/overlay.js",
-  events: "ui-src/recorderEvents.js",
-  selector: "ui-src/selectorStrategy.js",
-  assertion: "ui-src/assertionPicker.js",
+  constants: "injected/constants-global.bundle.js",
+  utilities: "utils/utilities.js",
   store: "ui-src/store/recorderStore.js",
+  selector: "ui-src/selectorStrategy.js",
+  overlay: "ui-src/overlay.js",
+  panel: "injected/panel.bundle.js",
+  assertion: "ui-src/assertionPicker.js", // 💥 capture assertion first
+  events: "ui-src/recorderEvents.js", // 💥 high-level event binding
+  floatingAssert: "injected/floatingAssert.bundle.js", // ✅ injected last
 };
 
-for (const key in scriptPaths) {
-  const content = await fs.promises.readFile(
-    path.join(__dirname, scriptPaths[key]),
-    "utf8"
-  );
-  await page.addInitScript(content);
-}
-
-// Capture initial SPA navigation (once only)
 let firstUrlCaptured = false;
-await page.exposeBinding("captureInitialNavigation", (_, url) => {
-  if (!firstUrlCaptured && !url.includes("about:blank")) {
-    firstUrlCaptured = true;
-    fetch("http://localhost:3111/record", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        action: "navigate",
-        url,
-        timestamp: Date.now(),
-      }),
-    }).then(() => {
-      console.log("🌐 Initial navigation captured:", url);
-    });
+
+// Handle first page
+const firstPage = await context.newPage();
+await exposeRecorderControls(firstPage, __dirname, globalRecorderMode, browser);
+const firstTabId = uuidv4();
+await injectScripts(
+  firstPage,
+  true,
+  globalRecorderMode,
+  cssContent,
+  scriptPaths,
+  __dirname
+);
+
+// Handle new tabs/windows
+context.on("page", async (newPage) => {
+  await exposeRecorderControls(newPage, __dirname, globalRecorderMode, browser);
+  const tabId = uuidv4();
+  console.log("🆕 New tab opened:", tabId);
+  await injectScripts(
+    newPage,
+    false,
+    globalRecorderMode,
+    cssContent,
+    scriptPaths,
+    __dirname
+  );
+  const url = newPage.url();
+  if (!url.includes("about:blank") && firstUrlCaptured) {
+    const title = await newPage.title();
+    const eventKey = `newPage-${tabId}`;
+    await Promise.all([
+      injectToLocalStorage(newPage, false),
+      injectToSessionStorage(newPage, [
+        { key: "tabId", value: tabId },
+        { key: "url", value: url },
+        { key: "title", value: title },
+      ]),
+    ]);
+    if (globalRecorderMode.value !== "pause") {
+      // ✅ Record the switchToWindow action
+      await fetch("http://localhost:3111/record", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "switchToWindow",
+          tabId,
+          attributes: { url, title, eventKey },
+          timestamp: Date.now(),
+        }),
+      });
+    }
   }
 });
 
-await page.addInitScript(() => {
-  window.captureInitialNavigation?.(window.location.href);
+firstPage.on("framenavigated", async (frame) => {
+  if (frame === firstPage.mainFrame() && !firstUrlCaptured) {
+    const url = frame.url();
+    if (!url.includes("about:blank") && !firstUrlCaptured) {
+      await firstPage.waitForLoadState("load");
+      await updateInitialRecorderState(firstPage, globalRecorderMode, true);
+      const title = await firstPage.title();
+      firstUrlCaptured = true;
+      console.log("🌐 First page navigation recorded:", url);
+      const tabId = uuidv4();
+      await Promise.all([
+        injectToLocalStorage(firstPage, true),
+        injectToSessionStorage(firstPage, [
+          { key: "tabId", value: tabId },
+          { key: "url", value: url },
+          { key: "title", value: title },
+        ]),
+      ]);
+      await fetch("http://localhost:3111/record", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "navigate",
+          url,
+          tabId: firstTabId,
+          attributes: { title },
+          timestamp: Date.now(),
+        }),
+      });
+    }
+  }
 });
 
-// UI Controls via window events
-await page.exposeBinding("toggleRecording", () => {
-  global.recording = !global.recording;
-  console.log(
-    global.recording ? "▶️ Resumed recording" : "⏸️ Paused recording"
-  );
-});
-
-await page.exposeBinding("stopRecording", async () => {
-  console.log("🛑 Stopping recording. Fetching actions from store...");
-  const steps = await fetch("http://localhost:3111/record").then((res) =>
-    res.json()
-  );
-
-  // Put `navigate` at the top
-  const sorted = [
-    ...steps.filter((a) => a.action === "navigate"),
-    ...steps.filter((a) => a.action !== "navigate"),
-  ];
-
-  const filePath = path.join(
-    __dirname,
-    "recordings",
-    `test-${Date.now()}.json`
-  );
-
-  // await fs.promises.writeFile(filePath, JSON.stringify(steps, null, 2));
-  // console.log(`✅ ${steps.length} steps saved to ${filePath}`);
-  await fs.promises.writeFile(filePath, JSON.stringify(steps, null, 2));
-  console.log(`✅ ${steps.length} steps saved to ${filePath}`);
-
-  await browser.close();
-  process.exit(0);
-});
-
-// await page.goto("https://example.com");
-await page.goto("about:blank");
+// await firstPage.goto("about:blank");
+await firstPage.goto("https://the-internet.herokuapp.com/");
+// await firstPage.goto("https://amazon.com/");

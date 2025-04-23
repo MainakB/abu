@@ -1,7 +1,7 @@
 (() => {
   const initializeOverlay = () => {
-    if (!document.body) {
-      console.warn("document.body not ready, retrying...");
+    if (!document.documentElement) {
+      console.warn("document.documentElement not ready, retrying...");
       requestIdleCallback(initializeOverlay);
       return;
     }
@@ -17,9 +17,10 @@
     highlightBox.style.transition = "all 0.1s ease";
     highlightBox.style.boxSizing = "border-box";
 
-    document.body.appendChild(highlightBox);
+    document.documentElement.appendChild(highlightBox);
 
-    document.addEventListener("mousemove", (e) => {
+    document.addEventListener("mousemove", async (e) => {
+      if (window.__isPaused()) return;
       const target = e.target;
 
       if (
@@ -41,7 +42,8 @@
       highlightBox.style.display = "block";
     });
 
-    document.addEventListener("mouseout", () => {
+    document.addEventListener("mouseout", async (e) => {
+      if (window.__isPaused()) return;
       highlightBox.style.display = "none";
     });
 

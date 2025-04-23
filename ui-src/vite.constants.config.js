@@ -8,10 +8,10 @@ export default defineConfig({
   build: {
     lib: {
       // 🆕 NEW ENTRY POINT
-      entry: resolve(__dirname, "floatingAssertDockMount.jsx"),
-      name: "FloatingAssertDock",
+      entry: resolve(__dirname, "constants/constantsWindowGlobal.js"),
+      name: "GlobalConstants",
       formats: ["iife"],
-      fileName: () => "floatingAssert.bundle.js", // ⬅️ keep same filename
+      fileName: () => "constants-global.bundle.js", // ⬅️ keep same filename
     },
     outDir: resolve(__dirname, "../injected"),
     emptyOutDir: false, // Don't wipe out `panel.bundle.js`

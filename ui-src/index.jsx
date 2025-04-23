@@ -1,6 +1,6 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
-import RecorderPanel from "./components/RecorderPanel-backup";
+import RecorderPanel from "./components/RecorderPanel";
 import "./style.css";
 
 let root; // Persist root for potential reuse
@@ -14,56 +14,112 @@ const initializeRecorderPanel = () => {
     rootEl.id = "recorder-panel-root";
 
     // Ensure document.body exists before appending
-    if (document.body) {
-      document.body.appendChild(rootEl);
+    if (document.documentElement) {
+      document.documentElement.appendChild(rootEl);
     } else {
-      console.warn("document.body not ready. Retrying...");
+      console.warn("document.documentElement not ready. Retrying...");
       requestIdleCallback(initializeRecorderPanel);
       return;
     }
+    // if (document.body) {
+    //   document.body.appendChild(rootEl);
+    // } else {
+    //   console.warn("document.body not ready. Retrying...");
+    //   requestIdleCallback(initializeRecorderPanel);
+    //   return;
+    // }
   }
 
-  // const root = ReactDOM.createRoot(rootEl);
-  if (!root) {
-    root = ReactDOM.createRoot(rootEl);
-  }
+  if (!rootEl.hasChildNodes()) {
+    if (!root) {
+      root = ReactDOM.createRoot(rootEl);
+    }
 
-  console.log("✅ React panel injected");
-  root.render(<RecorderPanel />);
+    root.render(<RecorderPanel />);
+    console.log("✅ React panel injected");
+  } else {
+    console.log("⚠️ Recorder panel already rendered");
+  }
 };
 
-const setupDomObserver = () => {
-  const target = document.body;
-  if (!target) {
+const observeDOMAndRoute = () => {
+  console.log("🔍 DOM + Route observer initialized");
+
+  const reinjectIfMissing = () => {
+    const exists = document.getElementById("recorder-panel-root");
+    if (!exists) {
+      console.warn("⚠️ Panel missing after route change. Reinserting...");
+      initializeRecorderPanel();
+    }
+  };
+  const target = document.documentElement;
+  if (target instanceof Node) {
+    const mo = new MutationObserver(reinjectIfMissing);
+    mo.observe(document.documentElement, { childList: true, subtree: true });
+  } else {
     console.warn(
-      "❗ document.body not ready for MutationObserver. Retrying..."
+      "⚠️ DOM observer not initialized: document.documentElement not available."
     );
-    setTimeout(setupDomObserver, 100); // Retry after 100ms
+  }
+  const wrap = (fn) => {
+    return function (...args) {
+      const result = fn.apply(this, args);
+      setTimeout(reinjectIfMissing, 50);
+      return result;
+    };
+  };
+
+  history.pushState = wrap(history.pushState);
+  history.replaceState = wrap(history.replaceState);
+  window.addEventListener("popstate", () => {
+    console.log("🔁 Detected popstate route change");
+    setTimeout(reinjectIfMissing, 50);
+  });
+};
+
+window.__bootRecorderUI = () => {
+  // If this is the top frame AND it contains a frameset, do NOT inject UI here
+  if (
+    window === window.top &&
+    document.documentElement &&
+    document.documentElement.tagName.toLowerCase() === "frameset"
+  ) {
+    console.warn("⚠️ Skipping panel injection in <frameset> document.");
     return;
   }
 
-  const observer = new MutationObserver(() => {
-    const exists = document.getElementById("recorder-panel-root");
-    if (!exists) {
-      console.warn("⚠️ Recorder panel missing. Reinjecting...");
-      initializeRecorderPanel();
-    }
-  });
+  // If we're in an iframe/frame but NOT the first one, skip (optional)
+  if (window !== window.top) {
+    // const isFirstFrame = window.parent.frames[0] === window;
+    // if (!isFirstFrame) {
+    //   console.warn("❌ Skipping panel in non-primary frame.");
+    //   return;
+    // }
+    return;
+  }
 
-  observer.observe(target, { childList: true, subtree: true });
+  const tryBoot = () => {
+    if (window.__recorderStore) {
+      initializeRecorderPanel();
+      observeDOMAndRoute();
+      // window.__setupDomObserver();
+    } else {
+      console.warn("⏳ Waiting for __recorderStore...");
+      setTimeout(tryBoot, 50);
+    }
+  };
+
+  tryBoot(); // Don't delay – we’re already injected via script tag
+
+  if (
+    document.readyState === "complete" ||
+    document.readyState === "interactive"
+  ) {
+    requestIdleCallback(tryBoot);
+  } else {
+    document.addEventListener("DOMContentLoaded", tryBoot);
+  }
 };
 
-// Ensure script runs when DOM is fully loaded
-if (document.readyState === "loading") {
-  // document.addEventListener("DOMContentLoaded", initializeRecorderPanel);
-  document.addEventListener("DOMContentLoaded", () => {
-    initializeRecorderPanel();
-    setupDomObserver();
-  });
-} else {
-  // requestIdleCallback(initializeRecorderPanel);
-  requestIdleCallback(() => {
-    initializeRecorderPanel();
-    setupDomObserver();
-  });
-}
+// ✅ Auto-run it on main page
+window.__bootRecorderUI();
