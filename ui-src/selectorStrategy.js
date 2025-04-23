@@ -17,13 +17,13 @@
     // Preferred stable selectors
     selectors.id = el.id ? `#${el.id}` : null;
     selectors.name = el.name ? `[name="${el.name}"]` : null;
-    selectors.testId = el.dataset.testid
+    selectors["data-testid"] = el.dataset.testid
       ? `[data-testid="${el.dataset.testid}"]`
       : null;
-    selectors.aria = el.getAttribute("aria-label")
+    selectors["aria-label"] = el.getAttribute("aria-label")
       ? `[aria-label="${el.getAttribute("aria-label")}"]`
       : null;
-    selectors.ariaRole = el.getAttribute("role")
+    selectors.role = el.getAttribute("role")
       ? `[role="${el.getAttribute("role")}"]`
       : null;
     selectors.className = getUniqueClass(el);

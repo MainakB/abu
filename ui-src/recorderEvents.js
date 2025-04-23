@@ -128,6 +128,9 @@
           e,
           value,
           selectOptionIndex,
+          ...(selectedOption.tagName
+            ? { selectOptionTag: selectedOption.tagName.toLowerCase() }
+            : {}),
         })
       );
     });
