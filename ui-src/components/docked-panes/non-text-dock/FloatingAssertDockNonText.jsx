@@ -9,6 +9,13 @@ function getOwnText(el) {
     .trim();
 }
 
+function getHeader(type) {
+  const base = "Assert Element Is";
+  if (type === ASSERTIONMODES.VISIBILITY) return `${base} Visible`;
+  if (type === ASSERTIONMODES.ENABLED) return `${base} Enabled`;
+  if (type === ASSERTIONMODES.DISABLED) return `${base} Disabled`;
+  if (type === ASSERTIONMODES.PRSENECE) return `${base} Present`;
+}
 export default function FloatingAssertDockNonText({
   el,
   mode,
@@ -27,11 +34,10 @@ export default function FloatingAssertDockNonText({
       onClick={(e) => e.stopPropagation()}
       onMouseDown={(e) => e.stopPropagation()}
     >
-      <div style={{ marginBottom: "6px" }}>
-        <strong>
-          Assert that element{" "}
-          {mode === ASSERTIONMODES.TEXT ? "text equals " : "value equals "}
-        </strong>
+      <div className="assert-dock-content">
+        <div className="assert-dock-header">
+          <strong>{getHeader(mode)}</strong>
+        </div>
       </div>
       <div className="docked-pane-footer-confirm-cancel">
         <div className="docked-pane-footer-assert-container">

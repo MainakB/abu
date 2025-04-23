@@ -10,18 +10,18 @@
   const assertionModes = window.__ASSERTIONMODES;
 
   const addListeners = () => {
-    document.addEventListener("click", async (e) => {
+    document.addEventListener("click", (e) => {
       const el = e.target;
       const mode = window.__recorderStore?.getMode?.() || "record";
       let shouldUpdateInput = false;
-      if (await window.__isPaused()) return;
+      if (window.__isPaused()) return;
       // 🛑 Finalize any pending input before handling click
       if (currentInput && el !== currentInput) {
         const finalValue = currentInput.value;
         shouldUpdateInput = finalValue !== initialValue;
         if (shouldUpdateInput) {
-          await window.__maybeRecordTabSwitch?.("recorder", "click input");
-          await window.__recordAction(
+          window.__maybeRecordTabSwitch?.("recorder-click-input");
+          window.__recordAction(
             window.__buildData({
               action: "input",
               el: currentInput,
@@ -41,11 +41,10 @@
         return;
       }
       if (isIgnorable(el)) return;
-      if (!shouldUpdateInput)
-        await window.__maybeRecordTabSwitch?.("recorder", "click");
+      if (!shouldUpdateInput) window.__maybeRecordTabSwitch?.("recorder-click");
 
       if (el.tagName && el.tagName.toLowerCase() === "select") return;
-      await window.__recordAction(
+      window.__recordAction(
         window.__buildData({
           action: "click",
           el,
@@ -55,8 +54,8 @@
       );
     });
 
-    document.addEventListener("focusin", async (e) => {
-      if (await window.__isPaused()) return;
+    document.addEventListener("focusin", (e) => {
+      if (window.__isPaused()) return;
       const el = e.target;
       if (
         el instanceof HTMLInputElement &&
@@ -87,8 +86,8 @@
       }
     }
 
-    document.addEventListener("focusout", async (e) => {
-      if (await window.__isPaused()) return;
+    document.addEventListener("focusout", (e) => {
+      if (window.__isPaused()) return;
       const el = e.target;
       if (el === currentInput) {
         const finalValue = el.value;
@@ -102,8 +101,8 @@
       }
     });
 
-    document.addEventListener("change", async (e) => {
-      if (await window.__isPaused()) return;
+    document.addEventListener("change", (e) => {
+      if (window.__isPaused()) return;
       const el = e.target;
       if (isIgnorable(el)) return;
       const tag = el.tagName.toLowerCase();
@@ -121,8 +120,8 @@
         return;
       }
 
-      await window.__maybeRecordTabSwitch?.("recorder", "change");
-      await window.__recordAction(
+      window.__maybeRecordTabSwitch?.("recorder-change");
+      window.__recordAction(
         window.__buildData({
           action: "select",
           el,

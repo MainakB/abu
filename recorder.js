@@ -76,7 +76,6 @@ await exposeRecorderControls(firstPage, __dirname, globalRecorderMode, browser);
 const firstTabId = uuidv4();
 await injectScripts(
   firstPage,
-  firstTabId,
   true,
   globalRecorderMode,
   cssContent,
@@ -91,7 +90,6 @@ context.on("page", async (newPage) => {
   console.log("🆕 New tab opened:", tabId);
   await injectScripts(
     newPage,
-    tabId,
     false,
     globalRecorderMode,
     cssContent,
@@ -103,7 +101,7 @@ context.on("page", async (newPage) => {
     const title = await newPage.title();
     const eventKey = `newPage-${tabId}`;
     await Promise.all([
-      injectToLocalStorage(newPage, false, tabId),
+      injectToLocalStorage(newPage, false),
       injectToSessionStorage(newPage, [
         { key: "tabId", value: tabId },
         { key: "url", value: url },
@@ -137,7 +135,7 @@ firstPage.on("framenavigated", async (frame) => {
       console.log("🌐 First page navigation recorded:", url);
       const tabId = uuidv4();
       await Promise.all([
-        injectToLocalStorage(firstPage, true, tabId),
+        injectToLocalStorage(firstPage, true),
         injectToSessionStorage(firstPage, [
           { key: "tabId", value: tabId },
           { key: "url", value: url },

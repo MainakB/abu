@@ -21,8 +21,8 @@
 
     let hoverTarget = null;
 
-    document.addEventListener("mousemove", async (e) => {
-      if (await window.__isPaused()) return;
+    document.addEventListener("mousemove", (e) => {
+      if (window.__isPaused()) return;
       const mode = window.__recorderStore.getMode();
 
       if (!Object.values(assertionModes).includes(mode)) return;
@@ -78,8 +78,8 @@
 
     document.addEventListener(
       "click",
-      async (e) => {
-        if (await window.__isPaused()) return;
+      (e) => {
+        if (window.__isPaused()) return;
         const mode = window.__recorderStore.getMode();
 
         if (!Object.values(assertionModes).includes(mode)) return;
@@ -107,7 +107,7 @@
 
         const el = hoverTarget;
         if (!el || typeof window.__getSelectors !== "function") return;
-        await window.__maybeRecordTabSwitch?.(`assert`, "click");
+        window.__maybeRecordTabSwitch?.(`assert-click`);
 
         window.showFloatingAssert(mode, el, e, mode);
 
@@ -118,7 +118,7 @@
         // as this will be done from docked pane on confirm/cancel
         // if (!["text", "value"].includes(mode)) {
         if (!Object.values(nonDockAsserts).includes(mode)) {
-          await window.__recorderStore.setMode("record");
+          window.__recorderStore.setMode("record");
         }
       },
       true
@@ -127,8 +127,8 @@
     ["pointerdown", "pointerup", "touchstart"].forEach((evt) => {
       document.addEventListener(
         evt,
-        async (e) => {
-          if (await window.__isPaused()) return;
+        (e) => {
+          if (window.__isPaused()) return;
           const mode = window.__recorderStore?.getMode?.();
           if (Object.values(assertionModes).includes(mode)) {
             if (!(e.target instanceof Element)) return;
@@ -138,7 +138,7 @@
             ) {
               return;
             }
-            await window.__maybeRecordTabSwitch?.(`assert`, evt);
+            window.__maybeRecordTabSwitch?.(`assert-${evt}`);
             e.preventDefault();
             e.stopPropagation();
             e.stopImmediatePropagation();

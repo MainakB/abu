@@ -16,18 +16,17 @@ export const ensureChromiumInstalled = (chromium) => {
   }
 };
 
-export const injectToLocalStorage = async (p, isInitialPage, tabId) => {
+export const injectToLocalStorage = async (p, isInitialPage) => {
   // ✅ Set flag in localStorage for this window
   await p.evaluate(
     (arg) => {
       try {
         localStorage.setItem("isInitialPage", arg.isInitialPage);
-        localStorage.setItem("activeTabId", arg.tabId);
       } catch (err) {
         console.warn("⚠️ Could not write to localStorage:", err);
       }
     },
-    { isInitialPage, tabId }
+    { isInitialPage }
   );
 };
 
@@ -37,6 +36,9 @@ export const injectToSessionStorage = async (p, sessionArgs) => {
     // ✅ Set flag in localStorage for this window
     await p.evaluate((arg) => {
       try {
+        if (arg.key === "tabId") {
+          window.__recorderStore.setActiveTabId(arg.value);
+        }
         sessionStorage.setItem(arg.key, arg.value);
       } catch (err) {
         console.warn("⚠️ Could not write to sessionStorage:", err);
@@ -71,7 +73,6 @@ export const allowPopups = (page) => {
 
 export const injectScripts = async (
   page,
-  tabId,
   initialPage,
   recoderModeValue,
   cssContent,

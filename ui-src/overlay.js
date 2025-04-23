@@ -20,7 +20,7 @@
     document.documentElement.appendChild(highlightBox);
 
     document.addEventListener("mousemove", async (e) => {
-      if (await window.__isPaused()) return;
+      if (window.__isPaused()) return;
       const target = e.target;
 
       if (
@@ -43,7 +43,7 @@
     });
 
     document.addEventListener("mouseout", async (e) => {
-      if (await window.__isPaused()) return;
+      if (window.__isPaused()) return;
       highlightBox.style.display = "none";
     });
 

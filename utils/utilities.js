@@ -88,34 +88,38 @@
     console.log("✅ Step added:", data);
   };
 
-  const syncRecorderState = async () => {
+  const syncRecorderState = () => {
     try {
       let isPaused = window.__recorderStore.getMode() === "pause";
-      await window.__syncRecorderStatusOnInternalSwitchTab();
+      window.__syncRecorderStatusOnInternalSwitchTab();
     } catch (err) {}
   };
 
-  window.__isPaused = async () => {
-    await syncRecorderState();
+  window.__isPaused = () => {
+    syncRecorderState();
     const mode = window.__recorderStore?.getMode?.() || "record";
     return mode === "pause";
   };
 
-  window.__maybeRecordTabSwitch = async (calledFrom, temp) => {
-    const isPaused = await window.__isPaused();
+  window.__maybeRecordTabSwitch = (calledFrom) => {
+    const isPaused = window.__isPaused();
+
     if (isPaused) return;
-    const isInitialPage = localStorage.getItem("isInitialPage") === "true";
-    const activeTabId = localStorage.getItem("activeTabId");
     const thisTabId = sessionStorage.getItem("tabId");
-    if (isInitialPage || activeTabId === thisTabId) return;
+    console.log(
+      ' sessionStorage.getItem("tabId"): ',
+      sessionStorage.getItem("tabId")
+    );
+    const shouldSwich =
+      window.__recorderStore.maybeUpdateActiveTabId(thisTabId);
+    if (!shouldSwich) return;
 
     const title = sessionStorage.getItem("title");
     const url = sessionStorage.getItem("url");
 
-    const now = Date.now();
     const key = `${calledFrom}-${thisTabId}`;
 
-    await fetch("http://localhost:3111/record", {
+    fetch("http://localhost:3111/record", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -129,8 +133,6 @@
         timestamp: Date.now(),
       }),
     });
-
-    localStorage.setItem("activeTabId", thisTabId);
   };
 
   window.__setupDomObserver = () => {
