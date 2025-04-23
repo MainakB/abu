@@ -14,6 +14,7 @@ wss.on("connection", function connection(ws) {
   ws.on("message", function incoming(message) {
     try {
       const data = JSON.parse(message);
+      console.log("Received data: ", data);
       if (data.type === "mode") {
         currentMode = data.mode;
         for (const client of clients) {

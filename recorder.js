@@ -18,7 +18,9 @@ import {
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
-let globalRecorderMode = "record";
+const globalRecorderMode = {
+  value: "record",
+};
 
 ensureChromiumInstalled(chromium);
 
@@ -108,7 +110,7 @@ context.on("page", async (newPage) => {
         { key: "title", value: title },
       ]),
     ]);
-    if (globalRecorderMode !== "pause") {
+    if (globalRecorderMode.value !== "pause") {
       // ✅ Record the switchToWindow action
       await fetch("http://localhost:3111/record", {
         method: "POST",

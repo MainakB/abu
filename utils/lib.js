@@ -51,14 +51,14 @@ export const updateInitialRecorderState = async (
   initialPage = false
 ) => {
   const recorderState = initialPage
-    ? globalRecorderMode
-    : globalRecorderMode === "pause"
+    ? globalRecorderMode.value
+    : globalRecorderMode.value === "pause"
     ? "record"
     : "pause";
-  globalRecorderMode = recorderState;
+  globalRecorderMode.value = recorderState;
   await page.evaluate((value) => {
     localStorage.setItem("recorderMode", value);
-  }, globalRecorderMode);
+  }, globalRecorderMode.value);
 };
 
 export const allowPopups = (page) => {
@@ -158,14 +158,14 @@ export const exposeRecorderControls = async (
   browser
 ) => {
   await page.exposeBinding("__toggleRecording", async () => {
-    await updateInitialRecorderState(page, false);
+    await updateInitialRecorderState(page, globalRecorderMode, false);
 
     console.log(
-      globalRecorderMode === "record"
+      globalRecorderMode.value === "record"
         ? "▶️ Resumed recording"
         : "⏸️ Paused recording"
     );
-    return globalRecorderMode;
+    return globalRecorderMode.value;
   });
 
   await page.exposeBinding(
@@ -173,7 +173,7 @@ export const exposeRecorderControls = async (
     async () => {
       await page.evaluate((value) => {
         localStorage.setItem("recorderMode", value);
-      }, globalRecorderMode);
+      }, globalRecorderMode.value);
     }
   );
 
