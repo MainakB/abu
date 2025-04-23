@@ -84,7 +84,7 @@ await injectScripts(
 
 // Handle new tabs/windows
 context.on("page", async (newPage) => {
-  await exposeRecorderControls(newPage, __dirname);
+  await exposeRecorderControls(newPage, __dirname, globalRecorderMode, browser);
   const tabId = uuidv4();
   console.log("🆕 New tab opened:", tabId);
   await injectScripts(
