@@ -55,7 +55,7 @@
     return {
       action,
       ...(assertion ? { assertion } : {}),
-      ...(expected ? { expected } : {}),
+      ...(expected !== undefined ? { expected } : {}),
       tagName: el.tagName.toLowerCase(),
       selectors,
       ...(attributeAssertPropName ? { attributeAssertPropName } : {}),

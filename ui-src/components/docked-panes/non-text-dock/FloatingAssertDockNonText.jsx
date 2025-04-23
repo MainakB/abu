@@ -49,7 +49,6 @@ export default function FloatingAssertDockNonText({
               setSofAssert(false);
               onCancel();
             }}
-            style={{ marginRight: 6 }}
           >
             ❌
           </button>

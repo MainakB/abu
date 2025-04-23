@@ -66,8 +66,25 @@
       ) {
         currentInput = el;
         initialValue = el.value;
+        el.addEventListener("keydown", handleKeydown);
       }
     });
+    function handleKeydown(e) {
+      if (e.key === "Enter" && currentInput) {
+        const el = currentInput;
+        const finalValue = el.value;
+
+        if (finalValue !== initialValue) {
+          window.__recordAction(
+            window.__buildData({ action: "input", el, e, value: finalValue })
+          );
+        }
+
+        currentInput.removeEventListener("keydown", handleKeydown);
+        currentInput = null;
+        initialValue = null;
+      }
+    }
 
     document.addEventListener("focusout", async (e) => {
       if (await window.__isPaused()) return;
@@ -75,7 +92,9 @@
       if (el === currentInput) {
         const finalValue = el.value;
         if (finalValue !== initialValue) {
-          record(buildData({ action: "input", el, e, value: finalValue }));
+          window.__recordAction(
+            window.__buildData({ action: "input", el, e, value: finalValue })
+          );
         }
         currentInput = null;
         initialValue = null;

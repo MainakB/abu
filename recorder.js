@@ -159,3 +159,4 @@ firstPage.on("framenavigated", async (frame) => {
 
 // await firstPage.goto("about:blank");
 await firstPage.goto("https://the-internet.herokuapp.com/");
+// await firstPage.goto("https://amazon.com/");

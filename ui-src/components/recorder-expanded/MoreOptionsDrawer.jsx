@@ -247,12 +247,93 @@ export default function MoreOptionsDrawer({
                 ✓ Assert Element Disabled
               </li>
               <li>✓ Assert Element Count</li>
-              <li>✓ Assert Radio State</li>
-              <li>✓ Assert Checkbox State</li>
-              <li>✓ Assert Dropdown Selected</li>
-              <li>✓ Assert Dropdown Count</li>
-              <li>✓ Assert Dropdown Contains</li>
-              <li>✓ Assert Dropdown Duplicate Count</li>
+              <li
+                className={getClassName(currentMode, ASSERTIONMODES.RADIOSTATE)}
+                onClick={async () =>
+                  await onMenuSelection(ASSERTIONMODES.RADIOSTATE)
+                }
+              >
+                ✓ Assert Radio State
+              </li>
+              <li
+                className={getClassName(
+                  currentMode,
+                  ASSERTIONMODES.CHECKBOXSTATE
+                )}
+                onClick={async () =>
+                  await onMenuSelection(ASSERTIONMODES.CHECKBOXSTATE)
+                }
+              >
+                ✓ Assert Checkbox State
+              </li>
+              <li
+                className={getClassName(
+                  currentMode,
+                  ASSERTIONMODES.DROPDOWNSELECTED
+                )}
+                onClick={async () =>
+                  await onMenuSelection(ASSERTIONMODES.DROPDOWNSELECTED)
+                }
+              >
+                ✓ Assert Dropdown Selected
+              </li>
+              <li
+                className={getClassName(
+                  currentMode,
+                  ASSERTIONMODES.DROPDOWNCOUNTIS
+                )}
+                onClick={async () =>
+                  await onMenuSelection(ASSERTIONMODES.DROPDOWNCOUNTIS)
+                }
+              >
+                ✓ Assert Dropdown Count
+              </li>
+              <li
+                className={getClassName(
+                  currentMode,
+                  ASSERTIONMODES.DROPDOWNCONTAINS
+                )}
+                onClick={async () =>
+                  await onMenuSelection(ASSERTIONMODES.DROPDOWNCONTAINS)
+                }
+              >
+                ✓ Assert Dropdown Contains
+              </li>
+              <li
+                className={getClassName(
+                  currentMode,
+                  ASSERTIONMODES.DROPDOWNVALUESARE
+                )}
+                onClick={async () =>
+                  await onMenuSelection(ASSERTIONMODES.DROPDOWNVALUESARE)
+                }
+              >
+                ✓ Assert Dropdown Values
+              </li>
+              <li
+                className={getClassName(
+                  currentMode,
+                  ASSERTIONMODES.DROPDOWNINALPHABETICORDER
+                )}
+                onClick={async () =>
+                  await onMenuSelection(
+                    ASSERTIONMODES.DROPDOWNINALPHABETICORDER
+                  )
+                }
+              >
+                ✓ Assert Dropdown Ordering
+              </li>
+              <li
+                className={getClassName(
+                  currentMode,
+                  ASSERTIONMODES.DROPDOWNDUPLICATECOUNT
+                )}
+                onClick={async () =>
+                  await onMenuSelection(ASSERTIONMODES.DROPDOWNDUPLICATECOUNT)
+                }
+              >
+                ✓ Assert Dropdown Duplicate Count
+              </li>
               <li>✓ Assert Cookie Value</li>
               <li>✓ Assert Text Box Value</li>
               <li>✓ Assert Current Url</li>

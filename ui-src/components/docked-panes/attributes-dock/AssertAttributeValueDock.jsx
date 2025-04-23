@@ -12,7 +12,7 @@ export default function AssertAttributeValueDock({
   const [attributeStates, setAttributeStates] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [softAssert, setSofAssert] = useState(false);
+  const [softAssert, setSoftAssert] = useState(false);
 
   useEffect(() => {
     const fetchAttributes = async () => {
@@ -182,7 +182,7 @@ export default function AssertAttributeValueDock({
           <input
             type="checkbox"
             checked={softAssert}
-            onChange={() => setSofAssert((prev) => !prev)}
+            onChange={() => setSoftAssert((prev) => !prev)}
           ></input>
           <label>Soft Assert</label>
         </div>
@@ -199,7 +199,7 @@ export default function AssertAttributeValueDock({
             onClick={() => {
               handleConfirm(softAssert);
               // onConfirm(expected, softAssert);
-              setSofAssert(false);
+              setSoftAssert(false);
             }}
             disabled={!hasCheckedItems}
           >

@@ -109,19 +109,7 @@
         if (!el || typeof window.__getSelectors !== "function") return;
         await window.__maybeRecordTabSwitch?.(`assert`, "click");
 
-        let assertType = "text";
-        if (
-          mode === assertionModes.VISIBILITY ||
-          mode === assertionModes.PRSENECE ||
-          mode === assertionModes.ENABLED ||
-          mode === assertionModes.DISABLED
-        ) {
-          assertType = "nonText";
-        } else if (mode === assertionModes.ATTRIBUTEVALUE) {
-          assertType = mode;
-        }
-
-        window.showFloatingAssert(mode, el, e, assertType);
+        window.showFloatingAssert(mode, el, e, mode);
 
         assertBox.style.display = "none";
         hoverTarget = null;

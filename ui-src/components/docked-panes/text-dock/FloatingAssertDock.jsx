@@ -2,11 +2,20 @@ import React, { useState, useEffect } from "react";
 import { ASSERTIONMODES } from "../../../constants/index.js";
 
 function getOwnText(el) {
-  return [...el.childNodes]
-    .filter((n) => n.nodeType === Node.TEXT_NODE)
-    .map((n) => n.textContent.trim())
-    .join(" ")
-    .trim();
+  try {
+    if (!el) return "";
+
+    const textValue = [...el.childNodes]
+      .filter((n) => n.nodeType === Node.TEXT_NODE)
+      .map((n) => n.textContent.trim())
+      .join(" ")
+      .trim();
+
+    return textValue || el.innerText?.trim() || "";
+  } catch (err) {
+    console.warn("getOwnText failed:", err);
+    return "";
+  }
 }
 
 export default function FloatingAssertDock({ el, mode, onConfirm, onCancel }) {
@@ -19,16 +28,14 @@ export default function FloatingAssertDock({ el, mode, onConfirm, onCancel }) {
 
   const [softAssert, setSofAssert] = useState(false);
 
-  useEffect(() => {
-    if (!el) return;
-    // if (mode === "text") {
-    if (mode === ASSERTIONMODES.TEXT) {
-      setExpected(el.innerText?.trim() || "");
-    } else if (mode === ASSERTIONMODES.VALUE) {
-      // else if (mode === "value") {
-      setExpected(el.value || el.getAttribute("value") || "");
-    }
-  }, [el, mode]);
+  // useEffect(() => {
+  //   if (!el) return;
+  //   if (mode === ASSERTIONMODES.TEXT) {
+  //     setExpected(expected || el.innerText?.trim() || "");
+  //   } else if (mode === ASSERTIONMODES.VALUE) {
+  //     setExpected(expected || el.value || el.getAttribute("value") || "");
+  //   }
+  // }, [el, mode]);
 
   return (
     <div
@@ -66,11 +73,12 @@ export default function FloatingAssertDock({ el, mode, onConfirm, onCancel }) {
               setSofAssert(false);
               onCancel();
             }}
-            style={{ marginRight: 6 }}
+            className="docked-pane-footer-cancel-button"
           >
             ❌
           </button>
           <button
+            className="docked-pane-footer-confirm-button"
             onClick={() => {
               onConfirm(expected, softAssert);
               setSofAssert(false);

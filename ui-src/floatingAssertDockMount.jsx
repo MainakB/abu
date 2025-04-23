@@ -5,6 +5,9 @@ import FloatingAssertDockNonText from "./components/docked-panes/non-text-dock/F
 import FloatingCookieListDock from "./components/docked-panes/cookie-dock/FloatingCookieListDock.jsx";
 import FloatingDeleteCookieDock from "./components/docked-panes/cookie-dock/FloatingDeleteCookieDock.jsx";
 import AssertAttributeValueDock from "./components/docked-panes/attributes-dock/AssertAttributeValueDock.jsx";
+import AssertCheckedStateDock from "./components/docked-panes/checked-state-dock/AssertCheckedStateDock.jsx";
+import FloatingDropdownAssertDock from "./components/docked-panes/dropdown-dock/FloatingDropdownAssertDock.jsx";
+import FloatingAssertDockNotSupported from "./components/docked-panes/dropdown-dock/FloatingAssertDockNotSupported.jsx";
 
 import { ASSERTIONMODES, ASSERTIONNAMES } from "./constants/index.js";
 
@@ -24,6 +27,31 @@ const getModeSelected = (val) => {
   if (val === ASSERTIONMODES.DISABLED) return ASSERTIONNAMES.DISABLED;
   if (val === ASSERTIONMODES.ADDCOOKIES) return ASSERTIONNAMES.ADDCOOKIES;
   if (val === ASSERTIONMODES.DELETECOOKIES) return ASSERTIONNAMES.DELETECOOKIES;
+
+  if (val === ASSERTIONMODES.CHECKBOXCHECKED)
+    return ASSERTIONNAMES.CHECKBOXCHECKED;
+  if (val === ASSERTIONMODES.CHECKBOXNOTCHECKED)
+    return ASSERTIONNAMES.CHECKBOXNOTCHECKED;
+  if (val === ASSERTIONMODES.RADIOCHECKED) return ASSERTIONNAMES.RADIOCHECKED;
+  if (val === ASSERTIONMODES.RADIONOTCHECKED)
+    return ASSERTIONNAMES.RADIONOTCHECKED;
+
+  if (val === ASSERTIONMODES.DROPDOWNCONTAINS)
+    return ASSERTIONNAMES.DROPDOWNCONTAINS;
+  if (val === ASSERTIONMODES.DROPDOWNCOUNTIS)
+    return ASSERTIONNAMES.DROPDOWNCOUNTIS;
+  if (val === ASSERTIONMODES.DROPDOWNCOUNTISNOT)
+    return ASSERTIONNAMES.DROPDOWNCOUNTISNOT;
+  if (val === ASSERTIONMODES.DROPDOWNINALPHABETICORDER)
+    return ASSERTIONNAMES.DROPDOWNINALPHABETICORDER;
+  if (val === ASSERTIONMODES.DROPDOWNNOTSELECTED)
+    return ASSERTIONNAMES.DROPDOWNNOTSELECTED;
+  if (val === ASSERTIONMODES.DROPDOWNSELECTED)
+    return ASSERTIONNAMES.DROPDOWNSELECTED;
+  if (val === ASSERTIONMODES.DROPDOWNVALUESARE)
+    return ASSERTIONNAMES.DROPDOWNVALUESARE;
+  if (val === ASSERTIONMODES.DROPDOWNDUPLICATECOUNT)
+    return ASSERTIONNAMES.DROPDOWNDUPLICATECOUNT;
 };
 
 window.showFloatingAssert = (mode, el, e, type) => {
@@ -55,7 +83,12 @@ window.showFloatingAssert = (mode, el, e, type) => {
   }
 
   let textValue = "";
-  if (!(type === "addCookies" || type === "deleteCookies")) {
+  if (
+    !(
+      type === ASSERTIONMODES.ADDCOOKIES ||
+      type === ASSERTIONMODES.DELETECOOKIES
+    )
+  ) {
     textValue = el.innerText?.trim() || "";
   }
 
@@ -120,7 +153,74 @@ window.showFloatingAssert = (mode, el, e, type) => {
     await closeDock();
   };
 
-  if (type === "text") {
+  const recordCheckboxRadioAssert = async (
+    checkBoxState,
+    isSoftAssert,
+    elToUse
+  ) => {
+    const isRadio = checkBoxState.type === ASSERTIONMODES.RADIOSTATE;
+
+    let assertName = "";
+    if (isRadio) {
+      if (checkBoxState.isChecked) {
+        assertName = ASSERTIONNAMES.RADIOCHECKED;
+      } else {
+        assertName = ASSERTIONNAMES.RADIONOTCHECKED;
+      }
+    } else {
+      if (checkBoxState.isChecked) {
+        assertName = ASSERTIONNAMES.CHECKBOXCHECKED;
+      } else {
+        assertName = ASSERTIONNAMES.CHECKBOXNOTCHECKED;
+      }
+    }
+
+    await window.__recordAction(
+      window.__buildData({
+        action: "assert",
+        isSoftAssert,
+        assertion: assertName,
+        expected: checkBoxState.isChecked,
+        el: elToUse,
+        e,
+      })
+    );
+
+    await closeDock();
+  };
+
+  const recordDropdownAssert = async (
+    expected,
+    isSoftAssert,
+    isNegative,
+    assertName,
+    modeVal
+  ) => {
+    if (
+      isNegative &&
+      (modeVal === ASSERTIONMODES.DROPDOWNCOUNTIS ||
+        modeVal === ASSERTIONMODES.DROPDOWNSELECTED)
+    ) {
+      assertName =
+        modeVal === ASSERTIONMODES.DROPDOWNCOUNTIS
+          ? ASSERTIONNAMES.DROPDOWNCOUNTISNOT
+          : ASSERTIONNAMES.DROPDOWNNOTSELECTED;
+    }
+    await window.__recordAction(
+      window.__buildData({
+        action: "assert",
+        isSoftAssert,
+        assertion: assertName,
+        expected,
+        el,
+        e,
+      })
+    );
+
+    await closeDock();
+  };
+
+  if (type === ASSERTIONMODES.TEXT || type === ASSERTIONMODES.VALUE) {
     floatingAssertRoot.render(
       <FloatingAssertDock
         mode={mode}
@@ -146,7 +246,7 @@ window.showFloatingAssert = (mode, el, e, type) => {
         }}
       />
     );
-  } else if (type === "attrValue") {
+  } else if (type === ASSERTIONMODES.ATTRIBUTEVALUE) {
     floatingAssertRoot.render(
       <AssertAttributeValueDock
         getAttributes={getElementAttributes}
@@ -158,7 +258,28 @@ window.showFloatingAssert = (mode, el, e, type) => {
         }
       />
     );
-  } else if (type === "nonText") {
+  } else if (
+    type === ASSERTIONMODES.CHECKBOXSTATE ||
+    type === ASSERTIONMODES.RADIOSTATE
+  ) {
+    floatingAssertRoot.render(
+      <AssertCheckedStateDock
+        getAttributes={getElementAttributes}
+        mode={mode}
+        el={el}
+        onCancel={async () => closeDock()}
+        onConfirm={async (checkBoxState, isSoftAssert, elToUse) =>
+          recordCheckboxRadioAssert(checkBoxState, isSoftAssert, elToUse)
+        }
+        label={type === ASSERTIONMODES.CHECKBOXSTATE ? "Checkbox" : "Radio"}
+      />
+    );
+  } else if (
+    type === ASSERTIONMODES.VISIBILITY ||
+    type === ASSERTIONMODES.ENABLED ||
+    type === ASSERTIONMODES.PRSENECE ||
+    type === ASSERTIONMODES.DISABLED
+  ) {
     floatingAssertRoot.render(
       <FloatingAssertDockNonText
         mode={mode}
@@ -179,11 +300,10 @@ window.showFloatingAssert = (mode, el, e, type) => {
             })
           );
           await closeDock();
-          // await window.__recorderStore.setMode("record");
         }}
       />
     );
-  } else if (type === "addCookies") {
+  } else if (type === ASSERTIONMODES.ADDCOOKIES) {
     floatingAssertRoot.render(
       <FloatingCookieListDock
         onCancel={async () => {
@@ -203,7 +323,7 @@ window.showFloatingAssert = (mode, el, e, type) => {
         }}
       />
     );
-  } else if (type === "deleteCookies") {
+  } else if (type === ASSERTIONMODES.DELETECOOKIES) {
     floatingAssertRoot.render(
       <FloatingDeleteCookieDock
         onCancel={async () => {
@@ -221,5 +341,47 @@ window.showFloatingAssert = (mode, el, e, type) => {
         }}
       />
     );
+  } else if (
+    type === ASSERTIONMODES.DROPDOWNCONTAINS ||
+    type === ASSERTIONMODES.DROPDOWNCOUNTIS ||
+    type === ASSERTIONMODES.DROPDOWNCOUNTISNOT ||
+    type === ASSERTIONMODES.DROPDOWNINALPHABETICORDER ||
+    type === ASSERTIONMODES.DROPDOWNNOTSELECTED ||
+    type === ASSERTIONMODES.DROPDOWNSELECTED ||
+    type === ASSERTIONMODES.DROPDOWNVALUESARE ||
+    type === ASSERTIONMODES.DROPDOWNDUPLICATECOUNT
+  ) {
+    if (el && el.tagName && el.tagName.toLowerCase().includes("select")) {
+      floatingAssertRoot.render(
+        <FloatingDropdownAssertDock
+          mode={mode}
+          el={el}
+          onCancel={async () => closeDock()}
+          onConfirm={async (
+            expected,
+            softAssert,
+            isNegative,
+            assertName,
+            modeVal
+          ) =>
+            recordDropdownAssert(
+              expected,
+              softAssert,
+              isNegative,
+              assertName,
+              modeVal
+            )
+          }
+        />
+      );
+    } else {
+      floatingAssertRoot.render(
+        <FloatingAssertDockNotSupported
+          mode={mode}
+          el={el}
+          onCancel={async () => closeDock()}
+        />
+      );
+    }
   }
 };
