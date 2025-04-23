@@ -69,6 +69,7 @@
         el.addEventListener("keydown", handleKeydown);
       }
     });
+
     function handleKeydown(e) {
       if (e.key === "Enter" && currentInput) {
         const el = currentInput;
