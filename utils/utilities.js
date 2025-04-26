@@ -165,6 +165,7 @@
     cookies,
     attributeAssertPropName,
     selectOptionTag,
+    locatorName,
   }) => {
     if (
       action === "addCookies" ||
@@ -181,6 +182,7 @@
 
     const result = {
       action,
+      ...(locatorName && locatorName !== "" ? { locatorName } : {}),
       ...(assertion ? { assertion } : {}),
       ...(expected !== undefined ? { expected } : {}),
       tagName: el.tagName.toLowerCase(),

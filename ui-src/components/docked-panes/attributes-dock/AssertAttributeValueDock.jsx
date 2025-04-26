@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-// import "./assertAttributeValueDock.css";
+import ConfirmCancelFooter from "../confirm-cancel-footer/ConfirmCancelFooter.jsx";
 
 export default function AssertAttributeValueDock({
   getAttributes,
@@ -13,6 +13,7 @@ export default function AssertAttributeValueDock({
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [softAssert, setSoftAssert] = useState(false);
+  const [locatorName, setLocatorName] = useState("");
 
   useEffect(() => {
     const fetchAttributes = async () => {
@@ -55,15 +56,37 @@ export default function AssertAttributeValueDock({
     fetchAttributes();
   }, [getAttributes]);
 
+  // const updateAttribute = (index, field, value) => {
+  //   const updated = [...attributeStates];
+  //   updated[index] = { ...updated[index], [field]: value };
+  //   setAttributeStates(updated);
+  // };
   const updateAttribute = (index, field, value) => {
-    const updated = [...attributeStates];
-    updated[index] = { ...updated[index], [field]: value };
-    setAttributeStates(updated);
+    setAttributeStates((prevAttributes) =>
+      prevAttributes.map((attr, i) =>
+        i === index ? { ...attr, [field]: value } : attr
+      )
+    );
+  };
+
+  const toggleSelectAll = () => {
+    const allSelected = attributeStates.every((attr) => attr.checked);
+    setAttributeStates((prevAttributes) =>
+      prevAttributes.map((attr) => ({
+        ...attr,
+        checked: !allSelected, // If all selected, unselect; otherwise select all
+      }))
+    );
   };
 
   const hasCheckedItems = attributeStates.some((attr) => attr.checked);
 
-  const handleConfirm = (isSoftAssert) => {
+  const handleCancel = () => {
+    setSoftAssert(false);
+    onCancel();
+  };
+
+  const handleConfirm = () => {
     const selectedAssertions = attributeStates
       .filter((attr) => attr.checked)
       .map((attr) => ({
@@ -72,7 +95,8 @@ export default function AssertAttributeValueDock({
         isNegative: attr.isNegative,
         isSubstringMatch: attr.isSubstringMatch,
       }));
-    onConfirm(selectedAssertions, isSoftAssert);
+    onConfirm(selectedAssertions, softAssert, locatorName);
+    setSoftAssert(false);
   };
 
   return (
@@ -93,6 +117,17 @@ export default function AssertAttributeValueDock({
         )}
         {!loading && !error && attributeStates.length > 0 && (
           <div className="assert-attributes-container">
+            <div className="assert-attributes-container-wrapper">
+              <button
+                className="assert-toggle-button-neg-pos"
+                type="button"
+                onClick={toggleSelectAll}
+              >
+                {attributeStates.every((attr) => attr.checked)
+                  ? "Deselect All"
+                  : "Select All"}
+              </button>
+            </div>
             {attributeStates.map((attr, index) => (
               <div key={index} className="assert-attribute-row">
                 <label className="assert-checkbox-container">
@@ -177,36 +212,15 @@ export default function AssertAttributeValueDock({
         )}
       </div>
 
-      <div className="docked-pane-footer-confirm-cancel">
-        <div className="docked-pane-footer-assert-container">
-          <input
-            type="checkbox"
-            checked={softAssert}
-            onChange={() => setSoftAssert((prev) => !prev)}
-          ></input>
-          <label>Soft Assert</label>
-        </div>
-        <div className="docked-pane-footer-buttons">
-          <button
-            className="docked-pane-footer-cancel-button"
-            onClick={onCancel}
-          >
-            ❌
-          </button>
-          <button
-            className="docked-pane-footer-confirm-button"
-            // onClick={handleConfirm}
-            onClick={() => {
-              handleConfirm(softAssert);
-              // onConfirm(expected, softAssert);
-              setSoftAssert(false);
-            }}
-            disabled={!hasCheckedItems}
-          >
-            ✅
-          </button>
-        </div>
-      </div>
+      <ConfirmCancelFooter
+        locatorName={locatorName}
+        setLocatorName={setLocatorName}
+        softAssert={softAssert}
+        setSoftAssert={setSoftAssert}
+        onCancel={handleCancel}
+        onConfirm={handleConfirm}
+        disabled={!hasCheckedItems}
+      />
     </div>
   );
 }

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { ASSERTIONMODES } from "../../../constants/index.js";
+import ConfirmCancelFooter from "../confirm-cancel-footer/ConfirmCancelFooter.jsx";
 
 function getOwnText(el) {
   try {
@@ -26,7 +27,8 @@ export default function FloatingAssertDock({ el, mode, onConfirm, onCancel }) {
     return "";
   });
 
-  const [softAssert, setSofAssert] = useState(false);
+  const [softAssert, setSoftAssert] = useState(false);
+  const [locatorName, setLocatorName] = useState("");
 
   // useEffect(() => {
   //   if (!el) return;
@@ -36,6 +38,16 @@ export default function FloatingAssertDock({ el, mode, onConfirm, onCancel }) {
   //     setExpected(expected || el.value || el.getAttribute("value") || "");
   //   }
   // }, [el, mode]);
+
+  const handleCancel = () => {
+    setSoftAssert(false);
+    onCancel();
+  };
+
+  const handleConfirm = () => {
+    onConfirm(expected, softAssert, locatorName);
+    setSoftAssert(false);
+  };
 
   return (
     <div
@@ -58,37 +70,15 @@ export default function FloatingAssertDock({ el, mode, onConfirm, onCancel }) {
         onChange={(e) => setExpected(e.target.value)}
         placeholder="Enter expected value..."
       />
-      <div className="docked-pane-footer-confirm-cancel">
-        <div className="docked-pane-footer-assert-container">
-          <input
-            type="checkbox"
-            checked={softAssert}
-            onChange={() => setSofAssert((prev) => !prev)}
-          ></input>
-          <label>Soft Assert</label>
-        </div>
-        <div className="docked-pane-footer-buttons">
-          <button
-            onClick={() => {
-              setSofAssert(false);
-              onCancel();
-            }}
-            className="docked-pane-footer-cancel-button"
-          >
-            ❌
-          </button>
-          <button
-            className="docked-pane-footer-confirm-button"
-            onClick={() => {
-              onConfirm(expected, softAssert);
-              setSofAssert(false);
-            }}
-            disabled={!expected}
-          >
-            ✅
-          </button>
-        </div>
-      </div>
+      <ConfirmCancelFooter
+        locatorName={locatorName}
+        setLocatorName={setLocatorName}
+        softAssert={softAssert}
+        setSoftAssert={setSoftAssert}
+        onCancel={handleCancel}
+        onConfirm={handleConfirm}
+        disabled={expected === ""}
+      />
     </div>
   );
 }

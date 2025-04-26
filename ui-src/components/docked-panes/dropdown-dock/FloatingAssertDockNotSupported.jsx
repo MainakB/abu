@@ -56,7 +56,6 @@ export default function FloatingAssertDockNotSupported({ el, mode, onCancel }) {
           >
             ❌
           </button>
-          {/* <button onClick={onCancel}>✅</button> */}
         </div>
       </div>
     </div>

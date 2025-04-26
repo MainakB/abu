@@ -8,12 +8,12 @@ export const mapData = (arg, idx) => {
   let result;
 
   if (actionType === FUNCTIONMAPPER.NAVIGATE.key) {
-    const fnNameAlias = FUNCTIONMAPPER.NAVIGATE.name || fnKey;
+    const fnNameAlias = FUNCTIONMAPPER.NAVIGATE.name;
     result = [{ step: `Given ${fnNameAlias} "${arg.url}"` }, idx];
   }
 
   if (actionType === FUNCTIONMAPPER.SWITCHTOWINDOW.key) {
-    const fnNameAlias = FUNCTIONMAPPER.SWITCHTOWINDOW.name || fnKey;
+    const fnNameAlias = FUNCTIONMAPPER.SWITCHTOWINDOW.name;
     result = [
       {
         step: `And ${fnNameAlias}("${
@@ -25,7 +25,7 @@ export const mapData = (arg, idx) => {
   }
 
   if (actionType === FUNCTIONMAPPER.CLICK.key) {
-    const fnNameAlias = FUNCTIONMAPPER.CLICK.name || fnKey;
+    const fnNameAlias = FUNCTIONMAPPER.CLICK.name;
     const loc = constructLocators(arg, idx);
     result = [
       {
@@ -37,7 +37,7 @@ export const mapData = (arg, idx) => {
   }
 
   if (actionType === FUNCTIONMAPPER.INPUT.key) {
-    const fnNameAlias = FUNCTIONMAPPER.INPUT.name || fnKey;
+    const fnNameAlias = FUNCTIONMAPPER.INPUT.name;
     const loc = constructLocators(arg, idx);
     result = [
       {
@@ -50,7 +50,7 @@ export const mapData = (arg, idx) => {
 
   const hasSoftAssert = arg.isSoftAssert ? ", isSoftAssert: true" : "";
   if (actionType === FUNCTIONMAPPER.TEXT.key) {
-    const fnNameAlias = FUNCTIONMAPPER.TEXT.name || fnKey;
+    const fnNameAlias = FUNCTIONMAPPER.TEXT.name;
     const loc = constructLocators(arg, idx);
 
     result = [
@@ -63,7 +63,19 @@ export const mapData = (arg, idx) => {
   }
 
   if (actionType === FUNCTIONMAPPER.VISIBILITY.key) {
-    const fnNameAlias = FUNCTIONMAPPER.VISIBILITY.name || fnKey;
+    const fnNameAlias = FUNCTIONMAPPER.VISIBILITY.name;
+    const loc = constructLocators(arg, idx);
+    result = [
+      {
+        step: `And ${fnNameAlias}({po:"${loc.locKeyName}"${hasSoftAssert}})`,
+        locator: loc.result,
+      },
+      loc.newIdx,
+    ];
+  }
+
+  if (actionType === FUNCTIONMAPPER.INVISIBILITY.key) {
+    const fnNameAlias = FUNCTIONMAPPER.INVISIBILITY.name;
     const loc = constructLocators(arg, idx);
     result = [
       {
@@ -75,7 +87,7 @@ export const mapData = (arg, idx) => {
   }
 
   if (actionType === FUNCTIONMAPPER.ATTRIBUTEVALUEEQUALS.key) {
-    const fnNameAlias = FUNCTIONMAPPER.ATTRIBUTEVALUEEQUALS.name || fnKey;
+    const fnNameAlias = FUNCTIONMAPPER.ATTRIBUTEVALUEEQUALS.name;
     const loc = constructLocators(arg, idx);
     result = [
       {
@@ -87,7 +99,7 @@ export const mapData = (arg, idx) => {
   }
 
   if (actionType === FUNCTIONMAPPER.NOTATTRIBUTEVALUEEQUALS.key) {
-    const fnNameAlias = FUNCTIONMAPPER.NOTATTRIBUTEVALUEEQUALS.name || fnKey;
+    const fnNameAlias = FUNCTIONMAPPER.NOTATTRIBUTEVALUEEQUALS.name;
     const loc = constructLocators(arg, idx);
     result = [
       {
@@ -99,7 +111,7 @@ export const mapData = (arg, idx) => {
   }
 
   if (actionType === FUNCTIONMAPPER.ATTRIBUTEVALUECONTAINS.key) {
-    const fnNameAlias = FUNCTIONMAPPER.ATTRIBUTEVALUECONTAINS.name || fnKey;
+    const fnNameAlias = FUNCTIONMAPPER.ATTRIBUTEVALUECONTAINS.name;
     const loc = constructLocators(arg, idx);
     result = [
       {
@@ -111,7 +123,7 @@ export const mapData = (arg, idx) => {
   }
 
   if (actionType === FUNCTIONMAPPER.NOTATTRIBUTEVALUECONTAINS.key) {
-    const fnNameAlias = FUNCTIONMAPPER.NOTATTRIBUTEVALUECONTAINS.name || fnKey;
+    const fnNameAlias = FUNCTIONMAPPER.NOTATTRIBUTEVALUECONTAINS.name;
     const loc = constructLocators(arg, idx);
     result = [
       {
@@ -123,7 +135,7 @@ export const mapData = (arg, idx) => {
   }
 
   if (actionType === FUNCTIONMAPPER.DROPDOWNSELECTED.key) {
-    const fnNameAlias = FUNCTIONMAPPER.DROPDOWNSELECTED.name || fnKey;
+    const fnNameAlias = FUNCTIONMAPPER.DROPDOWNSELECTED.name;
     const loc = constructLocators(arg, idx);
     result = [
       {
@@ -135,7 +147,7 @@ export const mapData = (arg, idx) => {
   }
 
   if (actionType === FUNCTIONMAPPER.DROPDOWNCOUNTIS.key) {
-    const fnNameAlias = FUNCTIONMAPPER.DROPDOWNCOUNTIS.name || fnKey;
+    const fnNameAlias = FUNCTIONMAPPER.DROPDOWNCOUNTIS.name;
     const loc = constructLocators(arg, idx);
     result = [
       {
@@ -147,7 +159,7 @@ export const mapData = (arg, idx) => {
   }
 
   if (actionType === FUNCTIONMAPPER.DROPDOWNINALPHABETICORDER.key) {
-    const fnNameAlias = FUNCTIONMAPPER.DROPDOWNINALPHABETICORDER.name || fnKey;
+    const fnNameAlias = FUNCTIONMAPPER.DROPDOWNINALPHABETICORDER.name;
     const loc = constructLocators(arg, idx);
     result = [
       {
@@ -159,7 +171,7 @@ export const mapData = (arg, idx) => {
   }
 
   if (actionType === FUNCTIONMAPPER.DROPDOWNCONTAINS.key) {
-    const fnNameAlias = FUNCTIONMAPPER.DROPDOWNCONTAINS.name || fnKey;
+    const fnNameAlias = FUNCTIONMAPPER.DROPDOWNCONTAINS.name;
     const loc = constructLocators(arg, idx);
     result = [
       {
@@ -193,6 +205,10 @@ const getExportTypes = (key) => {
 
   if (key === "xpath") {
     return wrapEnum("Types.LocatorTypes.XPATH");
+  }
+
+  if (key === "css") {
+    return wrapEnum("Types.LocatorTypes.CSS");
   }
 
   if (key === "cssSr") {

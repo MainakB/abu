@@ -1,46 +1,5 @@
-/* Theme variables with fallbacks to handle light/dark website themes */
 :root {
-  /* Light theme variables (default) */
-  --recorder-bg-color: rgba(240, 240, 240, 0.95);
-  --recorder-text-color: #333;
-  --recorder-border-color: #ccc;
-  --recorder-hover-color: rgba(105, 71, 71, 0.4);
-  --recorder-active-color: rgba(212, 212, 212, 0.28);
-  --recorder-section-bg: #e8e8e8;
-  --recorder-button-bg: #f0f0f0;
-  --recorder-button-hover: #e0e0e0;
-  --recorder-panel-footer: #fafafa;
-  --recorder-input-bg: white;
-  --recorder-checkbox-bg: white;
-  --recorder-subtle-color: #666;
-  --recorder-error-color: #d32f2f;
-  --recorder-success-bg: #e8f5e9;
-  --recorder-success-border: #c8e6c9;
-  --recorder-scrollbar: #c0c0c0;
-  --recorder-scrollbar-hover: #999;
-}
-
-/* Media query to detect dark mode preference */
-@media (prefers-color-scheme: dark) {
-  :root {
-    --recorder-bg-color: rgba(40, 40, 40, 0.95);
-    --recorder-text-color: #e0e0e0;
-    --recorder-border-color: #555;
-    --recorder-hover-color: rgba(150, 120, 120, 0.4);
-    --recorder-active-color: rgba(80, 80, 80, 0.5);
-    --recorder-section-bg: #383838;
-    --recorder-button-bg: #3a3a3a;
-    --recorder-button-hover: #4a4a4a;
-    --recorder-panel-footer: #2c2c2c;
-    --recorder-input-bg: #2a2a2a;
-    --recorder-checkbox-bg: #2a2a2a;
-    --recorder-subtle-color: #aaa;
-    --recorder-error-color: #ff6b6b;
-    --recorder-success-bg: #2e3b2f;
-    --recorder-success-border: #3a4c3c;
-    --recorder-scrollbar: #555;
-    --recorder-scrollbar-hover: #777;
-  }
+  --recorder-text-color: black;
 }
 
 /* Scope all typography styles to our recorder components */
@@ -66,58 +25,17 @@
   color: var(--recorder-text-color) !important;
 }
 
-#floating-assert-dock-root,
-#floating-cookie-list-dock,
-#floating-cookie-delete-dock,
-#floating-assert-attribute-dock {
-  background: var(--recorder-bg-color) !important;
-  border: 1px solid var(--recorder-border-color) !important;
-}
-
-#floating-assert-dock-root .docked-pane-footer-confirm-cancel,
-#floating-cookie-list-dock .docked-pane-footer-confirm-cancel,
-#floating-cookie-delete-dock .docked-pane-footer-confirm-cancel,
-.docked-pane-locator-container {
-  background: var(--recorder-panel-footer) !important;
-  border-top: 1px solid var(--recorder-border-color) !important;
-}
-
-#floating-assert-dock-root .docked-pane-footer-buttons button,
-.docked-pane-footer-buttons button,
-.docked-pane-footer-cancel-button,
-.cookie-add-button,
-.delete-cookie-add-button,
-.assert-toggle,
-.assert-toggle-button-neg-pos {
-  background: var(--recorder-button-bg) !important;
-  color: var(--recorder-text-color) !important;
-  border-color: var(--recorder-border-color) !important;
-}
-
-#floating-assert-dock-root .docked-pane-footer-buttons button:hover,
-.docked-pane-footer-buttons button:hover,
-.docked-pane-footer-cancel-button:hover,
-.cookie-add-button:hover,
-.delete-cookie-add-button:hover,
-.assert-toggle:hover,
-.assert-toggle-button-neg-pos:hover {
-  background: var(--recorder-button-hover) !important;
-}
-
-
 /* Reset styles for our components to prevent inheritance */
 .recorder-panel *,
 .drawer *,
 #floating-cookie-list-dock *,
 #floating-cookie-delete-dock *,
-#floating-assert-dock-root *,
-#floating-assert-attribute-dock * {
+#floating-assert-dock-root * {
   margin: 0;
   padding: 0;
   border: 0;
   font: inherit;
   vertical-align: baseline;
-  color: var(--recorder-text-color);
 }
 
 .recorder-panel {
@@ -133,8 +51,7 @@
   align-items: center;
   gap: 8px;
   padding: 5px 10px;
-  /* background: rgba(240, 240, 240, 1); */
-  background: var(--recorder-bg-color) !important;
+  background: rgba(240, 240, 240, 1);
   /* frosted look */
   backdrop-filter: blur(3px);
   -webkit-backdrop-filter: blur(3px);
@@ -199,8 +116,7 @@
 }
 
 .recorder-panel button:hover {
-  /* background-color: #69474765; */
-  background-color: var(--recorder-hover-color) !important;
+  background-color: #69474765;
 }
 
 .recorder-panel button.blinking {
@@ -208,13 +124,11 @@
   animation-name: blinker;
   animation-duration: 2s;
   animation-iteration-count: infinite;
-  /* background-color: #857979; */
-  background-color: var(--recorder-hover-color) !important;
+  background-color: #857979;
 }
 
 .recorder-panel button:active {
-  /* background-color: #d4d4d448; */
-  background-color: var(--recorder-active-color) !important;
+  background-color: #d4d4d448;
 }
 
 /* Compact footer */
@@ -389,16 +303,8 @@
 .assert-dock-header strong {
   font-size: 15px !important;
   font-weight: 600 !important;
-  /* color: #333 !important; */
-  color: var(--recorder-text-color) !important;
+  color: #333 !important;
   display: block !important;
-}
-
-.assert-dock-header strong,
-#floating-assert-dock-root .docked-pane-footer-assert-container label,
-#floating-assert-dock-root .locator-name-container label,
-.assert-toggle-label {
-  color: var(--recorder-text-color) !important;
 }
 
 .assert-dock-textarea {
@@ -419,20 +325,8 @@
 
 .assert-dock-textarea:focus {
   outline: none !important;
-  /* border-color: #666 !important; */
-  border-color: var(--recorder-border-color) !important;
+  border-color: #666 !important;
   box-shadow: 0 0 0 2px rgba(102, 102, 102, 0.1) !important;
-}
-
-.assert-dock-textarea,
-.cookie-input,
-.delete-cookie-input,
-.assert-input,
-.locator-name-container input,
-.cookie-same-site-select {
-  background: var(--recorder-input-bg) !important;
-  color: var(--recorder-text-color) !important;
-  border-color: var(--recorder-border-color) !important;
 }
 
 @keyframes blinker {
@@ -455,9 +349,7 @@
   top: 100%;
   left: 0;
   margin-top: 8px;
-  /* background: rgba(240, 240, 240, 1); */
-  background: var(--recorder-bg-color) !important;
-  border: 1px solid var(--recorder-border-color) !important;
+  background: rgba(240, 240, 240, 1);
   box-shadow: 0 1px 5px rgba(0, 0, 0, 0.2);
   padding: 15px 10px;
   border-radius: 12px;
@@ -530,8 +422,7 @@
   margin-bottom: 6px;
   /* mod */
   padding: 8px;
-  /* background: #e8e8e8; */
-  background: var(--recorder-section-bg) !important;
+  background: #e8e8e8;
   border-radius: 6px;
   user-select: none;
 }
@@ -584,14 +475,12 @@
 }
 
 .drawer-list::-webkit-scrollbar-thumb {
-  /* background: #c0c0c0; */
-  background: var(--recorder-scrollbar) !important;
+  background: #c0c0c0;
   border-radius: 3px;
 }
 
 .drawer-list::-webkit-scrollbar-thumb:hover {
-  /* background: #999; */
-  background: var(--recorder-scrollbar-hover) !important;
+  background: #999;
 }
 
 .drawer-list li:hover {
@@ -675,32 +564,6 @@
   gap: 15px !important;
   align-items: flex-start !important;
   margin-bottom: 15px !important;
-  transition: all 0.3s ease;
-  transform-origin: top;
-}
-
-.delete-cookie-row-enter,
-.cookie-item-enter {
-  opacity: 0;
-  transform: scaleY(0);
-}
-
-.delete-cookie-row-enter-active,
-.cookie-item-enter-active {
-  opacity: 1;
-  transform: scaleY(1);
-}
-
-.delete-cookie-row-exit,
-.cookie-item-exit {
-  opacity: 1;
-  transform: scaleY(1);
-}
-
-.delete-cookie-row-exit-active,
-.cookie-item-exit-active {
-  opacity: 0;
-  transform: scaleY(0);
 }
 
 /* Fix remove button */
@@ -749,9 +612,7 @@
 }
 
 .cookie-preview pre {
-  /* background: #f7f7f7 !important; */
-  background: var(--recorder-section-bg) !important;
-  color: var(--recorder-text-color) !important;
+  background: #f7f7f7 !important;
   padding: 10px !important;
   border-radius: 6px !important;
   margin-top: 8px !important;
@@ -809,8 +670,7 @@
 /* Fix error messages */
 .cookie-error,
 .delete-cookie-error {
-  /* color: red !important; */
-  color: var(--recorder-error-color) !important;
+  color: red !important;
   font-size: 12px !important;
   margin-top: 4px !important;
 }
@@ -820,11 +680,7 @@
   border-bottom: 1px solid #eee !important;
   margin-bottom: 16px !important;
   padding-bottom: 16px !important;
-  transition: all 300ms ease;
-  transform-origin: top;
 }
-
-
 
 /* Fix add button */
 .cookie-add-button,
@@ -852,16 +708,14 @@
 .delete-all-checkbox-container {
   margin-bottom: 20px !important;
   padding: 10px !important;
-  /* background: #f9f9f9 !important; */
-  background: var(--recorder-section-bg) !important;
+  background: #f9f9f9 !important;
   border-radius: 4px !important;
 }
 
 /* Fix required asterisk */
 .cookie-required,
 .delete-cookie-required {
-  /* color: red !important; */
-  color: var(--recorder-error-color) !important;
+  color: red !important;
   margin-left: 2px !important;
   display: inline !important;
   vertical-align: super !important;
@@ -897,8 +751,6 @@
 #floating-cookie-list-dock select,
 #floating-cookie-delete-dock select {
   appearance: auto !important;
-  background: var(--recorder-checkbox-bg) !important;
-  color: var(--recorder-text-color) !important;
   -webkit-appearance: auto !important;
   -moz-appearance: auto !important;
 }
@@ -928,44 +780,12 @@
   gap: 12px !important;
 }
 
-.assert-attributes-container-wrapper {
-  margin-bottom: 10px;
-  text-align: right !important;
-}
-
-
-.select-all-button-container {
-  display: flex !important;
-  justify-content: flex-end !important;
-  /* padding: 4px 8px !important; */
-  padding: 0 8px 8px 8px !important;
-  background: var(--recorder-section-bg) !important;
-  border-radius: 6px !important;
-
-
-}
-
-.select-all-button-container button {
-  padding: 6px 12px !important;
-  font-size: 14px !important;
-  background: var(--recorder-button-bg) !important;
-  border: 1px solid var(--recorder-border-color) !important;
-  border-radius: 4px !important;
-  cursor: pointer !important;
-  transition: background-color 0.2s ease !important;
-}
-
-.select-all-button-container button:hover {
-  background: var(--recorder-button-hover-bg) !important;
-}
-
 .assert-attribute-row {
   display: flex !important;
   align-items: center !important;
   gap: 10px !important;
   padding: 8px !important;
-  /* background: #f9f9f9 !important; */
-  background: var(--recorder-section-bg) !important;
+  background: #f9f9f9 !important;
   border-radius: 6px !important;
 }
 
@@ -997,10 +817,8 @@
 
 .assert-attribute-name {
   width: 150px !important;
-  /* background: #f0f0f0 !important;
-  color: #666 !important; */
-  color: var(--recorder-subtle-color) !important;
-  background: var(--recorder-section-bg) !important;
+  background: #f0f0f0 !important;
+  color: #666 !important;
 }
 
 .assert-attribute-value {
@@ -1042,10 +860,8 @@
 } */
 
 .assert-attribute-row:has(.assert-checkbox:checked) {
-  /* background: #e8f5e9 !important;
-  border: 1px solid #c8e6c9 !important; */
-  background: var(--recorder-success-bg) !important;
-  border: 1px solid var(--recorder-success-border) !important;
+  background: #e8f5e9 !important;
+  border: 1px solid #c8e6c9 !important;
 }
 
 .assert-toggle-button-neg-pos {
@@ -1076,12 +892,9 @@
 
 /* Visual feedback for negative assertions */
 .assert-toggle-button-neg-pos[title*="not"] {
-  /* background: #ffebee !important;
+  background: #ffebee !important;
   border-color: #ffcdd2 !important;
-  color: #d32f2f !important; */
-  background: rgba(255, 0, 0, 0.15) !important;
-  border-color: rgba(255, 0, 0, 0.3) !important;
-  color: var(--recorder-text-color) !important;
+  color: #d32f2f !important;
 }
 
 .assert-toggle-button-neg-pos[title*="not"]:hover {
@@ -1091,12 +904,9 @@
 
 /* Visual feedback for substring match */
 .assert-toggle-button-neg-pos[title*="Substring"] {
-  /* background: #e3f2fd !important;
+  background: #e3f2fd !important;
   border-color: #bbdefb !important;
-  color: #1976d2 !important; */
-  background: rgba(0, 100, 255, 0.15) !important;
-  border-color: rgba(0, 100, 255, 0.3) !important;
-  color: var(--recorder-text-color) !important;
+  color: #1976d2 !important;
 }
 
 .assert-toggle-button-neg-pos[title*="Substring"]:hover {
@@ -1134,14 +944,4 @@ gap: 12px !important; */
   padding: 8px 12px;
   font-size: 14px;
   box-sizing: border-box;
-}
-
-html body .recorder-panel,
-html body .drawer,
-html body #floating-cookie-list-dock,
-html body #floating-cookie-delete-dock,
-html body #floating-assert-dock-root,
-html body #floating-assert-attribute-dock {
-  visibility: visible !important;
-  opacity: 1 !important;
 }

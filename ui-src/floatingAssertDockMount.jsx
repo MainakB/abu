@@ -22,6 +22,8 @@ const getModeSelected = (val) => {
   if (val === ASSERTIONMODES.NETREQUEST) return ASSERTIONNAMES.NETREQUEST;
 
   if (val === ASSERTIONMODES.VISIBILITY) return ASSERTIONNAMES.VISIBILITY;
+  if (val === ASSERTIONMODES.INVISIBILITY) return ASSERTIONNAMES.INVISIBILITY;
+
   if (val === ASSERTIONMODES.PRSENECE) return ASSERTIONNAMES.PRSENECE;
   if (val === ASSERTIONMODES.ENABLED) return ASSERTIONNAMES.ENABLED;
   if (val === ASSERTIONMODES.DISABLED) return ASSERTIONNAMES.DISABLED;
@@ -52,6 +54,7 @@ const getModeSelected = (val) => {
     return ASSERTIONNAMES.DROPDOWNVALUESARE;
   if (val === ASSERTIONMODES.DROPDOWNDUPLICATECOUNT)
     return ASSERTIONNAMES.DROPDOWNDUPLICATECOUNT;
+  if (val === ASSERTIONNAMES.NOTPRESENT) return ASSERTIONNAMES.NOTPRESENT;
 };
 
 window.showFloatingAssert = (mode, el, e, type) => {
@@ -130,16 +133,27 @@ window.showFloatingAssert = (mode, el, e, type) => {
     }
   };
 
-  const recordAttributesAssert = async (selectedAssertions, isSoftAssert) => {
+  const recordAttributesAssert = async (
+    selectedAssertions,
+    isSoftAssert,
+    locatorName
+  ) => {
     for (let i = 0; i < selectedAssertions.length; i++) {
       const attrObj = selectedAssertions[i];
       const attrMode = getRecordAttributeAssertionMode(
         attrObj.isNegative,
         attrObj.isSubstringMatch
       );
-      await window.__recordAction(
+      const locSubstring = attrObj.attributeName
+        .replace(/[ -]/g, "_")
+        .toLowerCase();
+
+      window.__recordAction(
         window.__buildData({
           action: "assert",
+          ...(locatorName && locatorName !== ""
+            ? { locatorName: `${locatorName}_${locSubstring}` }
+            : locatorName),
           isSoftAssert,
           assertion: attrMode,
           attributeAssertPropName: attrObj.attributeName,
@@ -156,7 +170,8 @@ window.showFloatingAssert = (mode, el, e, type) => {
   const recordCheckboxRadioAssert = async (
     checkBoxState,
     isSoftAssert,
-    elToUse
+    elToUse,
+    locatorName
   ) => {
     const isRadio = checkBoxState.type === ASSERTIONMODES.RADIOSTATE;
 
@@ -178,6 +193,7 @@ window.showFloatingAssert = (mode, el, e, type) => {
     await window.__recordAction(
       window.__buildData({
         action: "assert",
+        locatorName,
         isSoftAssert,
         assertion: assertName,
         expected: checkBoxState.isChecked,
@@ -194,7 +210,8 @@ window.showFloatingAssert = (mode, el, e, type) => {
     isSoftAssert,
     isNegative,
     assertName,
-    modeVal
+    modeVal,
+    locatorName
   ) => {
     if (
       isNegative &&
@@ -206,9 +223,10 @@ window.showFloatingAssert = (mode, el, e, type) => {
           ? ASSERTIONNAMES.DROPDOWNCOUNTISNOT
           : ASSERTIONNAMES.DROPDOWNNOTSELECTED;
     }
-    await window.__recordAction(
+    window.__recordAction(
       window.__buildData({
         action: "assert",
+        locatorName,
         isSoftAssert,
         assertion: assertName,
         expected,
@@ -220,30 +238,89 @@ window.showFloatingAssert = (mode, el, e, type) => {
     await closeDock();
   };
 
+  const floatingAssertDockOnConfirm = async (
+    expected,
+    isSoftAssert,
+    locatorName
+  ) => {
+    window.__recordAction(
+      window.__buildData({
+        action: "assert",
+        isSoftAssert,
+        locatorName,
+        assertion: getModeSelected(mode),
+        expected,
+        el,
+        e,
+        text: textValue,
+      })
+    );
+    await closeDock();
+  };
+
+  const floatingAssertDockNonTextConfirm = async (
+    isSoftAssert,
+    isNegative,
+    locatorName
+  ) => {
+    let modeVal = mode;
+    console.log("modeVal: ", modeVal);
+    if (isNegative) {
+      if (mode === ASSERTIONMODES.PRSENECE) {
+        modeVal = ASSERTIONNAMES.NOTPRESENT;
+      } else if (mode === ASSERTIONMODES.ENABLED) {
+        modeVal = ASSERTIONNAMES.DISABLED;
+      } else if (mode === ASSERTIONMODES.VISIBILITY) {
+        modeVal = ASSERTIONNAMES.INVISIBILITY;
+      }
+    }
+
+    console.log("modeVal after: ", modeVal);
+    console.log("getModeSelected(modeVal) : ", getModeSelected(modeVal));
+
+    window.__recordAction(
+      window.__buildData({
+        action: "assert",
+        locatorName,
+        isSoftAssert,
+        assertion: getModeSelected(modeVal),
+        el,
+        e,
+        text: textValue,
+      })
+    );
+    await closeDock();
+  };
+
+  const floatingCookieListDockConfirm = async (cookieList) => {
+    window.__recordAction(
+      window.__buildData({
+        action: "addCookies",
+        cookies: cookieList,
+      })
+    );
+    await Promise.all([window.__addCookies(cookieList), closeDock()]);
+  };
+
+  const floatingDeleteCookieDockConfirm = async (cookieList) => {
+    window.__recordAction(
+      window.__buildData({
+        action: "deleteCookies",
+        cookies: cookieList,
+      })
+    );
+    await Promise.all([window.__deleteCookies(cookieList), closeDock()]);
+  };
+
   if (type === ASSERTIONMODES.TEXT || type === ASSERTIONMODES.VALUE) {
     floatingAssertRoot.render(
       <FloatingAssertDock
         mode={mode}
         el={el}
-        onCancel={async () => {
-          await closeDock();
-          // await window.__recorderStore.setMode("record");
-        }}
-        onConfirm={async (expected, isSoftAssert) => {
-          await window.__recordAction(
-            window.__buildData({
-              action: "assert",
-              isSoftAssert,
-              assertion: getModeSelected(mode),
-              expected,
-              el,
-              e,
-              text: textValue,
-            })
-          );
-          await closeDock();
-          // await window.__recorderStore.setMode("record");
-        }}
+        onCancel={closeDock}
+        onConfirm={(expected, isSoftAssert, locatorName) =>
+          floatingAssertDockOnConfirm(expected, isSoftAssert, locatorName)
+        }
       />
     );
   } else if (type === ASSERTIONMODES.ATTRIBUTEVALUE) {
@@ -252,9 +329,9 @@ window.showFloatingAssert = (mode, el, e, type) => {
         getAttributes={getElementAttributes}
         mode={mode}
         el={el}
-        onCancel={async () => closeDock()}
-        onConfirm={async (selectedAssertions, isSoftAssert) =>
-          recordAttributesAssert(selectedAssertions, isSoftAssert)
+        onCancel={closeDock}
+        onConfirm={(selectedAssertions, isSoftAssert, locatorName) =>
+          recordAttributesAssert(selectedAssertions, isSoftAssert, locatorName)
         }
       />
     );
@@ -267,9 +344,14 @@ window.showFloatingAssert = (mode, el, e, type) => {
         getAttributes={getElementAttributes}
         mode={mode}
         el={el}
-        onCancel={async () => closeDock()}
-        onConfirm={async (checkBoxState, isSoftAssert, elToUse) =>
-          recordCheckboxRadioAssert(checkBoxState, isSoftAssert, elToUse)
+        onCancel={closeDock}
+        onConfirm={(checkBoxState, isSoftAssert, elToUse, locatorName) =>
+          recordCheckboxRadioAssert(
+            checkBoxState,
+            isSoftAssert,
+            elToUse,
+            locatorName
+          )
         }
         label={type === ASSERTIONMODES.CHECKBOXSTATE ? "Checkbox" : "Radio"}
       />
@@ -277,68 +359,34 @@ window.showFloatingAssert = (mode, el, e, type) => {
   } else if (
     type === ASSERTIONMODES.VISIBILITY ||
     type === ASSERTIONMODES.ENABLED ||
-    type === ASSERTIONMODES.PRSENECE ||
-    type === ASSERTIONMODES.DISABLED
+    type === ASSERTIONMODES.PRSENECE
   ) {
     floatingAssertRoot.render(
       <FloatingAssertDockNonText
         mode={mode}
         el={el}
-        onCancel={async () => {
-          await closeDock();
-          // await window.__recorderStore.setMode("record");
-        }}
-        onConfirm={async (isSoftAssert) => {
-          await window.__recordAction(
-            window.__buildData({
-              action: "assert",
-              isSoftAssert,
-              assertion: getModeSelected(mode),
-              el,
-              e,
-              text: textValue,
-            })
-          );
-          await closeDock();
-        }}
+        onCancel={closeDock}
+        onConfirm={(isSoftAssert, isNegative, locatorName) =>
+          floatingAssertDockNonTextConfirm(
+            isSoftAssert,
+            isNegative,
+            locatorName
+          )
+        }
       />
     );
   } else if (type === ASSERTIONMODES.ADDCOOKIES) {
     floatingAssertRoot.render(
       <FloatingCookieListDock
-        onCancel={async () => {
-          await closeDock();
-        }}
-        onConfirm={async (cookieList) => {
-          // for (const cookie of cookieList) {
-          await window.__addCookies(cookieList); // Exposed via context.exposeBinding
-          await window.__recordAction(
-            window.__buildData({
-              action: "addCookies",
-              cookies: cookieList,
-            })
-          );
-          // }
-          await closeDock();
-        }}
+        onCancel={closeDock}
+        onConfirm={(cookieList) => floatingCookieListDockConfirm(cookieList)}
       />
     );
   } else if (type === ASSERTIONMODES.DELETECOOKIES) {
     floatingAssertRoot.render(
       <FloatingDeleteCookieDock
-        onCancel={async () => {
-          await closeDock();
-        }}
-        onConfirm={async (cookieList) => {
-          await window.__deleteCookies(cookieList); // Exposed via context.exposeBinding
-          await window.__recordAction(
-            window.__buildData({
-              action: "deleteCookies",
-              cookies: cookieList,
-            })
-          );
-          await closeDock();
-        }}
+        onCancel={closeDock}
+        onConfirm={(cookieList) => floatingDeleteCookieDockConfirm(cookieList)}
       />
     );
   } else if (
@@ -356,20 +404,22 @@ window.showFloatingAssert = (mode, el, e, type) => {
         <FloatingDropdownAssertDock
           mode={mode}
           el={el}
-          onCancel={async () => closeDock()}
-          onConfirm={async (
+          onCancel={closeDock}
+          onConfirm={(
             expected,
             softAssert,
             isNegative,
             assertName,
-            modeVal
+            modeVal,
+            locatorName
           ) =>
             recordDropdownAssert(
               expected,
               softAssert,
               isNegative,
               assertName,
-              modeVal
+              modeVal,
+              locatorName
             )
           }
         />
@@ -379,7 +429,7 @@ window.showFloatingAssert = (mode, el, e, type) => {
         <FloatingAssertDockNotSupported
           mode={mode}
           el={el}
-          onCancel={async () => closeDock()}
+          onCancel={closeDock}
         />
       );
     }

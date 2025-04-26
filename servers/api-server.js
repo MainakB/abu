@@ -85,10 +85,59 @@ const writeLiveToFile = (action, fileName) => {
 const getFilePath = (FILE_NAME) =>
   path.join(process.cwd(), "recordings", FILE_NAME);
 
+// const writeLocatorObject = (locatorId, locatorBlock, fileName) => {
+//   const filePath = getFilePath(fileName);
+
+//   // Step 1: Ensure directory exists
+//   const dir = path.dirname(filePath);
+//   if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+
+//   let locators = {};
+//   let existing = "";
+
+//   if (fs.existsSync(filePath)) {
+//     existing = fs.readFileSync(filePath, "utf-8");
+
+//     // Step 2: Extract the existing JSON object using regex
+//     const match = existing.match(/export const \w+: [\w.]+ = ({[\s\S]*});?/);
+
+//     if (match) {
+//       try {
+//         locators = eval(
+//           `(${match[1]
+//             .replace(/__fileName/g, '"__fileName"')
+//             .replace(
+//               /Types\.LocatorTypes\.(\w+)/g,
+//               "__ENUM__Types.LocatorTypes.$1"
+//             )})`
+//         );
+//       } catch (err) {
+//         console.error("⚠️ Failed to parse existing locator object:", err);
+//       }
+//     }
+//   }
+
+//   // Step 3: Add or update the locator
+//   locators[locatorId] = locatorBlock;
+
+//   // Stringify and unquote "__fileName"
+//   let objectStr = JSON.stringify(locators, null, 2);
+//   objectStr = objectStr
+//     .replace(/"__fileName"/g, "__fileName")
+//     .replace(/"__ENUM__(Types\.[\w.]+)"/g, "$1");
+
+//   // Step 4: Rebuild the .ts content
+//   const output = `${IMPORT_LINE}
+
+// export const ${EXPORT_VAR_NAME}: Types.ILocatorMetadataObject = ${objectStr};
+// `;
+
+//   fs.writeFileSync(filePath, output);
+//   console.log(`✅ Locator "${locatorId}" written to ${fileName}`);
+// };
+
 const writeLocatorObject = (locatorId, locatorBlock, fileName) => {
   const filePath = getFilePath(fileName);
-
-  // Step 1: Ensure directory exists
   const dir = path.dirname(filePath);
   if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
 
@@ -98,35 +147,36 @@ const writeLocatorObject = (locatorId, locatorBlock, fileName) => {
   if (fs.existsSync(filePath)) {
     existing = fs.readFileSync(filePath, "utf-8");
 
-    // Step 2: Extract the existing JSON object using regex
-    const match = existing.match(/export const \w+: [\w.]+ = ({[\s\S]*});?/);
+    const match = existing.match(
+      /export const \w+: [\w.]+ = ({[\s\S]*?});?\s*$/
+    );
 
     if (match) {
-      try {
-        locators = eval(
-          `(${match[1]
-            .replace(/__fileName/g, '"__fileName"')
-            .replace(
-              /Types\.LocatorTypes\.(\w+)/g,
-              "__ENUM__Types.LocatorTypes.$1"
-            )})`
+      let code = match[1]
+        .replace(/__fileName/g, '"__fileName"')
+        .replace(
+          /Types\.LocatorTypes\.(\w+)/g,
+          '"__ENUM__Types.LocatorTypes.$1"'
         );
+
+      try {
+        locators = eval(`(${code})`);
       } catch (err) {
-        console.error("⚠️ Failed to parse existing locator object:", err);
+        console.error("⚠️ Failed to eval locator object:", err);
       }
     }
   }
 
-  // Step 3: Add or update the locator
+  // Update locator
   locators[locatorId] = locatorBlock;
 
-  // Stringify and unquote "__fileName"
-  let objectStr = JSON.stringify(locators, null, 2);
-  objectStr = objectStr
+  // Turn into formatted string
+  let objectStr = JSON.stringify(locators, null, 2)
     .replace(/"__fileName"/g, "__fileName")
     .replace(/"__ENUM__(Types\.[\w.]+)"/g, "$1");
+  // .replace(/"ENUM__(Types\.[\w.]+)"/g, "$1");
 
-  // Step 4: Rebuild the .ts content
+  // Output the final .ts content
   const output = `${IMPORT_LINE}
 
 export const ${EXPORT_VAR_NAME}: Types.ILocatorMetadataObject = ${objectStr};

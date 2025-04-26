@@ -238,14 +238,6 @@ export default function MoreOptionsDrawer({
               >
                 ✓ Assert Element Enabled
               </li>
-              <li
-                className={getClassName(currentMode, ASSERTIONMODES.DISABLED)}
-                onClick={async () =>
-                  await onMenuSelection(ASSERTIONMODES.DISABLED)
-                }
-              >
-                ✓ Assert Element Disabled
-              </li>
               <li>✓ Assert Element Count</li>
               <li
                 className={getClassName(currentMode, ASSERTIONMODES.RADIOSTATE)}

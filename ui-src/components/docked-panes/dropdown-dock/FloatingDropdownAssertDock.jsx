@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { ASSERTIONMODES, ASSERTIONNAMES } from "../../../constants/index.js";
+import ConfirmCancelFooter from "../confirm-cancel-footer/ConfirmCancelFooter.jsx";
 
 function getDropdownCount(el) {
   try {
@@ -153,8 +154,19 @@ export default function FloatingDropdownAssertDock({
     return "";
   });
 
-  const [softAssert, setSofAssert] = useState(false);
+  const [softAssert, setSoftAssert] = useState(false);
+  const [locatorName, setLocatorName] = useState("");
   const [isNegative, setIsNegative] = useState(false);
+
+  const handleConfirm = () => {
+    onConfirm(expected, softAssert, isNegative, assertName, mode, locatorName);
+    setSoftAssert(false);
+  };
+
+  const handleCancel = () => {
+    setSoftAssert(false);
+    onCancel();
+  };
 
   return (
     <div
@@ -173,50 +185,20 @@ export default function FloatingDropdownAssertDock({
         onChange={(e) => setExpected(e.target.value)}
         placeholder="Enter expected value..."
       />
-      <div className="docked-pane-footer-confirm-cancel">
-        {mode === ASSERTIONMODES.DROPDOWNCOUNTIS ||
-        mode === ASSERTIONMODES.DROPDOWNSELECTED ? (
-          <div className="docked-pane-footer-assert-container">
-            <input
-              type="checkbox"
-              checked={isNegative}
-              onChange={() => setIsNegative((prev) => !prev)}
-            ></input>
-            <label>Inverse</label>
-          </div>
-        ) : (
-          <></>
-        )}
-        <div className="docked-pane-footer-assert-container">
-          <input
-            type="checkbox"
-            checked={softAssert}
-            onChange={() => setSofAssert((prev) => !prev)}
-          ></input>
-          <label>Soft Assert</label>
-        </div>
-        <div className="docked-pane-footer-buttons">
-          <button
-            onClick={() => {
-              setSofAssert(false);
-              onCancel();
-            }}
-            className="docked-pane-footer-cancel-button"
-          >
-            ❌
-          </button>
-          <button
-            className="docked-pane-footer-confirm-button"
-            onClick={() => {
-              onConfirm(expected, softAssert, isNegative, assertName, mode);
-              setSofAssert(false);
-            }}
-            disabled={expected === ""}
-          >
-            ✅
-          </button>
-        </div>
-      </div>
+
+      <ConfirmCancelFooter
+        locatorName={locatorName}
+        setLocatorName={setLocatorName}
+        softAssert={softAssert}
+        setSoftAssert={setSoftAssert}
+        onCancel={handleCancel}
+        onConfirm={handleConfirm}
+        {...(mode === ASSERTIONMODES.DROPDOWNCOUNTIS ||
+        mode === ASSERTIONMODES.DROPDOWNSELECTED
+          ? { isNegative, setIsNegative }
+          : {})}
+        disabled={expected === ""}
+      />
     </div>
   );
 }

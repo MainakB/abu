@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { ASSERTIONMODES } from "../../../constants/index.js";
 
+import ConfirmCancelFooter from "../confirm-cancel-footer/ConfirmCancelFooter.jsx";
+
 function getOwnText(el) {
   return [...el.childNodes]
     .filter((n) => n.nodeType === Node.TEXT_NODE)
@@ -13,7 +15,6 @@ function getHeader(type) {
   const base = "Assert Element Is";
   if (type === ASSERTIONMODES.VISIBILITY) return `${base} Visible`;
   if (type === ASSERTIONMODES.ENABLED) return `${base} Enabled`;
-  if (type === ASSERTIONMODES.DISABLED) return `${base} Disabled`;
   if (type === ASSERTIONMODES.PRSENECE) return `${base} Present`;
 }
 export default function FloatingAssertDockNonText({
@@ -22,11 +23,23 @@ export default function FloatingAssertDockNonText({
   onConfirm,
   onCancel,
 }) {
-  const [softAssert, setSofAssert] = useState(false);
+  const [softAssert, setSoftAssert] = useState(false);
+  const [isNegative, setIsNegative] = useState(false);
+  const [locatorName, setLocatorName] = useState("");
 
   useEffect(() => {
     if (!el) return;
   }, [el, mode]);
+
+  const handleCancel = () => {
+    setSoftAssert(false);
+    onCancel();
+  };
+
+  const handleConfirm = () => {
+    onConfirm(softAssert, isNegative, locatorName, mode);
+    setSoftAssert(false);
+  };
 
   return (
     <div
@@ -39,36 +52,16 @@ export default function FloatingAssertDockNonText({
           <strong>{getHeader(mode)}</strong>
         </div>
       </div>
-      <div className="docked-pane-footer-confirm-cancel">
-        <div className="docked-pane-footer-assert-container">
-          <input
-            type="checkbox"
-            checked={softAssert}
-            onChange={() => setSofAssert((prev) => !prev)}
-          ></input>
-          <label>Soft Assert</label>
-        </div>
-        <div className="docked-pane-footer-buttons">
-          <button
-            className="docked-pane-footer-cancel-button"
-            onClick={() => {
-              setSofAssert(false);
-              onCancel();
-            }}
-          >
-            ❌
-          </button>
-          <button
-            className="docked-pane-footer-confirm-button"
-            onClick={() => {
-              onConfirm(softAssert);
-              setSofAssert(false);
-            }}
-          >
-            ✅
-          </button>
-        </div>
-      </div>
+      <ConfirmCancelFooter
+        locatorName={locatorName}
+        setLocatorName={setLocatorName}
+        softAssert={softAssert}
+        setSoftAssert={setSoftAssert}
+        onCancel={handleCancel}
+        onConfirm={handleConfirm}
+        isNegative={isNegative}
+        setIsNegative={setIsNegative}
+      />
     </div>
   );
 }
