@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { ASSERTIONMODES } from "../../../constants/index.js";
 import ConfirmCancelFooter from "../confirm-cancel-footer/ConfirmCancelFooter.jsx";
 
-function getCurrentUrl() {
+async function getCurrentUrl() {
   try {
     return window.__pageUrl();
   } catch (err) {
@@ -17,10 +17,18 @@ export default function CurrentUrlAssertDock({
   onConfirm,
   onCancel,
 }) {
-  const [expected, setExpected] = useState(() => getCurrentUrl());
+  const [expected, setExpected] = useState("");
   const [isNegative, setIsNegative] = useState(false);
   const [softAssert, setSoftAssert] = useState(false);
   const [exactMatch, setExactMatch] = useState(true);
+
+  useEffect(() => {
+    async function fetchUrl() {
+      const url = await getCurrentUrl();
+      setExpected(url);
+    }
+    fetchUrl();
+  }, []);
 
   const closeDockReset = () => {
     setSoftAssert(false);
@@ -33,7 +41,7 @@ export default function CurrentUrlAssertDock({
   };
 
   const handleConfirm = () => {
-    onConfirm(expected, softAssert);
+    onConfirm(expected, softAssert, isNegative, exactMatch);
     closeDockReset();
   };
 
@@ -55,8 +63,6 @@ export default function CurrentUrlAssertDock({
         placeholder="Enter expected value..."
       />
       <ConfirmCancelFooter
-        locatorName={locatorName}
-        setLocatorName={setLocatorName}
         softAssert={softAssert}
         setSoftAssert={setSoftAssert}
         isNegative={isNegative}

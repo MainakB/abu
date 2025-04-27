@@ -33,6 +33,14 @@ export const ASSERTIONMODES = {
 export const ASSERTIONNAMES = {
   TEXT: "toHaveText",
   VALUE: "toHaveValue",
+  TEXTNOTEQUALS: "toNotHaveText",
+  VALUENOTEQUALS: "toNotHaveValue",
+
+  TEXTCONTAINS: "toContainText",
+  VALUECONTAINS: "toContainValue",
+  TEXTNOTCONTAINS: "toNotContainText",
+  VALUENOTCONTAINS: "toNotContainValue",
+
   ATTRIBUTEVALUE: "attrValue",
 
   ATTRIBUTEVALUEEQUALS: "isAttrValueEquals",

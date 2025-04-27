@@ -29,15 +29,8 @@ export default function FloatingAssertDock({ el, mode, onConfirm, onCancel }) {
 
   const [softAssert, setSoftAssert] = useState(false);
   const [locatorName, setLocatorName] = useState("");
-
-  // useEffect(() => {
-  //   if (!el) return;
-  //   if (mode === ASSERTIONMODES.TEXT) {
-  //     setExpected(expected || el.innerText?.trim() || "");
-  //   } else if (mode === ASSERTIONMODES.VALUE) {
-  //     setExpected(expected || el.value || el.getAttribute("value") || "");
-  //   }
-  // }, [el, mode]);
+  const [isNegative, setIsNegative] = useState(false);
+  const [exactMatch, setExactMatch] = useState(true);
 
   const handleCancel = () => {
     setSoftAssert(false);
@@ -45,7 +38,7 @@ export default function FloatingAssertDock({ el, mode, onConfirm, onCancel }) {
   };
 
   const handleConfirm = () => {
-    onConfirm(expected, softAssert, locatorName);
+    onConfirm(expected, softAssert, locatorName, exactMatch, isNegative);
     setSoftAssert(false);
   };
 
@@ -75,6 +68,10 @@ export default function FloatingAssertDock({ el, mode, onConfirm, onCancel }) {
         setLocatorName={setLocatorName}
         softAssert={softAssert}
         setSoftAssert={setSoftAssert}
+        isNegative={isNegative}
+        setIsNegative={setIsNegative}
+        exactMatch={exactMatch}
+        setExactMatch={setExactMatch}
         onCancel={handleCancel}
         onConfirm={handleConfirm}
         disabled={expected === ""}

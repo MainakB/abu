@@ -327,7 +327,6 @@ export default function MoreOptionsDrawer({
                 ✓ Assert Dropdown Duplicate Count
               </li>
               <li>✓ Assert Cookie Value</li>
-              <li>✓ Assert Text Box Value</li>
               <li
                 className={getClassName(
                   currentMode,

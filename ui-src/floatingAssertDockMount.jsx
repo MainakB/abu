@@ -8,58 +8,13 @@ import AssertAttributeValueDock from "./components/docked-panes/attributes-dock/
 import AssertCheckedStateDock from "./components/docked-panes/checked-state-dock/AssertCheckedStateDock.jsx";
 import FloatingDropdownAssertDock from "./components/docked-panes/dropdown-dock/FloatingDropdownAssertDock.jsx";
 import FloatingAssertDockNotSupported from "./components/docked-panes/dropdown-dock/FloatingAssertDockNotSupported.jsx";
-import CurrentUrlAssertDock from "./components/docked-panes/dropdown-dock/CurrentUrlAssertDock.jsx";
+import CurrentUrlAssertDock from "./components/docked-panes/current-url-dock/CurrentUrlAssertDock.jsx";
 
 import { ASSERTIONMODES, ASSERTIONNAMES } from "./constants/index.js";
 
 let floatingAssertRoot = null;
 
-const getModeSelected = (val) => {
-  if (val === ASSERTIONMODES.TEXT) return ASSERTIONNAMES.TEXT;
-  if (val === ASSERTIONMODES.VALUE) return ASSERTIONNAMES.VALUE;
-  if (val === ASSERTIONMODES.ATTRIBUTEVALUE)
-    return ASSERTIONNAMES.ATTRIBUTEVALUE;
-  if (val === ASSERTIONMODES.NETPAYLOAD) return ASSERTIONNAMES.NETPAYLOAD;
-  if (val === ASSERTIONMODES.NETREQUEST) return ASSERTIONNAMES.NETREQUEST;
-
-  if (val === ASSERTIONMODES.VISIBILITY) return ASSERTIONNAMES.VISIBILITY;
-  if (val === ASSERTIONMODES.INVISIBILITY) return ASSERTIONNAMES.INVISIBILITY;
-
-  if (val === ASSERTIONMODES.PRSENECE) return ASSERTIONNAMES.PRSENECE;
-  if (val === ASSERTIONMODES.ENABLED) return ASSERTIONNAMES.ENABLED;
-  if (val === ASSERTIONMODES.DISABLED) return ASSERTIONNAMES.DISABLED;
-  if (val === ASSERTIONMODES.ADDCOOKIES) return ASSERTIONNAMES.ADDCOOKIES;
-  if (val === ASSERTIONMODES.DELETECOOKIES) return ASSERTIONNAMES.DELETECOOKIES;
-
-  if (val === ASSERTIONMODES.CHECKBOXCHECKED)
-    return ASSERTIONNAMES.CHECKBOXCHECKED;
-  if (val === ASSERTIONMODES.CHECKBOXNOTCHECKED)
-    return ASSERTIONNAMES.CHECKBOXNOTCHECKED;
-  if (val === ASSERTIONMODES.RADIOCHECKED) return ASSERTIONNAMES.RADIOCHECKED;
-  if (val === ASSERTIONMODES.RADIONOTCHECKED)
-    return ASSERTIONNAMES.RADIONOTCHECKED;
-
-  if (val === ASSERTIONMODES.DROPDOWNCONTAINS)
-    return ASSERTIONNAMES.DROPDOWNCONTAINS;
-  if (val === ASSERTIONMODES.DROPDOWNCOUNTIS)
-    return ASSERTIONNAMES.DROPDOWNCOUNTIS;
-  if (val === ASSERTIONMODES.DROPDOWNCOUNTISNOT)
-    return ASSERTIONNAMES.DROPDOWNCOUNTISNOT;
-  if (val === ASSERTIONMODES.DROPDOWNINALPHABETICORDER)
-    return ASSERTIONNAMES.DROPDOWNINALPHABETICORDER;
-  if (val === ASSERTIONMODES.DROPDOWNNOTSELECTED)
-    return ASSERTIONNAMES.DROPDOWNNOTSELECTED;
-  if (val === ASSERTIONMODES.DROPDOWNSELECTED)
-    return ASSERTIONNAMES.DROPDOWNSELECTED;
-  if (val === ASSERTIONMODES.DROPDOWNVALUESARE)
-    return ASSERTIONNAMES.DROPDOWNVALUESARE;
-  if (val === ASSERTIONMODES.DROPDOWNDUPLICATECOUNT)
-    return ASSERTIONNAMES.DROPDOWNDUPLICATECOUNT;
-  if (val === ASSERTIONNAMES.NOTPRESENT) return ASSERTIONNAMES.NOTPRESENT;
-};
-
-const ensureFloatingRoot = () => {
-  const doc = document;
+const ensureFloatingRoot = (doc) => {
   let rootEl = doc.getElementById("floating-assert-dock-root");
 
   // 💡 If stale root exists, remove and recreate it
@@ -87,7 +42,7 @@ window.showFloatingAssert = (mode, el, e, type) => {
   }
 
   // // Top-level only from here
-  // const doc = document;
+  const doc = document;
   // let rootEl = doc.getElementById("floating-assert-dock-root");
 
   // // 💡 If stale root exists, remove and recreate it
@@ -105,14 +60,16 @@ window.showFloatingAssert = (mode, el, e, type) => {
   // if (!floatingAssertRoot) {
   //   floatingAssertRoot = ReactDOM.createRoot(rootEl);
   // }
-  ensureFloatingRoot();
+  ensureFloatingRoot(doc);
 
   let textValue = "";
   if (
-    !(
-      type === ASSERTIONMODES.ADDCOOKIES ||
-      type === ASSERTIONMODES.DELETECOOKIES
-    )
+    el
+    // !(
+    //   type === ASSERTIONMODES.ADDCOOKIES ||
+    //   type === ASSERTIONMODES.DELETECOOKIES ||
+    //   type === ASSERTIONMODES.DELETECOOKIES
+    // )
   ) {
     textValue = el.innerText?.trim() || "";
   }
@@ -263,14 +220,85 @@ window.showFloatingAssert = (mode, el, e, type) => {
   const floatingAssertDockOnConfirm = async (
     expected,
     isSoftAssert,
-    locatorName
+    locatorName,
+    exact,
+    isNegative
   ) => {
+    // let assertName = ASSERTIONNAMES.TEXT;
+
+    // if (mode === ASSERTIONMODES.VALUE) {
+    //   assertName = ASSERTIONNAMES.VALUE;
+    // }
+
+    // let assertName = ASSERTIONNAMES.TEXT;
+    // if (mode === ASSERTIONMODES.TEXT){
+    //   if(exact){
+    //     if(isNegative){
+    //       assertName = ASSERTIONNAMES.TEXTNOTEQUALS;
+    //     }
+    //   } else{
+    //     if(isNegative){
+    //       assertName = ASSERTIONNAMES.TEXTNOTCONTAINS;
+    //     }  else{
+    //       assertName = ASSERTIONNAMES.TEXTCONTAINS;
+    //     }
+    //   }
+
+    // } else{
+    //   if(exact){
+    //     if(isNegative){
+    //       assertName = ASSERTIONNAMES.VALUE;
+    //     } else{
+    //       assertName = ASSERTIONNAMES.VALUENOTEQUALS;
+    //     }
+    //   } else{
+    //     if(isNegative){
+    //       assertName = ASSERTIONNAMES.VALUECONTAINS;
+    //     }  else{
+    //       assertName = ASSERTIONNAMES.VALUENOTCONTAINS;
+    //     }
+    //   }
+    // }
+
+    let assertName;
+
+    const isText = mode === ASSERTIONMODES.TEXT;
+
+    if (exact) {
+      assertName = isText
+        ? isNegative
+          ? ASSERTIONNAMES.TEXTNOTEQUALS
+          : ASSERTIONNAMES.TEXT
+        : isNegative
+        ? ASSERTIONNAMES.VALUENOTEQUALS
+        : ASSERTIONNAMES.VALUE;
+    } else {
+      assertName = isText
+        ? isNegative
+          ? ASSERTIONNAMES.TEXTNOTCONTAINS
+          : ASSERTIONNAMES.TEXTCONTAINS
+        : isNegative
+        ? ASSERTIONNAMES.VALUECONTAINS
+        : ASSERTIONNAMES.VALUENOTCONTAINS;
+    }
+
+    // TEXT: "toHaveText",
+    // VALUE: "toHaveValue",
+    // TEXTNOTEQUALS: "toNotHaveText",
+    // VALUENOTEQUALS: "toNotHaveValue",
+
+    // TEXTCONTAINS: "toContainText",
+    // VALUECONTAINS: "toContainValue",
+    // TEXTNOTCONTAINS: "toNotContainText",
+    // VALUENOTCONTAINS: "toNotContainValue",
+
     window.__recordAction(
       window.__buildData({
         action: "assert",
         isSoftAssert,
         locatorName,
-        assertion: getModeSelected(mode),
+        assertion: assertName,
+        // getModeSelected(mode),
         expected,
         el,
         e,
@@ -286,16 +314,15 @@ window.showFloatingAssert = (mode, el, e, type) => {
     isNegative,
     exactMatch
   ) => {
-    let modeVal = mode;
     let assertionName =
       ASSERTIONNAMES[
-        !exactMatch ? "ASSERTCURRENTURLNOTEQUALS" : "ASSERTCURRENTURLEQUALS"
+        !exactMatch ? "ASSERTCURRENTURLCONTAINS" : "ASSERTCURRENTURLEQUALS"
       ];
     if (isNegative) {
       if (!exactMatch) {
-        assertionName = ASSERTIONNAMES.ASSERTCURRENTURLNOTEQUALS;
-      } else {
         assertionName = ASSERTIONNAMES.ASSERTCURRENTURLNOTCONTAINS;
+      } else {
+        assertionName = ASSERTIONNAMES.ASSERTCURRENTURLNOTEQUALS;
       }
     }
 
@@ -316,7 +343,6 @@ window.showFloatingAssert = (mode, el, e, type) => {
     locatorName
   ) => {
     let modeVal = mode;
-    console.log("modeVal: ", modeVal);
     if (isNegative) {
       if (mode === ASSERTIONMODES.PRSENECE) {
         modeVal = ASSERTIONNAMES.NOTPRESENT;
@@ -327,15 +353,12 @@ window.showFloatingAssert = (mode, el, e, type) => {
       }
     }
 
-    console.log("modeVal after: ", modeVal);
-    console.log("getModeSelected(modeVal) : ", getModeSelected(modeVal));
-
     window.__recordAction(
       window.__buildData({
         action: "assert",
         locatorName,
         isSoftAssert,
-        assertion: getModeSelected(modeVal),
+        assertion: modeVal,
         el,
         e,
         text: textValue,
@@ -370,8 +393,14 @@ window.showFloatingAssert = (mode, el, e, type) => {
         mode={mode}
         el={el}
         onCancel={closeDock}
-        onConfirm={(expected, isSoftAssert, locatorName) =>
-          floatingAssertDockOnConfirm(expected, isSoftAssert, locatorName)
+        onConfirm={(expected, isSoftAssert, locatorName, exact, isNegative) =>
+          floatingAssertDockOnConfirm(
+            expected,
+            isSoftAssert,
+            locatorName,
+            exact,
+            isNegative
+          )
         }
       />
     );

@@ -17,7 +17,6 @@ export default function ConfirmCancelFooter({
   const updateLocatorName = (e) => {
     setLocatorName(e.target.value);
   };
-  console.log("Soft assert: ", softAssert);
   return (
     <div>
       {typeof locatorName !== "undefined" &&
