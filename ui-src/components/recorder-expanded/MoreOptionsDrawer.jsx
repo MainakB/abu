@@ -328,7 +328,19 @@ export default function MoreOptionsDrawer({
               </li>
               <li>✓ Assert Cookie Value</li>
               <li>✓ Assert Text Box Value</li>
-              <li>✓ Assert Current Url</li>
+              <li
+                className={getClassName(
+                  currentMode,
+                  ASSERTIONMODES.ASSERTCURRENTURL
+                )}
+                onClick={async () =>
+                  await onMenuSelectionLaunchDock(
+                    ASSERTIONMODES.ASSERTCURRENTURL
+                  )
+                }
+              >
+                ✓ Assert Current Url
+              </li>
               <li>✓ Assert Text In Page Source</li>
             </ul>
           )}

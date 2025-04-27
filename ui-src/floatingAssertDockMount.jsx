@@ -8,6 +8,7 @@ import AssertAttributeValueDock from "./components/docked-panes/attributes-dock/
 import AssertCheckedStateDock from "./components/docked-panes/checked-state-dock/AssertCheckedStateDock.jsx";
 import FloatingDropdownAssertDock from "./components/docked-panes/dropdown-dock/FloatingDropdownAssertDock.jsx";
 import FloatingAssertDockNotSupported from "./components/docked-panes/dropdown-dock/FloatingAssertDockNotSupported.jsx";
+import CurrentUrlAssertDock from "./components/docked-panes/dropdown-dock/CurrentUrlAssertDock.jsx";
 
 import { ASSERTIONMODES, ASSERTIONNAMES } from "./constants/index.js";
 
@@ -57,15 +58,7 @@ const getModeSelected = (val) => {
   if (val === ASSERTIONNAMES.NOTPRESENT) return ASSERTIONNAMES.NOTPRESENT;
 };
 
-window.showFloatingAssert = (mode, el, e, type) => {
-  if (window !== window.top) {
-    if (typeof window.top.showFloatingAssert === "function") {
-      window.top.showFloatingAssert(mode, el);
-    }
-    return;
-  }
-
-  // Top-level only from here
+const ensureFloatingRoot = () => {
   const doc = document;
   let rootEl = doc.getElementById("floating-assert-dock-root");
 
@@ -80,10 +73,39 @@ window.showFloatingAssert = (mode, el, e, type) => {
     doc.documentElement.appendChild(rootEl);
   }
 
-  // ✅ Re-create React root if needed
   if (!floatingAssertRoot) {
     floatingAssertRoot = ReactDOM.createRoot(rootEl);
   }
+};
+
+window.showFloatingAssert = (mode, el, e, type) => {
+  if (window !== window.top) {
+    if (typeof window.top.showFloatingAssert === "function") {
+      window.top.showFloatingAssert(mode, el);
+    }
+    return;
+  }
+
+  // // Top-level only from here
+  // const doc = document;
+  // let rootEl = doc.getElementById("floating-assert-dock-root");
+
+  // // 💡 If stale root exists, remove and recreate it
+  // if (floatingAssertRoot && !rootEl) {
+  //   floatingAssertRoot = null; // stale ref, kill it
+  // }
+
+  // if (!rootEl) {
+  //   rootEl = doc.createElement("div");
+  //   rootEl.id = "floating-assert-dock-root";
+  //   doc.documentElement.appendChild(rootEl);
+  // }
+
+  // // ✅ Re-create React root if needed
+  // if (!floatingAssertRoot) {
+  //   floatingAssertRoot = ReactDOM.createRoot(rootEl);
+  // }
+  ensureFloatingRoot();
 
   let textValue = "";
   if (
@@ -258,6 +280,36 @@ window.showFloatingAssert = (mode, el, e, type) => {
     await closeDock();
   };
 
+  const floatingAssertCurrentUrlConfirm = async (
+    expected,
+    isSoftAssert,
+    isNegative,
+    exactMatch
+  ) => {
+    let modeVal = mode;
+    let assertionName =
+      ASSERTIONNAMES[
+        !exactMatch ? "ASSERTCURRENTURLNOTEQUALS" : "ASSERTCURRENTURLEQUALS"
+      ];
+    if (isNegative) {
+      if (!exactMatch) {
+        assertionName = ASSERTIONNAMES.ASSERTCURRENTURLNOTEQUALS;
+      } else {
+        assertionName = ASSERTIONNAMES.ASSERTCURRENTURLNOTCONTAINS;
+      }
+    }
+
+    window.__recordAction(
+      window.__buildData({
+        action: "assert",
+        isSoftAssert,
+        assertion: assertionName,
+        expected,
+      })
+    );
+    await closeDock();
+  };
+
   const floatingAssertDockNonTextConfirm = async (
     isSoftAssert,
     isNegative,
@@ -320,6 +372,21 @@ window.showFloatingAssert = (mode, el, e, type) => {
         onCancel={closeDock}
         onConfirm={(expected, isSoftAssert, locatorName) =>
           floatingAssertDockOnConfirm(expected, isSoftAssert, locatorName)
+        }
+      />
+    );
+  } else if (type === ASSERTIONMODES.ASSERTCURRENTURL) {
+    floatingAssertRoot.render(
+      <CurrentUrlAssertDock
+        mode={mode}
+        onCancel={closeDock}
+        onConfirm={(expected, isSoftAssert, isNegative, exactMatch) =>
+          floatingAssertCurrentUrlConfirm(
+            expected,
+            isSoftAssert,
+            isNegative,
+            exactMatch
+          )
         }
       />
     );

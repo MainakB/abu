@@ -12,6 +12,7 @@ export const ASSERTIONMODES = {
   DROPDOWNNOTSELECTED: "dropdownNotSelected",
   DROPDOWNCOUNTIS: "dropdownCountIs",
   DROPDOWNCOUNTISNOT: "dropdownCountIsNot",
+  ASSERTCURRENTURL: "assertCurentUrl",
 
   DROPDOWNVALUESARE: "dropdownValuesAre",
   DROPDOWNINALPHABETICORDER: "dropdownInAlphabeticOrder",
@@ -68,9 +69,18 @@ export const ASSERTIONNAMES = {
   DELETECOOKIES: "deleteCookies",
   TAKESCREENSHOT: "takeScreenshot",
   PAGERELOAD: "pageReload",
+
+  ASSERTCURRENTURLEQUALS: "assertCurentUrlEquals",
+  ASSERTCURRENTURLCONTAINS: "assertCurentUrlContains",
+  ASSERTCURRENTURLNOTEQUALS: "assertCurentUrlNotEquals",
+  ASSERTCURRENTURLNOTCONTAINS: "assertCurentUrlNotContains",
 };
 
 export const FUNCTIONMAPPER = {
+  ASSERTCURRENTURLEQUALS: {
+    key: "assertCurentUrlEquals",
+    name: "assertCurentUrlEquals",
+  },
   CLICK: { key: "click", name: "click" },
   INPUT: { key: "input", name: "input" },
   TEXT: { key: "toHaveText", name: "elementTextEquals" },

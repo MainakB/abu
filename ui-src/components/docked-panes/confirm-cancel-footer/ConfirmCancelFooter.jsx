@@ -11,6 +11,8 @@ export default function ConfirmCancelFooter({
   isNegative,
   setIsNegative,
   disabled,
+  exactMatch,
+  setExactMatch,
 }) {
   const updateLocatorName = (e) => {
     setLocatorName(e.target.value);
@@ -40,6 +42,18 @@ export default function ConfirmCancelFooter({
               <label htmlFor="inverse-checkbox">Inverse</label>
             </div>
           )}
+        {typeof exactMatch !== "undefined" &&
+          typeof setExactMatch !== "undefined" && (
+            <div className="docked-pane-footer-assert-container">
+              <input
+                id="exactMatch-checkbox"
+                type="checkbox"
+                checked={exactMatch}
+                onChange={() => setExactMatch((prev) => !prev)}
+              ></input>
+              <label htmlFor="exactMatch-checkbox">Exact</label>
+            </div>
+          )}
         {typeof softAssert !== "undefined" &&
           typeof setSoftAssert !== "undefined" && (
             <div className="docked-pane-footer-assert-container">
@@ -52,6 +66,7 @@ export default function ConfirmCancelFooter({
               <label htmlFor="softassert-checkbox">Soft Assert</label>
             </div>
           )}
+
         <div className="docked-pane-footer-buttons">
           <button
             className="docked-pane-footer-cancel-button"

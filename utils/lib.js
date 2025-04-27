@@ -205,6 +205,8 @@ export const exposeRecorderControls = async (
     // await new Promise((resolve) => setTimeout(resolve, 250));
     await page.reload({ waitUntil: "domcontentloaded" });
   });
+
+  await page.exposeBinding("__pageUrl", () => page.url());
 };
 
 export const exposeContextBindings = async (ctx) => {

@@ -152,6 +152,13 @@
 
   // window.__locatorIndex = 1;
 
+  const buildOptionalField = (name, value) => {
+    if (value === undefined || value === null || value === "") {
+      return {}; // return empty if value not meaningful
+    }
+    return { [name]: value };
+  };
+
   window.__buildData = ({
     action,
     assertion,
@@ -167,45 +174,78 @@
     selectOptionTag,
     locatorName,
   }) => {
-    if (
-      action === "addCookies" ||
-      action === "deleteCookies" ||
-      action === "takeScreenshot" ||
-      action === "pageReload"
-    ) {
-      return {
-        action,
-        ...(cookies ? { cookies } : {}),
-      };
+    // if (
+    //   action === "addCookies" ||
+    //   action === "deleteCookies" ||
+    //   action === "takeScreenshot" ||
+    //   action === "pageReload" ||
+    //   assertion === __window.ASSERTCURRENTURLEQUALS ||
+    //   assertion === __window.ASSERTCURRENTURLCONTAINS ||
+    //   assertion === __window.ASSERTCURRENTURLNOTEQUALS ||
+    //   assertion === __window.ASSERTCURRENTURLNOTCONTAINS
+    // ) {
+    //   return {
+    //     action,
+    //     ...(cookies ? { cookies } : {}),
+    //   };
+    // }
+    let selectors = null;
+    let attributes = null;
+    if (el) {
+      ({ selectors, attributes } = window.__getSelectors(el));
     }
-    const { selectors, attributes } = window.__getSelectors(el);
+    // const { selectors, attributes } = window.__getSelectors(el);
 
     const result = {
       action,
-      ...(locatorName && locatorName !== "" ? { locatorName } : {}),
-      ...(assertion ? { assertion } : {}),
-      ...(expected !== undefined ? { expected } : {}),
-      tagName: el.tagName.toLowerCase(),
-      selectors,
-      ...(attributeAssertPropName ? { attributeAssertPropName } : {}),
-      attributes: {
-        ...(attributes || {}),
-        associatedLabel: getAssociatedLabel(el),
-        ...(attributes.type &&
-        attributes.type === "checkbox" &&
-        getCheckboxStatus(el) !== null
-          ? {
-              checked: getCheckboxStatus(el),
-              checkboxIndex: getCheckboxIndex(el),
-            }
-          : {}),
-      },
-      position: e ? { x: e.pageX, y: e.pageY } : null,
-      value,
-      text: text || el.innerText?.trim() || "",
-      selectOptionIndex,
-      ...(selectOptionTag ? { selectOptionTag } : {}),
+      // ...(cookies ? { cookies } : {}),
+      ...buildOptionalField("cookies", cookies),
+      ...buildOptionalField("locatorName", locatorName),
+      ...buildOptionalField("assertion", assertion),
+      ...buildOptionalField("expected", expected),
+      ...buildOptionalField("selectors", selectors),
+      ...buildOptionalField("attributeAssertPropName", attributeAssertPropName),
+      ...buildOptionalField("value", value),
+      ...buildOptionalField("text", text || el?.innerText?.trim() || ""),
+      ...buildOptionalField(
+        "selectOptionIndex",
+        selectOptionIndex !== undefined && selectOptionIndex !== null
+          ? selectOptionIndex
+          : null
+      ),
+      ...buildOptionalField("selectOptionTag", selectOptionTag),
+      ...(el ? { tagName: el.tagName.toLowerCase() } : {}),
+      ...(attributes
+        ? {
+            attributes: {
+              ...attributes,
+              associatedLabel: getAssociatedLabel(el),
+              ...(attributes.type &&
+              attributes.type === "checkbox" &&
+              getCheckboxStatus(el) !== null
+                ? {
+                    checked: getCheckboxStatus(el),
+                    checkboxIndex: getCheckboxIndex(el),
+                  }
+                : {}),
+            },
+          }
+        : {}),
+      ...(e ? { position: { x: e.pageX, y: e.pageY } } : {}),
       isSoftAssert,
+      // ...(locatorName && locatorName !== "" ? { locatorName } : {}),
+      // ...(assertion ? { assertion } : {}),
+      // ...(expected !== undefined ? { expected } : {}),
+
+      // ...(selectors ? { selectors } : {}),
+      // ...(attributeAssertPropName ? { attributeAssertPropName } : {}),
+
+      // ...(value ? { value } : {}),
+      // ...(text ? { text: text || el.innerText?.trim() || "" } : {}),
+      // ...(selectOptionIndex !== undefined && selectOptionIndex !== null
+      //   ? { selectOptionIndex }
+      //   : {}),
+      // ...(selectOptionTag ? { selectOptionTag } : {}),
     };
     return result;
     // return mapData(result);

@@ -94,7 +94,8 @@
           mode === assertionModes.ADDCOOKIES ||
           mode === assertionModes.DELETECOOKIES ||
           mode === assertionModes.TAKESCREENSHOT ||
-          mode === assertionModes.PAGERELOAD
+          mode === assertionModes.PAGERELOAD ||
+          mode === assertionModes.ASSERTCURRENTURL
         ) {
           assertBox.style.display = "none";
           hoverTarget = null;
