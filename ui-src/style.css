@@ -402,7 +402,8 @@
 }
 
 .assert-dock-textarea {
-  width: 100% !important;
+  width: calc(100% - 20px) !important;
+  margin: 0 10px 10px 10px !important;
   min-height: 120px !important;
   padding: 10px !important;
   border: 1px solid #ccc !important;
@@ -413,7 +414,6 @@
   background: #fff !important;
   transition: all 0.2s ease !important;
   font-family: inherit !important;
-  margin-bottom: 0 !important;
   box-sizing: border-box !important;
 }
 
@@ -429,7 +429,8 @@
 .delete-cookie-input,
 .assert-input,
 .locator-name-container input,
-.cookie-same-site-select {
+.cookie-same-site-select,
+.reuse-input {
   background: var(--recorder-input-bg) !important;
   color: var(--recorder-text-color) !important;
   border-color: var(--recorder-border-color) !important;
@@ -537,6 +538,7 @@
 }
 
 .drawer-list {
+  transition: max-height 0.3s ease;
   list-style: none !important;
   padding-left: 10px !important;
   margin: 0;
@@ -545,6 +547,15 @@
   overflow-y: auto;
   /* Enable scrolling */
 }
+
+/* .drawer-divider {
+  border-top: 1px dashed #aaa;
+  margin: 4px;
+  height: 0.3px;
+  list-style: none;
+  opacity: 0.6;
+  cursor: none
+} */
 
 .drawer-list li {
   font-size: 14px;
@@ -1001,10 +1012,16 @@
   color: #666 !important; */
   color: var(--recorder-subtle-color) !important;
   background: var(--recorder-section-bg) !important;
+  /* color: #b1b0b0 */
 }
 
 .assert-attribute-value {
   flex: 1 !important;
+  max-width: 50vw !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  /* optional: make text cut nicely */
+  white-space: nowrap !important;
 }
 
 .assert-toggle {
@@ -1144,4 +1161,75 @@ html body #floating-assert-dock-root,
 html body #floating-assert-attribute-dock {
   visibility: visible !important;
   opacity: 1 !important;
+}
+
+
+.reuse-step-container,
+.pdf-text-container {
+  display: flex !important;
+  flex-direction: column;
+  gap: 10px;
+  margin: 0px 10px 10px !important;
+}
+
+.reuse-step-wrapper {
+  display: flex !important;
+  width: 100%;
+}
+
+
+.reuse-label {
+  background-color: #b1b0b0;
+  color: #222;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 5px 12px !important;
+  font-size: 14px;
+  font-weight: 500;
+  border-top-left-radius: 4px;
+  border-bottom-left-radius: 4px;
+  border: 1px solid #ccc;
+  border-right: none;
+  height: 38px;
+  box-sizing: border-box;
+}
+
+.reuse-input {
+  border-top-left-radius: 0 !important;
+  border-bottom-left-radius: 0 !important;
+  height: 38px !important;
+  width: 100% !important;
+  padding: 6px 10px !important;
+  border: 1px solid #ccc !important;
+  border-left: none !important;
+  /* border-radius: 0px 4px 4px 0px !important; */
+  /* margin-top: 4px !important; */
+  font-size: 14px !important;
+  font-weight: 400 !important;
+  font-family: inherit !important;
+  box-sizing: border-box !important;
+  /* display: block !important; */
+}
+
+.pdf-text-container-child-wrapper {
+  margin-left: 5px !important;
+}
+
+.assert-pdf-text-textarea {
+  /* width: calc(100% - 20px) !important; */
+  width: 100%;
+  margin: 0px !important;
+  /* margin: 0 10px 0px 10px !important; */
+  min-height: 120px !important;
+  padding: 10px !important;
+  border: 1px solid #ccc !important;
+  border-radius: 6px !important;
+  font-size: 14px !important;
+  line-height: 1.5 !important;
+  resize: vertical !important;
+  background: #fff !important;
+  transition: all 0.2s ease !important;
+  font-family: inherit !important;
+  box-sizing: border-box !important;
 }

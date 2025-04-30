@@ -147,6 +147,7 @@ export default function AssertAttributeValueDock({
                   value={attr.name}
                   readOnly
                   disabled
+                  title={attr.name}
                 />
 
                 <button

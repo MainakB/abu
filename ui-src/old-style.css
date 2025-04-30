@@ -308,7 +308,7 @@
 }
 
 .assert-dock-textarea {
-  width: 100% !important;
+  /* width: 100% !important; */
   min-height: 120px !important;
   padding: 10px !important;
   border: 1px solid #ccc !important;
@@ -319,7 +319,9 @@
   background: #fff !important;
   transition: all 0.2s ease !important;
   font-family: inherit !important;
-  margin-bottom: 0 !important;
+  /* margin-bottom: 0 !important; */
+  width: calc(100% - 20px) !important;
+  margin: 0 10px 10px 10px !important;
   box-sizing: border-box !important;
 }
 

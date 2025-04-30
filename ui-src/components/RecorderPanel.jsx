@@ -165,7 +165,7 @@ export default function RecorderPanel() {
     setDrawerOpen(false);
   };
 
-  const toggleModeOnMonoStep = async (nextMode) => {
+  const toggleModeOnMonoStep = async (nextMode, value) => {
     const isSame = mode === nextMode;
     const newMode = isSame ? "record" : nextMode;
     await window.__recorderStore.setMode(newMode);

@@ -94,8 +94,15 @@
           mode === assertionModes.ADDCOOKIES ||
           mode === assertionModes.DELETECOOKIES ||
           mode === assertionModes.TAKESCREENSHOT ||
+          mode === assertionModes.ADDREUSESTEP ||
           mode === assertionModes.PAGERELOAD ||
-          mode === assertionModes.ASSERTCURRENTURL
+          mode === assertionModes.ASSERTCURRENTURL ||
+          mode === assertionModes.ASSERTCOOKIEVALUE ||
+          mode === assertionModes.ASSERTTEXTINPAGESOURCE ||
+          mode === assertionModes.ASSERTTEXTINPDF ||
+          mode === assertionModes.ASSERTPDFCOMPARISON ||
+          mode === assertionModes.ASSERTTEXTIMAGESINPDF ||
+          mode === assertionModes.ASSERTCPDPDF
         ) {
           assertBox.style.display = "none";
           hoverTarget = null;

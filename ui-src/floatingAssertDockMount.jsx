@@ -4,11 +4,17 @@ import FloatingAssertDock from "./components/docked-panes/text-dock/FloatingAsse
 import FloatingAssertDockNonText from "./components/docked-panes/non-text-dock/FloatingAssertDockNonText.jsx";
 import FloatingCookieListDock from "./components/docked-panes/cookie-dock/FloatingCookieListDock.jsx";
 import FloatingDeleteCookieDock from "./components/docked-panes/cookie-dock/FloatingDeleteCookieDock.jsx";
+import AssertCookieValueDock from "./components/docked-panes/cookie-dock/AssertCookieValueDock.jsx";
 import AssertAttributeValueDock from "./components/docked-panes/attributes-dock/AssertAttributeValueDock.jsx";
 import AssertCheckedStateDock from "./components/docked-panes/checked-state-dock/AssertCheckedStateDock.jsx";
 import FloatingDropdownAssertDock from "./components/docked-panes/dropdown-dock/FloatingDropdownAssertDock.jsx";
+import FloatingDropdownOrderAssertDock from "./components/docked-panes/dropdown-dock/FloatingDropdownOrderAssertDock.jsx";
+
 import FloatingAssertDockNotSupported from "./components/docked-panes/dropdown-dock/FloatingAssertDockNotSupported.jsx";
 import CurrentUrlAssertDock from "./components/docked-panes/current-url-dock/CurrentUrlAssertDock.jsx";
+import AddReuseTextBoxDock from "./components/docked-panes/addreuse-text-box-dock/AddReuseTextBoxDock.jsx";
+import FloatingAssertTextInPdf from "./components/docked-panes/pdf-assertions/FloatingAssertTextInPdf.jsx";
+import FloatingAssertPdfCompare from "./components/docked-panes/pdf-assertions/FloatingAssertPdfCompare.jsx";
 
 import { ASSERTIONMODES, ASSERTIONNAMES } from "./constants/index.js";
 
@@ -43,6 +49,7 @@ window.showFloatingAssert = (mode, el, e, type) => {
 
   // // Top-level only from here
   const doc = document;
+  console.log("Insert showFloatingAssert");
   // let rootEl = doc.getElementById("floating-assert-dock-root");
 
   // // 💡 If stale root exists, remove and recreate it
@@ -74,6 +81,81 @@ window.showFloatingAssert = (mode, el, e, type) => {
     textValue = el.innerText?.trim() || "";
   }
 
+  const ASSERTION_NAME_LOOKUP = {
+    [ASSERTIONMODES.TEXT]: {
+      exact: {
+        positive: ASSERTIONNAMES.TEXT,
+        negative: ASSERTIONNAMES.TEXTNOTEQUALS,
+      },
+      contains: {
+        positive: ASSERTIONNAMES.TEXTCONTAINS,
+        negative: ASSERTIONNAMES.TEXTNOTCONTAINS,
+      },
+    },
+    [ASSERTIONMODES.VALUE]: {
+      exact: {
+        positive: ASSERTIONNAMES.VALUE,
+        negative: ASSERTIONNAMES.VALUENOTEQUALS,
+      },
+      contains: {
+        positive: ASSERTIONNAMES.VALUENOTCONTAINS,
+        negative: ASSERTIONNAMES.VALUECONTAINS,
+      },
+    },
+    [ASSERTIONMODES.ASSERTTEXTINPAGESOURCE]: {
+      exact: {
+        positive: ASSERTIONNAMES.ASSERTTEXTINPAGESOURCE,
+        negative: ASSERTIONNAMES.ASSERTTEXTINPAGESOURCENOTEQUALS,
+      },
+      contains: {
+        positive: ASSERTIONNAMES.ASSERTTEXTINPAGESOURCECONTAINS,
+        negative: ASSERTIONNAMES.ASSERTTEXTINPAGESOURCENOTCONTAINS,
+      },
+    },
+    [ASSERTIONMODES.ASSERTCOOKIEVALUE]: {
+      exact: {
+        positive: ASSERTIONNAMES.ASSERTCOOKIEVALUEEQUALS,
+        negative: ASSERTIONNAMES.ASSERTCOOKIEVALUENOTEQUALS,
+      },
+      contains: {
+        positive: ASSERTIONNAMES.ASSERTCOOKIEVALUECONTAINS,
+        negative: ASSERTIONNAMES.ASSERTCOOKIEVALUENOTCONTAINS,
+      },
+    },
+
+    [ASSERTIONMODES.ATTRIBUTEVALUE]: {
+      exact: {
+        positive: ASSERTIONNAMES.ATTRIBUTEVALUEEQUALS,
+        negative: ASSERTIONNAMES.NOTATTRIBUTEVALUEEQUALS,
+      },
+      contains: {
+        positive: ASSERTIONNAMES.ATTRIBUTEVALUECONTAINS,
+        negative: ASSERTIONNAMES.NOTATTRIBUTEVALUECONTAINS,
+      },
+    },
+    //
+    [ASSERTIONMODES.ASSERTTEXTINPDF]: {
+      exact: {
+        positive: ASSERTIONNAMES.ASSERTTEXTINPDF,
+      },
+    },
+    [ASSERTIONMODES.ASSERTPDFCOMPARISON]: {
+      exact: {
+        positive: ASSERTIONNAMES.ASSERTPDFCOMPARISON,
+      },
+    },
+    [ASSERTIONMODES.ASSERTTEXTIMAGESINPDF]: {
+      exact: {
+        positive: ASSERTIONNAMES.ASSERTTEXTIMAGESINPDF,
+      },
+    },
+    [ASSERTIONMODES.ASSERTCPDPDF]: {
+      exact: {
+        positive: ASSERTIONNAMES.ASSERTCPDPDF,
+      },
+    },
+  };
+
   const closeDock = async () => {
     if (floatingAssertRoot) {
       floatingAssertRoot.unmount();
@@ -96,33 +178,24 @@ window.showFloatingAssert = (mode, el, e, type) => {
     return attributes;
   };
 
-  const getRecordAttributeAssertionMode = (isNegative, isSubstringMatch) => {
-    if (isNegative) {
-      if (isSubstringMatch) {
-        return ASSERTIONNAMES.NOTATTRIBUTEVALUECONTAINS;
-      } else {
-        return ASSERTIONNAMES.NOTATTRIBUTEVALUEEQUALS;
-      }
-    } else {
-      if (isSubstringMatch) {
-        return ASSERTIONNAMES.ATTRIBUTEVALUECONTAINS;
-      } else {
-        return ASSERTIONNAMES.ATTRIBUTEVALUEEQUALS;
-      }
-    }
+  const getCookies = async () => {
+    const cookies = await window.__getCookies();
+    return cookies;
   };
 
   const recordAttributesAssert = async (
-    selectedAssertions,
+    selectedAssertions = [],
     isSoftAssert,
     locatorName
   ) => {
+    const assertionMapping = ASSERTION_NAME_LOOKUP[mode];
+
     for (let i = 0; i < selectedAssertions.length; i++) {
       const attrObj = selectedAssertions[i];
-      const attrMode = getRecordAttributeAssertionMode(
-        attrObj.isNegative,
-        attrObj.isSubstringMatch
-      );
+      const category = attrObj.isSubstringMatch ? "contains" : "exact";
+      const polarity = attrObj.isNegative ? "negative" : "positive";
+      const attrMode = assertionMapping[category][polarity];
+
       const locSubstring = attrObj.attributeName
         .replace(/[ -]/g, "_")
         .toLowerCase();
@@ -137,6 +210,31 @@ window.showFloatingAssert = (mode, el, e, type) => {
           assertion: attrMode,
           attributeAssertPropName: attrObj.attributeName,
           expected: attrObj.value,
+          el,
+          e,
+        })
+      );
+    }
+
+    await closeDock();
+  };
+
+  const recordCookiesAssert = async (selectedAssertions, isSoftAssert) => {
+    const assertionMapping = ASSERTION_NAME_LOOKUP[mode];
+
+    for (let i = 0; i < selectedAssertions.length; i++) {
+      const cookieObj = selectedAssertions[i];
+      const category = cookieObj.isSubstringMatch ? "contains" : "exact";
+      const polarity = cookieObj.isNegative ? "negative" : "positive";
+      const assertionName = assertionMapping[category][polarity];
+
+      window.__recordAction(
+        window.__buildData({
+          action: "assert",
+          isSoftAssert,
+          assertion: assertionName,
+          cookieName: cookieObj.name,
+          expected: cookieObj.value,
           el,
           e,
         })
@@ -184,6 +282,27 @@ window.showFloatingAssert = (mode, el, e, type) => {
     await closeDock();
   };
 
+  const recordDropdownOrderAssert = async (
+    checkBoxState,
+    isSoftAssert,
+    elToUse,
+    locatorName
+  ) => {
+    window.__recordAction(
+      window.__buildData({
+        action: "assert",
+        locatorName,
+        isSoftAssert,
+        assertion: ASSERTIONNAMES.DROPDOWNINALPHABETICORDER,
+        expected: checkBoxState.isChecked ? "asc" : "desc",
+        el,
+        e,
+      })
+    );
+
+    await closeDock();
+  };
+
   const recordDropdownAssert = async (
     expected,
     isSoftAssert,
@@ -224,73 +343,10 @@ window.showFloatingAssert = (mode, el, e, type) => {
     exact,
     isNegative
   ) => {
-    // let assertName = ASSERTIONNAMES.TEXT;
-
-    // if (mode === ASSERTIONMODES.VALUE) {
-    //   assertName = ASSERTIONNAMES.VALUE;
-    // }
-
-    // let assertName = ASSERTIONNAMES.TEXT;
-    // if (mode === ASSERTIONMODES.TEXT){
-    //   if(exact){
-    //     if(isNegative){
-    //       assertName = ASSERTIONNAMES.TEXTNOTEQUALS;
-    //     }
-    //   } else{
-    //     if(isNegative){
-    //       assertName = ASSERTIONNAMES.TEXTNOTCONTAINS;
-    //     }  else{
-    //       assertName = ASSERTIONNAMES.TEXTCONTAINS;
-    //     }
-    //   }
-
-    // } else{
-    //   if(exact){
-    //     if(isNegative){
-    //       assertName = ASSERTIONNAMES.VALUE;
-    //     } else{
-    //       assertName = ASSERTIONNAMES.VALUENOTEQUALS;
-    //     }
-    //   } else{
-    //     if(isNegative){
-    //       assertName = ASSERTIONNAMES.VALUECONTAINS;
-    //     }  else{
-    //       assertName = ASSERTIONNAMES.VALUENOTCONTAINS;
-    //     }
-    //   }
-    // }
-
-    let assertName;
-
-    const isText = mode === ASSERTIONMODES.TEXT;
-
-    if (exact) {
-      assertName = isText
-        ? isNegative
-          ? ASSERTIONNAMES.TEXTNOTEQUALS
-          : ASSERTIONNAMES.TEXT
-        : isNegative
-        ? ASSERTIONNAMES.VALUENOTEQUALS
-        : ASSERTIONNAMES.VALUE;
-    } else {
-      assertName = isText
-        ? isNegative
-          ? ASSERTIONNAMES.TEXTNOTCONTAINS
-          : ASSERTIONNAMES.TEXTCONTAINS
-        : isNegative
-        ? ASSERTIONNAMES.VALUECONTAINS
-        : ASSERTIONNAMES.VALUENOTCONTAINS;
-    }
-
-    // TEXT: "toHaveText",
-    // VALUE: "toHaveValue",
-    // TEXTNOTEQUALS: "toNotHaveText",
-    // VALUENOTEQUALS: "toNotHaveValue",
-
-    // TEXTCONTAINS: "toContainText",
-    // VALUECONTAINS: "toContainValue",
-    // TEXTNOTCONTAINS: "toNotContainText",
-    // VALUENOTCONTAINS: "toNotContainValue",
+    const assertionMapping = ASSERTION_NAME_LOOKUP[mode];
+    const category = exact ? "exact" : "contains";
+    const polarity = isNegative ? "negative" : "positive";
+    const assertName = assertionMapping[category][polarity];
 
     window.__recordAction(
       window.__buildData({
@@ -387,21 +443,59 @@ window.showFloatingAssert = (mode, el, e, type) => {
     await Promise.all([window.__deleteCookies(cookieList), closeDock()]);
   };
 
-  if (type === ASSERTIONMODES.TEXT || type === ASSERTIONMODES.VALUE) {
+  const recordAddReuseStep = async (fileName, params) => {
+    let expectedStep = params
+      ? `use(${fileName}) ${params}`
+      : `use(${fileName})`;
+
+    window.__recordAction(
+      window.__buildData({
+        action: "addReuse",
+        expected: expectedStep,
+      })
+    );
+    await closeDock();
+  };
+
+  const recordTextInPdfStep = async (fileName, params) => {
+    let expectedStep = params
+      ? `use(${fileName}) ${params}`
+      : `use(${fileName})`;
+
+    window.__recordAction(
+      window.__buildData({
+        action: "addReuse",
+        expected: expectedStep,
+      })
+    );
+    await closeDock();
+  };
+
+  const recordPdfCompareStep = async (fileName, params) => {
+    let expectedStep = params
+      ? `use(${fileName}) ${params}`
+      : `use(${fileName})`;
+
+    window.__recordAction(
+      window.__buildData({
+        action: "addReuse",
+        expected: expectedStep,
+      })
+    );
+    await closeDock();
+  };
+
+  if (
+    type === ASSERTIONMODES.TEXT ||
+    type === ASSERTIONMODES.VALUE ||
+    type === ASSERTIONMODES.ASSERTTEXTINPAGESOURCE
+  ) {
     floatingAssertRoot.render(
       <FloatingAssertDock
         mode={mode}
         el={el}
         onCancel={closeDock}
-        onConfirm={(expected, isSoftAssert, locatorName, exact, isNegative) =>
-          floatingAssertDockOnConfirm(
-            expected,
-            isSoftAssert,
-            locatorName,
-            exact,
-            isNegative
-          )
-        }
+        onConfirm={floatingAssertDockOnConfirm}
       />
     );
   } else if (type === ASSERTIONMODES.ASSERTCURRENTURL) {
@@ -409,14 +503,7 @@ window.showFloatingAssert = (mode, el, e, type) => {
       <CurrentUrlAssertDock
         mode={mode}
         onCancel={closeDock}
-        onConfirm={(expected, isSoftAssert, isNegative, exactMatch) =>
-          floatingAssertCurrentUrlConfirm(
-            expected,
-            isSoftAssert,
-            isNegative,
-            exactMatch
-          )
-        }
+        onConfirm={floatingAssertCurrentUrlConfirm}
       />
     );
   } else if (type === ASSERTIONMODES.ATTRIBUTEVALUE) {
@@ -426,9 +513,16 @@ window.showFloatingAssert = (mode, el, e, type) => {
         mode={mode}
         el={el}
         onCancel={closeDock}
-        onConfirm={(selectedAssertions, isSoftAssert, locatorName) =>
-          recordAttributesAssert(selectedAssertions, isSoftAssert, locatorName)
-        }
+        onConfirm={recordAttributesAssert}
+      />
+    );
+  } else if (type === ASSERTIONMODES.ASSERTCOOKIEVALUE) {
+    floatingAssertRoot.render(
+      <AssertCookieValueDock
+        getCookies={getCookies}
+        mode={mode}
+        onCancel={closeDock}
+        onConfirm={recordCookiesAssert}
       />
     );
   } else if (
@@ -441,14 +535,7 @@ window.showFloatingAssert = (mode, el, e, type) => {
         mode={mode}
         el={el}
         onCancel={closeDock}
-        onConfirm={(checkBoxState, isSoftAssert, elToUse, locatorName) =>
-          recordCheckboxRadioAssert(
-            checkBoxState,
-            isSoftAssert,
-            elToUse,
-            locatorName
-          )
-        }
+        onConfirm={recordCheckboxRadioAssert}
         label={type === ASSERTIONMODES.CHECKBOXSTATE ? "Checkbox" : "Radio"}
       />
     );
@@ -462,37 +549,32 @@ window.showFloatingAssert = (mode, el, e, type) => {
         mode={mode}
         el={el}
         onCancel={closeDock}
-        onConfirm={(isSoftAssert, isNegative, locatorName) =>
-          floatingAssertDockNonTextConfirm(
-            isSoftAssert,
-            isNegative,
-            locatorName
-          )
-        }
+        onConfirm={floatingAssertDockNonTextConfirm}
       />
     );
   } else if (type === ASSERTIONMODES.ADDCOOKIES) {
     floatingAssertRoot.render(
       <FloatingCookieListDock
         onCancel={closeDock}
-        onConfirm={(cookieList) => floatingCookieListDockConfirm(cookieList)}
+        onConfirm={floatingCookieListDockConfirm}
       />
     );
   } else if (type === ASSERTIONMODES.DELETECOOKIES) {
     floatingAssertRoot.render(
       <FloatingDeleteCookieDock
         onCancel={closeDock}
-        onConfirm={(cookieList) => floatingDeleteCookieDockConfirm(cookieList)}
+        onConfirm={floatingDeleteCookieDockConfirm}
       />
     );
   } else if (
     type === ASSERTIONMODES.DROPDOWNCONTAINS ||
     type === ASSERTIONMODES.DROPDOWNCOUNTIS ||
     type === ASSERTIONMODES.DROPDOWNCOUNTISNOT ||
-    type === ASSERTIONMODES.DROPDOWNINALPHABETICORDER ||
+    // type === ASSERTIONMODES.DROPDOWNINALPHABETICORDER ||
     type === ASSERTIONMODES.DROPDOWNNOTSELECTED ||
     type === ASSERTIONMODES.DROPDOWNSELECTED ||
     type === ASSERTIONMODES.DROPDOWNVALUESARE ||
+    type === ASSERTIONMODES.DROPDOWNDUPLICATECOUNT ||
     type === ASSERTIONMODES.DROPDOWNDUPLICATECOUNT
   ) {
     if (el && el.tagName && el.tagName.toLowerCase().includes("select")) {
@@ -501,23 +583,7 @@ window.showFloatingAssert = (mode, el, e, type) => {
           mode={mode}
           el={el}
           onCancel={closeDock}
-          onConfirm={(
-            expected,
-            softAssert,
-            isNegative,
-            assertName,
-            modeVal,
-            locatorName
-          ) =>
-            recordDropdownAssert(
-              expected,
-              softAssert,
-              isNegative,
-              assertName,
-              modeVal,
-              locatorName
-            )
-          }
+          onConfirm={recordDropdownAssert}
         />
       );
     } else {
@@ -529,5 +595,49 @@ window.showFloatingAssert = (mode, el, e, type) => {
         />
       );
     }
+  } else if (type === ASSERTIONMODES.DROPDOWNINALPHABETICORDER) {
+    if (el && el.tagName && el.tagName.toLowerCase().includes("select")) {
+      floatingAssertRoot.render(
+        <FloatingDropdownOrderAssertDock
+          el={el}
+          onCancel={closeDock}
+          onConfirm={recordDropdownOrderAssert}
+        />
+      );
+    } else {
+      floatingAssertRoot.render(
+        <FloatingAssertDockNotSupported
+          mode={mode}
+          el={el}
+          onCancel={closeDock}
+        />
+      );
+    }
+  } else if (type === ASSERTIONMODES.ADDREUSESTEP) {
+    floatingAssertRoot.render(
+      <AddReuseTextBoxDock
+        onCancel={closeDock}
+        onConfirm={recordAddReuseStep}
+        // onConfirm={(fileName, params) => recordAddReuseStep(fileName, params)}
+      />
+    );
+  } else if (type === ASSERTIONMODES.ASSERTTEXTINPDF) {
+    floatingAssertRoot.render(
+      <FloatingAssertTextInPdf
+        onCancel={closeDock}
+        onConfirm={recordTextInPdfStep}
+      />
+    );
+  } else if (
+    type === ASSERTIONMODES.ASSERTPDFCOMPARISON ||
+    type === ASSERTIONMODES.ASSERTTEXTIMAGESINPDF ||
+    type === ASSERTIONMODES.ASSERTCPDPDF
+  ) {
+    floatingAssertRoot.render(
+      <FloatingAssertPdfCompare
+        onCancel={closeDock}
+        onConfirm={recordPdfCompareStep}
+      />
+    );
   }
 };

@@ -6,6 +6,7 @@ export const ASSERTIONMODES = {
   PRSENECE: "presence",
   NOTPRESENT: "isAbsent",
   ATTRIBUTEVALUE: "attrValue",
+  ASSERTCOOKIEVALUE: "assertCookieValue",
   CHECKBOXSTATE: "checkBoxState",
   RADIOSTATE: "radioState",
   DROPDOWNSELECTED: "dropdownSelected",
@@ -13,6 +14,11 @@ export const ASSERTIONMODES = {
   DROPDOWNCOUNTIS: "dropdownCountIs",
   DROPDOWNCOUNTISNOT: "dropdownCountIsNot",
   ASSERTCURRENTURL: "assertCurentUrl",
+  ASSERTTEXTINPAGESOURCE: "assertTextInPageSource",
+  ASSERTTEXTINPDF: "assertTextInPdf",
+  ASSERTPDFCOMPARISON: "assertPdfComparison",
+  ASSERTTEXTIMAGESINPDF: "assertTextImagesInPdf",
+  ASSERTCPDPDF: "assertCpdPdf",
 
   DROPDOWNVALUESARE: "dropdownValuesAre",
   DROPDOWNINALPHABETICORDER: "dropdownInAlphabeticOrder",
@@ -27,10 +33,17 @@ export const ASSERTIONMODES = {
   ADDCOOKIES: "addCookies",
   DELETECOOKIES: "deleteCookies",
   TAKESCREENSHOT: "takeScreenshot",
+  ADDREUSESTEP: "addReuseStep",
   PAGERELOAD: "pageReload",
 };
 
 export const ASSERTIONNAMES = {
+  ASSERTCOOKIEVALUEEQUALS: "assertCookieValueEquals",
+  ASSERTCOOKIEVALUENOTEQUALS: "assertCookieValueNotEquals",
+
+  ASSERTCOOKIEVALUECONTAINS: "assertCookieValueContains",
+  ASSERTCOOKIEVALUENOTCONTAINS: "assertCookieValueNotContains",
+
   TEXT: "toHaveText",
   VALUE: "toHaveValue",
   TEXTNOTEQUALS: "toNotHaveText",
@@ -40,6 +53,16 @@ export const ASSERTIONNAMES = {
   VALUECONTAINS: "toContainValue",
   TEXTNOTCONTAINS: "toNotContainText",
   VALUENOTCONTAINS: "toNotContainValue",
+
+  ASSERTTEXTINPAGESOURCE: "assertTextInPageSource",
+  ASSERTTEXTINPDF: "assertTextInPdf",
+  ASSERTPDFCOMPARISON: "assertPdfComparison",
+  ASSERTTEXTIMAGESINPDF: "assertTextImagesInPdf",
+  ASSERTCPDPDF: "assertCpdPdf",
+
+  ASSERTTEXTINPAGESOURCENOTEQUALS: "assertTextInPageSourceNotEquals",
+  ASSERTTEXTINPAGESOURCECONTAINS: "assertTextInPageSourceContains",
+  ASSERTTEXTINPAGESOURCENOTCONTAINS: "assertTextInPageSourceNotContains",
 
   ATTRIBUTEVALUE: "attrValue",
 
@@ -76,6 +99,7 @@ export const ASSERTIONNAMES = {
   ADDCOOKIES: "addCookies",
   DELETECOOKIES: "deleteCookies",
   TAKESCREENSHOT: "takeScreenshot",
+  ADDREUSESTEP: "addReuseStep",
   PAGERELOAD: "pageReload",
 
   ASSERTCURRENTURLEQUALS: "assertCurentUrlEquals",
@@ -149,6 +173,7 @@ export const FUNCTIONMAPPER = {
   ADDCOOKIES: "addCookies",
   DELETECOOKIES: "deleteCookies",
   TAKESCREENSHOT: "takeScreenshot",
+  ADDREUSESTEP: "addReuseStep",
   PAGERELOAD: "pageReload",
   NAVIGATE: { key: "navigate", name: "url" },
   SWITCHTOWINDOW: { key: "switchToWindow", name: "switchWindow" },

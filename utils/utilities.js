@@ -173,32 +173,17 @@
     attributeAssertPropName,
     selectOptionTag,
     locatorName,
+    keyPressed,
+    cookieName,
   }) => {
-    // if (
-    //   action === "addCookies" ||
-    //   action === "deleteCookies" ||
-    //   action === "takeScreenshot" ||
-    //   action === "pageReload" ||
-    //   assertion === __window.ASSERTCURRENTURLEQUALS ||
-    //   assertion === __window.ASSERTCURRENTURLCONTAINS ||
-    //   assertion === __window.ASSERTCURRENTURLNOTEQUALS ||
-    //   assertion === __window.ASSERTCURRENTURLNOTCONTAINS
-    // ) {
-    //   return {
-    //     action,
-    //     ...(cookies ? { cookies } : {}),
-    //   };
-    // }
     let selectors = null;
     let attributes = null;
     if (el) {
       ({ selectors, attributes } = window.__getSelectors(el));
     }
-    // const { selectors, attributes } = window.__getSelectors(el);
 
     const result = {
       action,
-      // ...(cookies ? { cookies } : {}),
       ...buildOptionalField("cookies", cookies),
       ...buildOptionalField("locatorName", locatorName),
       ...buildOptionalField("assertion", assertion),
@@ -207,6 +192,9 @@
       ...buildOptionalField("attributeAssertPropName", attributeAssertPropName),
       ...buildOptionalField("value", value),
       ...buildOptionalField("text", text || el?.innerText?.trim() || ""),
+      ...buildOptionalField("keyPressed", keyPressed),
+      ...buildOptionalField("cookieName", cookieName),
+
       ...buildOptionalField(
         "selectOptionIndex",
         selectOptionIndex !== undefined && selectOptionIndex !== null
@@ -233,22 +221,8 @@
         : {}),
       ...(e ? { position: { x: e.pageX, y: e.pageY } } : {}),
       isSoftAssert,
-      // ...(locatorName && locatorName !== "" ? { locatorName } : {}),
-      // ...(assertion ? { assertion } : {}),
-      // ...(expected !== undefined ? { expected } : {}),
-
-      // ...(selectors ? { selectors } : {}),
-      // ...(attributeAssertPropName ? { attributeAssertPropName } : {}),
-
-      // ...(value ? { value } : {}),
-      // ...(text ? { text: text || el.innerText?.trim() || "" } : {}),
-      // ...(selectOptionIndex !== undefined && selectOptionIndex !== null
-      //   ? { selectOptionIndex }
-      //   : {}),
-      // ...(selectOptionTag ? { selectOptionTag } : {}),
     };
     return result;
-    // return mapData(result);
   };
 
   window.__recordAction = async (data) => {

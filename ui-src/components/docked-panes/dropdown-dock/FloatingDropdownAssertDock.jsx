@@ -75,9 +75,9 @@ function getHeader(modeValue) {
     return "Assert Dropdown Count";
   }
 
-  if (modeValue === ASSERTIONMODES.DROPDOWNINALPHABETICORDER) {
-    return "Assert Dropdown Order";
-  }
+  // if (modeValue === ASSERTIONMODES.DROPDOWNINALPHABETICORDER) {
+  //   return "Assert Dropdown Order";
+  // }
 
   if (modeValue === ASSERTIONMODES.DROPDOWNDUPLICATECOUNT) {
     return "Assert Dropdown Duplicates Count";
@@ -103,9 +103,9 @@ function getAssertionName(modeValue) {
     return ASSERTIONNAMES.DROPDOWNCOUNT;
   }
 
-  if (modeValue === ASSERTIONMODES.DROPDOWNINALPHABETICORDER) {
-    return ASSERTIONNAMES.DROPDOWNINALPHABETICORDER;
-  }
+  // if (modeValue === ASSERTIONMODES.DROPDOWNINALPHABETICORDER) {
+  //   return ASSERTIONNAMES.DROPDOWNINALPHABETICORDER;
+  // }
 
   if (modeValue === ASSERTIONMODES.DROPDOWNDUPLICATECOUNT) {
     return ASSERTIONNAMES.DROPDOWNDUPLICATECOUNT;
@@ -138,13 +138,10 @@ export default function FloatingDropdownAssertDock({
       return getDropdownCount(el);
     if (mode === ASSERTIONMODES.DROPDOWNCONTAINS) return "";
     if (
-      mode === ASSERTIONMODES.DROPDOWNINALPHABETICORDER ||
+      // mode === ASSERTIONMODES.DROPDOWNINALPHABETICORDER ||
       mode === ASSERTIONMODES.DROPDOWNVALUESARE
     )
-      return getDropdownOrder(
-        el,
-        mode === ASSERTIONMODES.DROPDOWNINALPHABETICORDER
-      );
+      return getDropdownOrder(el, false);
     if (
       mode === ASSERTIONMODES.DROPDOWNSELECTED ||
       mode === ASSERTIONMODES.DROPDOWNNOTSELECTED

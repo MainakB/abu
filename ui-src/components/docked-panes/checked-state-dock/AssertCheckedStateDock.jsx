@@ -146,10 +146,6 @@ export default function AssertCheckedStateDock({
 
   useEffect(() => {
     const timeout = setTimeout(() => {
-      console.log("Effective Element:", effectiveEl);
-      console.log("effectiveEl.tagName:", effectiveEl.tagName);
-      console.log("effectiveEl.type:", effectiveEl.type);
-      console.log("effectiveEl.checked:", effectiveEl.checked);
       if (effectiveEl && typeof effectiveEl.checked === "boolean") {
         setIsChecked(effectiveEl.checked);
       }

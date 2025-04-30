@@ -17,6 +17,7 @@ export default function ConfirmCancelFooter({
   const updateLocatorName = (e) => {
     setLocatorName(e.target.value);
   };
+
   return (
     <div>
       {typeof locatorName !== "undefined" &&

@@ -76,7 +76,13 @@
 
         if (finalValue !== initialValue) {
           window.__recordAction(
-            window.__buildData({ action: "input", el, e, value: finalValue })
+            window.__buildData({
+              action: "input",
+              el,
+              e,
+              value: finalValue,
+              keyPressed: "Enter",
+            })
           );
         }
 

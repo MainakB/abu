@@ -224,7 +224,6 @@ export const exposeContextBindings = async (ctx) => {
   });
 
   await ctx.exposeBinding("__deleteCookies", async ({ page }, cookies) => {
-    console.log("Received in __deleteCookies: ", cookies);
     if (cookies && Array.isArray(cookies) && cookies.length) {
       const cookiePromise = [];
       for (let cookie of cookies) {
@@ -237,4 +236,6 @@ export const exposeContextBindings = async (ctx) => {
       await ctx.clearCookies();
     }
   });
+
+  await ctx.exposeBinding("__getCookies", async () => ctx.cookies());
 };
