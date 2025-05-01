@@ -175,6 +175,9 @@
     locatorName,
     keyPressed,
     cookieName,
+    basePdfFileName,
+    referencePdfFileName,
+    pdfComparisonPages,
   }) => {
     let selectors = null;
     let attributes = null;
@@ -194,7 +197,9 @@
       ...buildOptionalField("text", text || el?.innerText?.trim() || ""),
       ...buildOptionalField("keyPressed", keyPressed),
       ...buildOptionalField("cookieName", cookieName),
-
+      ...buildOptionalField("basePdfFileName", basePdfFileName),
+      ...buildOptionalField("referencePdfFileName", referencePdfFileName),
+      ...buildOptionalField("pdfComparisonPages", pdfComparisonPages),
       ...buildOptionalField(
         "selectOptionIndex",
         selectOptionIndex !== undefined && selectOptionIndex !== null

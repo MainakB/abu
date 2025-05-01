@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { ASSERTIONMODES } from "../../../constants/index.js";
 import ConfirmCancelFooter from "../confirm-cancel-footer/ConfirmCancelFooter.jsx";
 
-export default function FloatingAssertTextInPdf({ mode, onConfirm, onCancel }) {
+export default function FloatingAssertTextInPdf({ onConfirm, onCancel }) {
   const inputRef = useRef(null);
   const textBoxRef = useRef(null);
 
@@ -30,7 +30,7 @@ export default function FloatingAssertTextInPdf({ mode, onConfirm, onCancel }) {
   };
 
   const handleConfirm = () => {
-    onConfirm(fileName, expected);
+    onConfirm(basePdf, expected, softAssert);
     closeDockReset();
   };
 
@@ -59,7 +59,7 @@ export default function FloatingAssertTextInPdf({ mode, onConfirm, onCancel }) {
           />
         </div>
         <div className="locator-name-container">
-          <label>Reference PDF Name</label>
+          <label>Text To Assert</label>
           <textarea
             ref={textBoxRef}
             className="assert-pdf-text-textarea"

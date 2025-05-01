@@ -457,29 +457,69 @@ window.showFloatingAssert = (mode, el, e, type) => {
     await closeDock();
   };
 
-  const recordTextInPdfStep = async (fileName, params) => {
-    let expectedStep = params
-      ? `use(${fileName}) ${params}`
-      : `use(${fileName})`;
-
+  const recordTextInPdfStep = async (
+    basePdfFileName,
+    expected,
+    isSoftAssert
+  ) => {
     window.__recordAction(
       window.__buildData({
-        action: "addReuse",
-        expected: expectedStep,
+        action: "assertTextInPdf",
+        basePdfFileName: basePdfFileName.endsWith(".pdf")
+          ? basePdfFileName
+          : `${basePdfFileName}.pdf`,
+        expected,
+        isSoftAssert,
       })
     );
     await closeDock();
   };
 
-  const recordPdfCompareStep = async (fileName, params) => {
-    let expectedStep = params
-      ? `use(${fileName}) ${params}`
-      : `use(${fileName})`;
+  const recordPdfCompareStep = async (
+    basePdfFileNm,
+    referencePdfFileNm,
+    pageRng,
+    isSoftAssert,
+    type
+  ) => {
+    const assertionMapping = ASSERTION_NAME_LOOKUP[type];
+    const category = "exact";
+    const polarity = "positive";
+    const assertName = assertionMapping[category][polarity];
+    let pdfComparisonPages = [];
+
+    if (pageRng && typeof pageRng === "string" && pageRng !== "") {
+      const pgs = pageRng.trim().split(",");
+
+      for (let p of pgs) {
+        if (p === "") continue;
+        if (Number.isNaN(Number(p))) {
+          console.warn(
+            `Received non-numeric value in page range. Page range passed ${pgs} and non-numeric value is: ${p}`
+          );
+          pdfComparisonPages = [];
+          break;
+        } else {
+          pdfComparisonPages.push(Number(p));
+        }
+      }
+    }
+
+    let basePdfFileName = basePdfFileNm.endsWith(".pdf")
+      ? basePdfFileNm
+      : `${basePdfFileNm}.pdf`;
+
+    const referencePdfFileName = referencePdfFileNm.endsWith(".pdf")
+      ? referencePdfFileNm
+      : `${referencePdfFileNm}.pdf`;
 
     window.__recordAction(
       window.__buildData({
-        action: "addReuse",
-        expected: expectedStep,
+        action: assertName,
+        basePdfFileName,
+        referencePdfFileName,
+        pdfComparisonPages,
+        isSoftAssert,
       })
     );
     await closeDock();
@@ -635,6 +675,7 @@ window.showFloatingAssert = (mode, el, e, type) => {
   ) {
     floatingAssertRoot.render(
       <FloatingAssertPdfCompare
+        type={type}
         onCancel={closeDock}
         onConfirm={recordPdfCompareStep}
       />

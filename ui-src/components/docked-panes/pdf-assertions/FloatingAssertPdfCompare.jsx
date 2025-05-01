@@ -3,15 +3,17 @@ import { ASSERTIONMODES } from "../../../constants/index.js";
 import ConfirmCancelFooter from "../confirm-cancel-footer/ConfirmCancelFooter.jsx";
 
 export default function FloatingAssertPdfCompare({
-  mode,
+  type,
   onConfirm,
   onCancel,
 }) {
   const basePdfInputRef = useRef(null);
   const refPdfInputRef = useRef(null);
+  const refPdfPageInputRef = useRef(null);
 
   const [basePdf, setBasePdf] = useState("");
   const [refPdf, setRefPdf] = useState("");
+  const [pageRange, setPageRange] = useState("");
   const [softAssert, setSoftAssert] = useState(false);
 
   useEffect(() => {
@@ -21,11 +23,15 @@ export default function FloatingAssertPdfCompare({
     if (refPdfInputRef.current) {
       refPdfInputRef.current.focus();
     }
+    if (refPdfPageInputRef.current) {
+      refPdfPageInputRef.current.focus();
+    }
   }, []);
 
   const closeDockReset = () => {
     setBasePdf("");
     setRefPdf("");
+    setPageRange("");
   };
 
   const handleCancel = () => {
@@ -34,7 +40,7 @@ export default function FloatingAssertPdfCompare({
   };
 
   const handleConfirm = () => {
-    onConfirm(fileName, expected);
+    onConfirm(basePdf, refPdf, pageRange, softAssert, type);
     closeDockReset();
   };
 
@@ -52,7 +58,7 @@ export default function FloatingAssertPdfCompare({
 
       <div className="pdf-text-container">
         <div className="locator-name-container">
-          <label>Base PDF Name</label>
+          <label>Base PDF Name (Required)</label>
 
           <input
             ref={basePdfInputRef}
@@ -64,7 +70,7 @@ export default function FloatingAssertPdfCompare({
           />
         </div>
         <div className="locator-name-container">
-          <label>Reference PDF Name</label>
+          <label>Reference PDF Name (Required)</label>
 
           <input
             ref={refPdfInputRef}
@@ -75,13 +81,25 @@ export default function FloatingAssertPdfCompare({
             placeholder="Enter reference PDF name.."
           />
         </div>
+        <div className="locator-name-container">
+          <label>Page Range To Compare (Optional)</label>
+
+          <input
+            ref={refPdfPageInputRef}
+            type="text"
+            className="cookie-input"
+            value={pageRange}
+            onChange={(e) => setPageRange(e.target.value)}
+            placeholder="Comma separated page numbers..."
+          />
+        </div>
       </div>
       <ConfirmCancelFooter
         softAssert={softAssert}
         setSoftAssert={setSoftAssert}
         onCancel={handleCancel}
         onConfirm={handleConfirm}
-        disabled={basePdf === "" || expected === ""}
+        disabled={basePdf === "" || refPdf === ""}
       />
     </div>
   );

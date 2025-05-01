@@ -15,6 +15,11 @@ export default function RecorderPanel() {
   const [isDrawerOpen, setDrawerOpen] = useState(false);
   const [expanded, setExpanded] = useState({
     assertions: false,
+    elementAssertions: false,
+    pdfAssertions: false,
+    dropdownAssertions: false,
+    networkAssertions: false,
+    genericAssertions: false,
     actions: false,
   });
 
@@ -207,6 +212,11 @@ export default function RecorderPanel() {
       return {
         assertions: section === "assertions",
         actions: section === "actions",
+        pdfAssertions: section === "pdfAssertions",
+        elementAssertions: section === "elementAssertions",
+        dropdownAssertions: section === "dropdownAssertions",
+        networkAssertions: section === "networkAssertions",
+        genericAssertions: section === "genericAssertions",
       };
     });
   };

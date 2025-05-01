@@ -1,4 +1,9 @@
 import React, { useState, useEffect } from "react";
+import PdfAssertionsList from "./PdfAssertionsList.jsx";
+import ElementAssertionsList from "./ElementAssertionsList.jsx";
+import DropdownAssertionsList from "./DropdownAssertionsList.jsx";
+import NetworkAssertionsList from "./NetworkAssertionsList.jsx";
+import GenericAssertionsList from "./GenericAssertionsList.jsx";
 import { ASSERTIONMODES } from "../../constants/index.js";
 
 export default function MoreOptionsDrawer({
@@ -54,57 +59,15 @@ export default function MoreOptionsDrawer({
     </li>
   );
 
-  const elementBasedAssertionItems = [
-    [ASSERTIONMODES.ATTRIBUTEVALUE, "Assert Attribute Value"],
-    [ASSERTIONMODES.NETPAYLOAD, "Assert Network Payload"],
-    [ASSERTIONMODES.NETREQUEST, "Assert Network Request URL"],
-    [ASSERTIONMODES.PRSENECE, "Assert Element Present"],
-    [ASSERTIONMODES.ENABLED, "Assert Element Enabled"],
-
-    [ASSERTIONMODES.RADIOSTATE, "Assert Radio State"],
-    [ASSERTIONMODES.CHECKBOXSTATE, "Assert Checkbox State"],
-    [ASSERTIONMODES.DROPDOWNSELECTED, "Assert Dropdown Selected"],
-    [ASSERTIONMODES.DROPDOWNCOUNTIS, "Assert Dropdown Count"],
-    [ASSERTIONMODES.DROPDOWNCONTAINS, "Assert Dropdown Contains"],
-    [ASSERTIONMODES.DROPDOWNVALUESARE, "Assert Dropdown Values"],
-    [ASSERTIONMODES.DROPDOWNINALPHABETICORDER, "Assert Dropdown Ordering"],
-    [ASSERTIONMODES.DROPDOWNDUPLICATECOUNT, "Assert Dropdown Duplicate Count"],
-  ];
-
-  const nonElementBasedAssertionItems = [
-    [ASSERTIONMODES.ASSERTCOOKIEVALUE, "Assert Cookie Value"],
-    [ASSERTIONMODES.ASSERTCURRENTURL, "Assert Current Url"],
-    [ASSERTIONMODES.ASSERTTEXTINPAGESOURCE, "Assert Text In Page Source"],
-    //
-    [ASSERTIONMODES.ASSERTTEXTINPDF, "Assert Text Present In PDF"],
-    [ASSERTIONMODES.ASSERTPDFCOMPARISON, "Assert Two PDFs Are Equal"],
-    [ASSERTIONMODES.ASSERTTEXTIMAGESINPDF, "Compare Text And Images In PDFs"],
-    [ASSERTIONMODES.ASSERTCPDPDF, "Compare Two PDFs For CPD From GCP"],
-  ];
+  const sharedProps = {
+    onToggleSection,
+    expanded,
+    getAssertDock,
+  };
 
   return (
     <div className="drawer">
       <div className="drawer-content">
-        <div className="drawer-section">
-          <div
-            className="drawer-title"
-            onClick={() => onToggleSection("assertions")}
-          >
-            Assertions {expanded.assertions ? "▲" : "▼"}
-          </div>
-          {expanded.assertions && (
-            <ul className="drawer-list">
-              {elementBasedAssertionItems.map(([mode, label]) =>
-                getAssertDock(mode, label)
-              )}
-              {/* <li className="drawer-divider" /> */}
-              {nonElementBasedAssertionItems.map(([mode, label]) =>
-                getAssertDock(mode, label, true)
-              )}
-            </ul>
-          )}
-        </div>
-
         <div className="drawer-section">
           <div
             className="drawer-title"
@@ -146,6 +109,11 @@ export default function MoreOptionsDrawer({
             </ul>
           )}
         </div>
+        <ElementAssertionsList {...sharedProps} />
+        <DropdownAssertionsList {...sharedProps} />
+        <NetworkAssertionsList {...sharedProps} />
+        <PdfAssertionsList {...sharedProps} />
+        <GenericAssertionsList {...sharedProps} />
       </div>
     </div>
   );
