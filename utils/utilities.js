@@ -1,4 +1,15 @@
 (() => {
+  const ws = new WebSocket("ws://localhost:8787");
+  let activeIFrame = null;
+  ws.addEventListener("message", (event) => {
+    try {
+      const data = JSON.parse(event.data);
+      if (data.type === "iframe-detected") {
+        activeIFrame = data.activeIFrame;
+      }
+    } catch {}
+  });
+
   const getAssociatedLabel = (el) => {
     if (!el.id) return null;
     const labelEl = document.querySelector(`label[for="${el.id}"]`);
@@ -26,131 +37,12 @@
     }
   };
 
-  // const mapData = (arg) => {
-  //   //   TEXT: "toHaveText",
-  //   // VALUE: "toHaveValue",
-  //   // ATTRIBUTEVALUE: "attrValue",
-
-  //   // ATTRIBUTEVALUEEQUALS: "isAttrValueEquals",
-  //   // ATTRIBUTEVALUECONTAINS: "isAttrValueContains",
-  //   // NOTATTRIBUTEVALUEEQUALS: "isNotAttrValueEquals",
-  //   // NOTATTRIBUTEVALUECONTAINS: "isNotAttrValueContains",
-
-  //   // CHECKBOXCHECKED: "isCheckBoxChecked",
-  //   // CHECKBOXNOTCHECKED: "isCheckBoxNotChecked",
-  //   // RADIOCHECKED: "isRadioChecked",
-  //   // RADIONOTCHECKED: "isRadioNotChecked",
-
-  //   // DROPDOWNSELECTED: "dropdownSelected",
-  //   // DROPDOWNNOTSELECTED: "dropdownNotSelected",
-  //   // DROPDOWNCOUNTIS: "dropdownCountIs",
-  //   // DROPDOWNCOUNTISNOT: "dropdownCountIsNot",
-
-  //   // DROPDOWNVALUESARE: "dropdownValuesAre",
-  //   // DROPDOWNINALPHABETICORDER: "dropdownInAlphabeticOrder",
-  //   // DROPDOWNDUPLICATECOUNT: "dropdownDuplicateCount",
-  //   // DROPDOWNCONTAINS: "dropdownContains",
-
-  //   // NETPAYLOAD: "toHaveNetPayload",
-  //   // NETREQUEST: "toHaveValue",
-  //   // VISIBILITY: "isVisible",
-  //   // ENABLED: "isEnabled",
-  //   // DISABLED: "isDisabled",
-  //   // PRSENECE: "isPresent",
-  //   // ADDCOOKIES: "addCookies",
-  //   // DELETECOOKIES: "deleteCookies",
-  //   // TAKESCREENSHOT: "takeScreenshot",
-  //   // PAGERELOAD: "pageReload",
-  //   let actionType = arg.action;
-  //   if (arg.action === "assert") {
-  //     actionType = arg.assertion;
-  //   }
-
-  //   if (actionType === window.__FUNCTIONMAPPER.NAVIGATE) {
-  //     return { step: `Given url "${arg.url}"` };
-  //   }
-
-  //   if (actionType === window.__FUNCTIONMAPPER.SWITCHTOWINDOW) {
-  //     return {
-  //       step: `And switchWindow("${
-  //         arg.attributes.url || arg.attributes.title
-  //       }")`,
-  //     };
-  //   }
-
-  //   if (actionType === window.__FUNCTIONMAPPER.CLICK) {
-  //     return {
-  //       step: `And click("${arg.url}")`,
-  //       locator: constructLocators(arg),
-  //     };
-  //   }
-  //   return arg;
-  // };
-
-  // const getLocObject = (keyName, value) => {
-  //   return {
-  //     locatorType: keyName,
-  //     locatorValue: value,
-  //   };
-  // };
-
-  // const constructLocators = (arg) => {
-  //   const arg = arg.selectors;
-  //   const attr = arg.attributes;
-  //   const tagname = arg.tagName;
-
-  //   const keys = Object.keys(arg);
-  //   const locator = [];
-
-  //   for (let key of keys) {
-  //     if (
-  //       (key === "id" ||
-  //         key === "name" ||
-  //         key === "xpath" ||
-  //         key === "css" ||
-  //         key === "className") &&
-  //       arg[key] &&
-  //       arg[key] !== null &&
-  //       arg[key] !== ""
-  //     ) {
-  //       locList.push(getLocObject(key, arg[key]));
-  //     } else if (
-  //       key === "href" &&
-  //       arg[key] &&
-  //       arg[key] !== null &&
-  //       arg[key] !== ""
-  //     ) {
-  //       locList.push(getLocObject("linkeText", arg[key]));
-  //     } else if (
-  //       arg[key] !== "" &&
-  //       key !== "iframes" &&
-  //       key !== "iframeDepth"
-  //     ) {
-  //       locList.push(
-  //         getLocObject("xpath", `//${tagname}[@${key}=${arg[key]}]`)
-  //       );
-  //     }
-  //   }
-
-  //   const result = {
-  //     [`locator_${window.__locatorIndex}`]: {
-  //       poParentObject: "__fileName",
-  //       description: "Please add a description",
-  //       locator,
-  //     },
-  //   };
-  //   window.__locatorIndex = window.__locatorIndex + 1;
-  //   return result;
-  // };
-
   const syncRecorderState = () => {
     try {
       let isPaused = window.__recorderStore.getMode() === "pause";
       window.__syncRecorderStatusOnInternalSwitchTab();
     } catch (err) {}
   };
-
-  // window.__locatorIndex = 1;
 
   const buildOptionalField = (name, value) => {
     if (value === undefined || value === null || value === "") {
@@ -178,6 +70,7 @@
     basePdfFileName,
     referencePdfFileName,
     pdfComparisonPages,
+    preComputedSelectors,
   }) => {
     let selectors = null;
     let attributes = null;
@@ -191,7 +84,7 @@
       ...buildOptionalField("locatorName", locatorName),
       ...buildOptionalField("assertion", assertion),
       ...buildOptionalField("expected", expected),
-      ...buildOptionalField("selectors", selectors),
+      ...buildOptionalField("selectors", preComputedSelectors || selectors),
       ...buildOptionalField("attributeAssertPropName", attributeAssertPropName),
       ...buildOptionalField("value", value),
       ...buildOptionalField("text", text || el?.innerText?.trim() || ""),
@@ -230,7 +123,107 @@
     return result;
   };
 
+  const getIframeLocators = (iframesAttr) => {
+    const tagName = iframesAttr.tagName || "*";
+    const selectors = { xpath: [] };
+
+    const attributes = ["id", "title", "className", "name", "src"];
+
+    for (const attr of attributes) {
+      const value = iframesAttr[attr];
+      if (value) {
+        const attrName = attr === "className" ? "class" : attr;
+        selectors.xpath.push(`.//${tagName}[@${attrName}=${value}]`);
+      }
+    }
+
+    return [
+      selectors,
+      iframesAttr["title"] || iframesAttr["name"] || iframesAttr["src"],
+    ];
+  };
+
+  const recordSwitchToDefaultFrame = async () => {
+    const data = {
+      action: "switchToDefaultFrame",
+    };
+
+    await fetch("http://localhost:3111/record", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(data),
+    });
+    console.log("✅ Step added:", data);
+  };
+
+  const recordSwitchToCurrentFrame = async (selectors) => {
+    const data = window.__buildData({
+      action: "switchFrame",
+      preComputedSelectors: selectors[0],
+      ...(selectors[1] && selectors[1] !== ""
+        ? { text: `iframe_${selectors[1]}` }
+        : {}),
+    });
+    await fetch("http://localhost:3111/record", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(data),
+    });
+    console.log("✅ Step added:", data);
+  };
+
+  const updateWsActiveIframe = (value) => {
+    if (ws.readyState === WebSocket.OPEN) {
+      ws.send(
+        JSON.stringify({
+          type: "set-active-iframe",
+          value,
+        })
+      );
+    }
+  };
+
+  const checkIframeDataInSocket = async (iframes) => {
+    const lastIframe = iframes[iframes.length - 1];
+
+    if (
+      activeIFrame &&
+      JSON.stringify(lastIframe) === JSON.stringify(activeIFrame)
+    ) {
+      return; // No change
+    }
+
+    if (activeIFrame) {
+      await recordSwitchToDefaultFrame(); // Reset before switching
+    }
+
+    for (let i = 0; i < iframes.length; i++) {
+      const iframeLocs = getIframeLocators(iframes[i]);
+      await recordSwitchToCurrentFrame(iframeLocs);
+
+      if (i === iframes.length - 1) {
+        updateWsActiveIframe(iframes[i]);
+      }
+    }
+  };
+
   window.__recordAction = async (data) => {
+    if (
+      data.selectors &&
+      data.selectors.iframes &&
+      Array.isArray(data.selectors.iframes) &&
+      data.selectors.iframes.length > 0
+    ) {
+      await checkIframeDataInSocket(data.selectors.iframes);
+    } else {
+      if (activeIFrame !== null) {
+        // SWITCH TO parent
+        await recordSwitchToDefaultFrame();
+        // DELETE SOCKET IFRAME - UPDATE SOCKET FRAME WITH NULL
+        updateWsActiveIframe(null);
+      }
+    }
+
     await fetch("http://localhost:3111/record", {
       method: "POST",
       headers: { "Content-Type": "application/json" },

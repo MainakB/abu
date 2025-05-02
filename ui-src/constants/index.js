@@ -177,6 +177,8 @@ export const FUNCTIONMAPPER = {
   PAGERELOAD: "pageReload",
   NAVIGATE: { key: "navigate", name: "url" },
   SWITCHTOWINDOW: { key: "switchToWindow", name: "switchWindow" },
+  SWITCHFRAME: { key: "switchFrame", name: "switchFrame" },
+  SWITCHTODEFAULTFRAME: { key: "switchToDefaultFrame", name: "switchFrame" },
 };
 
 export const NONDOCKASSERTIONNAMES = {

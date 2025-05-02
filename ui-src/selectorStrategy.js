@@ -153,6 +153,7 @@
       id: f.getAttribute("id") || null,
       className: f.className || null,
       title: f.getAttribute("title") || null,
+      tagName: f.tagName ? f.tagName.toLowerCase() : null,
     }));
   }
 

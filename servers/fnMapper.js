@@ -191,6 +191,26 @@ export const ACTION_HANDLERS = {
     idx,
   ],
 
+  [FUNCTIONMAPPER.SWITCHFRAME.key]: (arg, idx) => {
+    const loc = constructLocators(arg, idx);
+    return [
+      {
+        step: `And ${FUNCTIONMAPPER.SWITCHFRAME.name}("${loc.locKeyName}")`,
+        locator: loc.result,
+      },
+      idx,
+    ];
+  },
+
+  [FUNCTIONMAPPER.SWITCHTODEFAULTFRAME.key]: (arg, idx) => {
+    return [
+      {
+        step: `And ${FUNCTIONMAPPER.SWITCHTODEFAULTFRAME.name}()`,
+      },
+      idx,
+    ];
+  },
+
   [FUNCTIONMAPPER.CLICK.key]: (arg, idx) => {
     const loc = constructLocators(arg, idx);
     return [

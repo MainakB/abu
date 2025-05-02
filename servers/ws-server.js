@@ -41,7 +41,21 @@ wss.on("connection", function connection(ws) {
           }
         }
       }
+
+      if (data.type === "set-active-iframe") {
+        for (const client of clients) {
+          if (client.readyState === WebSocket.OPEN) {
+            client.send(
+              JSON.stringify({
+                type: "iframe-detected",
+                activeIFrame: data.value,
+              })
+            );
+          }
+        }
+      }
     } catch (err) {
+      console.error(err);
       console.warn("⚠️ Invalid WS message:", message);
     }
   });
