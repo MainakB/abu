@@ -34,7 +34,7 @@
     selectors.css = getCssSelector(el);
     let xpathText = generateTextBasedXpath(el);
     selectors.xpath = [generateXPath(el), ...(xpathText ? [xpathText] : [])]; // Last resort
-    const    = getIframePath(el);
+    const iFramesPath = getIframePath(el);
     selectors.iframes = iFramesPath;
     selectors.iframeDepth =
       iFramesPath && Array.isArray(iFramesPath) ? iFramesPath.length : -1;
