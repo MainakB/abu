@@ -32,9 +32,9 @@
         ? `[href="${el.getAttribute("href")}"]`
         : null;
     selectors.css = getCssSelector(el);
-    selectors.xpath = generateXPath(el); // Last resort
-
-    const iFramesPath = getIframePath(el);
+    let xpathText = generateTextBasedXpath(el);
+    selectors.xpath = [generateXPath(el), ...(xpathText ? [xpathText] : [])]; // Last resort
+    const    = getIframePath(el);
     selectors.iframes = iFramesPath;
     selectors.iframeDepth =
       iFramesPath && Array.isArray(iFramesPath) ? iFramesPath.length : -1;
@@ -75,10 +75,27 @@
     }`;
   };
 
+  const generateTextBasedXpath = (el) => {
+    let textValue = null;
+    try {
+      let elText = el.innerText?.trim() || el.textContent?.trim();
+      if (elText && elText !== "") {
+        let className = getUniqueClass(el);
+        let id = el.id;
+        if (id) {
+          textValue = `.//${el.tagName?.toLowerCase()}[@id='${id}' and text()='${elText}']`;
+        } else if (className) {
+          textValue = `.//${el.tagName?.toLowerCase()}[@class='${className}' and text()='${elText}']`;
+        } else {
+          textValue = `.//${el.tagName?.toLowerCase()}[text()='${elText}']`;
+        }
+      }
+    } catch (e) {}
+    return textValue;
+  };
+
   const getShadowRoot = (el) => {
     let rootMainNode = el.getRootNode();
-    console.log("RootNode type:", rootMainNode.toString());
-    console.log("RootNode instance of:", rootMainNode instanceof ShadowRoot);
     if (
       rootMainNode instanceof ShadowRoot ||
       rootMainNode.toString() === "[object HTMLDocument]"
@@ -91,10 +108,7 @@
       ) {
         rootMain = rootMain.host.getRootNode();
       }
-      console.log("rootMain :", rootMainNode);
     }
-
-    console.log("Top-level root:", rootMainNode);
   };
 
   function getIframePathFromTop(targetWin = window) {

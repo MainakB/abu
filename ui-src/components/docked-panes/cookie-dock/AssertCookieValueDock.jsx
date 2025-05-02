@@ -18,12 +18,10 @@ export default function AssertCookieValueDock({
       try {
         setLoading(true);
         const cookies = await getCookies();
-        console.log(cookies);
         // Handle both object and array formats
         let processedCookies;
         if (Array.isArray(cookies)) {
           processedCookies = cookies.map((cookie) => {
-            console.log("entries", Object.entries(cookie));
             const { name, value } = cookie;
             // Object.entries(cookie)[0];
             return {

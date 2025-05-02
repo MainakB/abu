@@ -3,7 +3,6 @@ import path from "path";
 import { chromium } from "playwright";
 import { fileURLToPath } from "url";
 import { dirname } from "path";
-import { execSync } from "child_process";
 import { v4 as uuidv4 } from "uuid";
 import {
   ensureChromiumInstalled,
@@ -14,8 +13,10 @@ import {
   injectScripts,
   exposeRecorderControls,
   exposeContextBindings,
+  startServers,
 } from "./utils/lib.js";
 
+startServers();
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 const globalRecorderMode = {
@@ -157,6 +158,6 @@ firstPage.on("framenavigated", async (frame) => {
   }
 });
 
-// await firstPage.goto("about:blank");
-await firstPage.goto("https://the-internet.herokuapp.com/");
+await firstPage.goto("about:blank");
+// await firstPage.goto("https://the-internet.herokuapp.com/");
 // await firstPage.goto("https://amazon.com/");

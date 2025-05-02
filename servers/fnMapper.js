@@ -1,0 +1,347 @@
+import { FUNCTIONMAPPER } from "../ui-src/constants/index.js";
+
+const getLocObject = (keyName, value) => {
+  if (Array.isArray(value)) {
+    const result = [];
+    for (const loc of value) {
+      result.push({
+        locatorType: keyName,
+        locatorValue: loc.replace(/"/g, "'"),
+      });
+    }
+    return result;
+  }
+  return {
+    locatorType: keyName,
+    locatorValue: value.replace(/"/g, "'"),
+  };
+};
+
+const wrapEnum = (str) => `__ENUM__${str}`;
+
+const getCamelCasedLocName = (input) => {
+  const cleaned = input.toLowerCase().replace(/[^a-zA-Z]+/g, " ");
+
+  // Convert to camelCase
+  const camelCase = cleaned
+    .trim()
+    .split(/\s+/)
+    .map((word, index) =>
+      index === 0
+        ? word.toLowerCase()
+        : word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
+    )
+    .join("");
+
+  return camelCase;
+};
+
+const getExportTypes = (key) => {
+  if (key === "id") {
+    return wrapEnum("Types.LocatorTypes.ID");
+  }
+
+  if (key === "name") {
+    return wrapEnum("Types.LocatorTypes.NAME");
+  }
+
+  if (key === "xpath") {
+    return wrapEnum("Types.LocatorTypes.XPATH");
+  }
+
+  if (key === "css") {
+    return wrapEnum("Types.LocatorTypes.CSS");
+  }
+
+  if (key === "cssSr") {
+    return wrapEnum("Types.LocatorTypes.CSSSR");
+  }
+
+  if (key === "deepCss") {
+    return wrapEnum("Types.LocatorTypes.DEEPCSS");
+  }
+
+  if (key === "cssContaingText") {
+    return wrapEnum("Types.LocatorTypes.CSSCONTAININGTEXT");
+  }
+
+  if (key === "linkedText") {
+    return wrapEnum("Types.LocatorTypes.LINKTEXT");
+  }
+
+  if (key === "partialLinkedText") {
+    return wrapEnum("Types.LocatorTypes.PARTIALLINKTEXT");
+  }
+
+  if (key === "buttonText") {
+    return wrapEnum("Types.LocatorTypes.BUTTONTEXT");
+  }
+
+  if (key === "partialButtonText") {
+    return wrapEnum("Types.LocatorTypes.PARTIALBUTTONTEXT");
+  }
+
+  if (key === "tagName") {
+    return wrapEnum("Types.LocatorTypes.TAGNAME");
+  }
+
+  if (key === "shadowRoot") {
+    return wrapEnum("Types.LocatorTypes.SHADOWROOT");
+  }
+};
+
+const constructLocators = (arg, locatorIndex) => {
+  const argSelectors = arg.selectors;
+  const attr = arg.attributes;
+  const tagname = arg.tagName;
+
+  const keys = Object.keys(argSelectors);
+  const locator = [];
+
+  for (let key of keys) {
+    if (
+      (key === "id" ||
+        key === "name" ||
+        key === "xpath" ||
+        key === "css" ||
+        key === "className") &&
+      argSelectors[key] &&
+      argSelectors[key] !== null &&
+      argSelectors[key] !== ""
+    ) {
+      const locs = getLocObject(getExportTypes(key), argSelectors[key]);
+      if (Array.isArray(locs)) {
+        for (const loc of locs) {
+          locator.push(loc);
+        }
+      } else {
+        locator.push(locs);
+      }
+    } else if (
+      key === "href" &&
+      argSelectors[key] &&
+      argSelectors[key] !== null &&
+      argSelectors[key] !== ""
+    ) {
+      locator.push(
+        getLocObject(getExportTypes("linkedText"), argSelectors[key])
+      );
+    } else if (
+      argSelectors[key] &&
+      argSelectors[key] !== "" &&
+      key !== "iframes" &&
+      key !== "iframeDepth"
+    ) {
+      locator.push(
+        getLocObject(
+          getExportTypes("xpath"),
+          `//${tagname}[@${key}=${argSelectors[key]}]`
+        )
+      );
+    }
+  }
+  let locKeyName = `locator_${locatorIndex}`;
+  let locNameUpdated = false;
+  if (arg.locatorName) {
+    locKeyName = arg.locatorName;
+    locNameUpdated = true;
+  } else if (
+    arg.text &&
+    typeof arg.text === "string" &&
+    arg.text.trim() !== ""
+  ) {
+    const locNameCamelCased = getCamelCasedLocName(arg.text);
+    if (
+      locNameCamelCased &&
+      typeof locNameCamelCased === "string" &&
+      locNameCamelCased.length < 34
+    ) {
+      locKeyName = `loc_${locNameCamelCased}`;
+      locNameUpdated = true;
+    }
+  }
+  let descText =
+    arg.text && typeof arg.text === "string" && arg.text.trim() !== ""
+      ? ` for ${arg.text}`
+      : "";
+
+  const result = {
+    [locKeyName]: {
+      poParentObject: "__fileName",
+      description: `${arg.tagName} tag${descText}`,
+      locator,
+    },
+  };
+  let newIdx = locatorIndex + (locNameUpdated ? 0 : 1);
+  return { result, newIdx, locKeyName };
+};
+
+export const ACTION_HANDLERS = {
+  [FUNCTIONMAPPER.NAVIGATE.key]: (arg, idx) => [
+    { step: `Given ${FUNCTIONMAPPER.NAVIGATE.name} "${arg.url}"` },
+    idx,
+  ],
+
+  [FUNCTIONMAPPER.SWITCHTOWINDOW.key]: (arg, idx) => [
+    {
+      step: `And ${FUNCTIONMAPPER.SWITCHTOWINDOW.name}("${
+        arg.attributes.url || arg.attributes.title
+      }")`,
+    },
+    idx,
+  ],
+
+  [FUNCTIONMAPPER.CLICK.key]: (arg, idx) => {
+    const loc = constructLocators(arg, idx);
+    return [
+      {
+        step: `And ${FUNCTIONMAPPER.CLICK.name}({po:"${loc.locKeyName}"})`,
+        locator: loc.result,
+      },
+      loc.newIdx,
+    ];
+  },
+
+  [FUNCTIONMAPPER.INPUT.key]: (arg, idx) => {
+    const loc = constructLocators(arg, idx);
+    return [
+      {
+        step: `And ${FUNCTIONMAPPER.INPUT.name}({po:"${loc.locKeyName}", txt:"${arg.value}"})`,
+        locator: loc.result,
+      },
+      loc.newIdx,
+    ];
+  },
+
+  [FUNCTIONMAPPER.TEXT.key]: (arg, idx) => {
+    const loc = constructLocators(arg, idx);
+    const soft = arg.isSoftAssert ? ", isSoftAssert: true" : "";
+    return [
+      {
+        step: `And ${FUNCTIONMAPPER.TEXT.name}({po:"${loc.locKeyName}", et:"${arg.expected}"${soft}})`,
+        locator: loc.result,
+      },
+      loc.newIdx,
+    ];
+  },
+
+  [FUNCTIONMAPPER.VISIBILITY.key]: (arg, idx) => {
+    const loc = constructLocators(arg, idx);
+    const soft = arg.isSoftAssert ? ", isSoftAssert: true" : "";
+    return [
+      {
+        step: `And ${FUNCTIONMAPPER.VISIBILITY.name}({po:"${loc.locKeyName}"${soft}})`,
+        locator: loc.result,
+      },
+      loc.newIdx,
+    ];
+  },
+
+  [FUNCTIONMAPPER.INVISIBILITY.key]: (arg, idx) => {
+    const loc = constructLocators(arg, idx);
+    const soft = arg.isSoftAssert ? ", isSoftAssert: true" : "";
+    return [
+      {
+        step: `And ${FUNCTIONMAPPER.INVISIBILITY.name}({po:"${loc.locKeyName}"${soft}})`,
+        locator: loc.result,
+      },
+      loc.newIdx,
+    ];
+  },
+
+  [FUNCTIONMAPPER.ATTRIBUTEVALUEEQUALS.key]: (arg, idx) => {
+    const loc = constructLocators(arg, idx);
+    const soft = arg.isSoftAssert ? ", isSoftAssert: true" : "";
+    return [
+      {
+        step: `And ${FUNCTIONMAPPER.ATTRIBUTEVALUEEQUALS.name}({po:"${loc.locKeyName}, atr: "${arg.attributeAssertPropName}", ea: "${arg.expected}"${soft}})`,
+        locator: loc.result,
+      },
+      loc.newIdx,
+    ];
+  },
+
+  [FUNCTIONMAPPER.NOTATTRIBUTEVALUEEQUALS.key]: (arg, idx) => {
+    const loc = constructLocators(arg, idx);
+    const soft = arg.isSoftAssert ? ", isSoftAssert: true" : "";
+    return [
+      {
+        step: `And ${FUNCTIONMAPPER.NOTATTRIBUTEVALUEEQUALS.name}({po:"${loc.locKeyName}, atr: "${arg.attributeAssertPropName}", ea: "${arg.expected}"${soft}})`,
+        locator: loc.result,
+      },
+      loc.newIdx,
+    ];
+  },
+
+  [FUNCTIONMAPPER.ATTRIBUTEVALUECONTAINS.key]: (arg, idx) => {
+    const loc = constructLocators(arg, idx);
+    const soft = arg.isSoftAssert ? ", isSoftAssert: true" : "";
+    return [
+      {
+        step: `And ${FUNCTIONMAPPER.ATTRIBUTEVALUECONTAINS.name}({po:"${loc.locKeyName}, atr: "${arg.attributeAssertPropName}", ea: "${arg.expected}"${soft}})`,
+        locator: loc.result,
+      },
+      loc.newIdx,
+    ];
+  },
+
+  [FUNCTIONMAPPER.NOTATTRIBUTEVALUECONTAINS.key]: (arg, idx) => {
+    const loc = constructLocators(arg, idx);
+    const soft = arg.isSoftAssert ? ", isSoftAssert: true" : "";
+    return [
+      {
+        step: `And ${FUNCTIONMAPPER.NOTATTRIBUTEVALUECONTAINS.name}({po:"${loc.locKeyName}, atr: "${arg.attributeAssertPropName}", ea: "${arg.expected}"${soft}})`,
+        locator: loc.result,
+      },
+      loc.newIdx,
+    ];
+  },
+
+  [FUNCTIONMAPPER.DROPDOWNSELECTED.key]: (arg, idx) => {
+    const loc = constructLocators(arg, idx);
+    const soft = arg.isSoftAssert ? ", isSoftAssert: true" : "";
+    return [
+      {
+        step: `And ${FUNCTIONMAPPER.DROPDOWNSELECTED.name}({po:"${loc.locKeyName}, et: "${arg.expected}"${soft}})`,
+        locator: loc.result,
+      },
+      loc.newIdx,
+    ];
+  },
+
+  [FUNCTIONMAPPER.DROPDOWNCOUNTIS.key]: (arg, idx) => {
+    const loc = constructLocators(arg, idx);
+    const soft = arg.isSoftAssert ? ", isSoftAssert: true" : "";
+    return [
+      {
+        step: `And ${FUNCTIONMAPPER.DROPDOWNCOUNTIS.name}({po:"${loc.locKeyName}, ect: "${arg.expected}"${soft}})`,
+        locator: loc.result,
+      },
+      loc.newIdx,
+    ];
+  },
+
+  [FUNCTIONMAPPER.DROPDOWNINALPHABETICORDER.key]: (arg, idx) => {
+    const loc = constructLocators(arg, idx);
+    const soft = arg.isSoftAssert ? ", isSoftAssert: true" : "";
+    return [
+      {
+        step: `And ${FUNCTIONMAPPER.DROPDOWNINALPHABETICORDER.name}({po:"${loc.locKeyName}, sortOrder: "${arg.expected}"${soft}})`,
+        locator: loc.result,
+      },
+      loc.newIdx,
+    ];
+  },
+
+  [FUNCTIONMAPPER.DROPDOWNCONTAINS.key]: (arg, idx) => {
+    const loc = constructLocators(arg, idx);
+    const soft = arg.isSoftAssert ? ", isSoftAssert: true" : "";
+    return [
+      {
+        step: `And ${FUNCTIONMAPPER.DROPDOWNCONTAINS.name}({po:"${loc.locKeyName}, txt: "${arg.expected}"${soft}})`,
+        locator: loc.result,
+      },
+      loc.newIdx,
+    ];
+  },
+};

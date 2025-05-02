@@ -13,7 +13,9 @@
     "record-only": "node recorder.js",
     "start-servers": "concurrently -n server,ws -c green,blue \"npm run start-server\" \"npm run start-ws\"",
     "record": "concurrently -n server,recorder -c green,blue \"npm run start-server\" \"npm run record-only\"",
-    "record-all": "npm run build-ui && concurrently -n server,ws,recorder -c green,blue,magenta \"npm run start-server\" \"npm run start-ws\" \"npm run record-only\""
+    "record-all": "npm run build-ui && concurrently -n server,ws,recorder -c green,blue,magenta \"npm run start-server\" \"npm run start-ws\" \"npm run record-only\"",
+    "record-after-wait": "wait-on tcp:3111 tcp:8787 && npm run record-only",
+    "recorder-start": "npm run build-ui && concurrently -n server,ws,record -c green,blue,magenta \"npm run start-server\" \"npm run start-ws\" \"npm run record-after-wait\""
   },
   "dependencies": {
     "concurrently": "^9.1.2",
@@ -23,6 +25,7 @@
     "react-dom": "^18.2.0",
     "react-transition-group": "^4.4.5",
     "uuid": "^11.1.0",
+    "wait-on": "^8.0.3",
     "ws": "^8.18.1"
   },
   "devDependencies": {

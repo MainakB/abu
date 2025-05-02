@@ -26,12 +26,10 @@ app.post("/record", (req, res) => {
   console.log("📩 Received action:", req.body);
   liveActions.push(req.body);
   const data = mapData(req.body, locIndex);
-  locIndex = data[1];
-  console.log("data is ", data);
+  locIndex = data[1] === locIndex ? locIndex : data[1];
   // writeLiveToFile(req.body.step, "steps.json");
   writeLiveToFile(data[0].step, "steps.feature");
   if (data[0].locator) {
-    console.log(" data[0].locator--", data[0].locator);
     const locKey = Object.keys(data[0].locator)[0];
     writeLocatorObject(
       locKey,

@@ -166,7 +166,7 @@ export default function RecorderPanel() {
     await window.__recorderStore.setMode(newMode);
     const evt = new MouseEvent("mousemove", { bubbles: true });
     document.dispatchEvent(evt);
-    await window.showFloatingAssert(newMode, undefined, undefined, newMode);
+    await window.top.showFloatingAssert(newMode, undefined, undefined, newMode);
     setDrawerOpen(false);
   };
 

@@ -116,8 +116,7 @@
         const el = hoverTarget;
         if (!el || typeof window.__getSelectors !== "function") return;
         window.__maybeRecordTabSwitch?.(`assert-click`);
-
-        window.showFloatingAssert(mode, el, e, mode);
+        window.top.showFloatingAssert(mode, el, e, mode);
 
         assertBox.style.display = "none";
         hoverTarget = null;

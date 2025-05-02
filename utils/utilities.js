@@ -250,10 +250,6 @@
 
     if (isPaused) return;
     const thisTabId = sessionStorage.getItem("tabId");
-    console.log(
-      ' sessionStorage.getItem("tabId"): ',
-      sessionStorage.getItem("tabId")
-    );
     const shouldSwich =
       window.__recorderStore.maybeUpdateActiveTabId(thisTabId);
     if (!shouldSwich) return;

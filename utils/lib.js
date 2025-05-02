@@ -1,10 +1,28 @@
 import fs from "fs";
 import path from "path";
-
+import { spawn, execSync } from "child_process";
 import { fileURLToPath } from "url";
 import { dirname } from "path";
-import { execSync } from "child_process";
 import { v4 as uuidv4 } from "uuid";
+
+let apiServer = null;
+let wsServer = null;
+
+export const startServers = () => {
+  apiServer = spawn("node", ["servers/api-server.js"], {
+    stdio: "inherit",
+  });
+  wsServer = spawn("node", ["servers/ws-server.js"], {
+    stdio: "inherit",
+  });
+};
+
+const stopServers = () => {
+  console.log("🛑 Shutting down servers...");
+  apiServer.kill();
+  wsServer.kill();
+  process.exit(0);
+};
 
 export const ensureChromiumInstalled = (chromium) => {
   const executablePath = chromium.executablePath();
@@ -198,6 +216,7 @@ export const exposeRecorderControls = async (
     console.log(`✅ ${steps.length} steps saved to ${filePath}`);
 
     await browser.close();
+    stopServers();
     process.exit(0);
   });
 

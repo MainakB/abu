@@ -46,7 +46,7 @@ export default function FloatingAssertPdfCompare({
 
   return (
     <div
-      id="floating-assert-dock-root"
+      id="floating-assert-dock-root-container"
       onClick={(e) => e.stopPropagation()}
       onMouseDown={(e) => e.stopPropagation()}
     >

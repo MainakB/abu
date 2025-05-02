@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { ASSERTIONMODES } from "../../../constants/index.js";
 import ConfirmCancelFooter from "../confirm-cancel-footer/ConfirmCancelFooter.jsx";
 
@@ -26,7 +26,7 @@ export default function FloatingAssertDock({ el, mode, onConfirm, onCancel }) {
       return el?.value || el?.getAttribute("value") || "";
     return "";
   });
-
+  // const [expected, setExpected] = useState("");
   const [softAssert, setSoftAssert] = useState(false);
   const [locatorName, setLocatorName] = useState("");
   const [isNegative, setIsNegative] = useState(false);
@@ -44,7 +44,7 @@ export default function FloatingAssertDock({ el, mode, onConfirm, onCancel }) {
 
   return (
     <div
-      id="floating-assert-dock-root"
+      id="floating-assert-dock-root-container"
       onClick={(e) => e.stopPropagation()}
       onMouseDown={(e) => e.stopPropagation()}
     >
@@ -53,7 +53,6 @@ export default function FloatingAssertDock({ el, mode, onConfirm, onCancel }) {
           <strong>
             Assert that element
             {mode === ASSERTIONMODES.TEXT ? " text" : " value"} equals
-            {/* {mode === "text" ? "text equals " : "value equals "} */}
           </strong>
         </div>
       </div>

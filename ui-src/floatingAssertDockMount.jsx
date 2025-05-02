@@ -49,35 +49,15 @@ window.showFloatingAssert = (mode, el, e, type) => {
 
   // // Top-level only from here
   const doc = document;
-  console.log("Insert showFloatingAssert");
-  // let rootEl = doc.getElementById("floating-assert-dock-root");
 
-  // // 💡 If stale root exists, remove and recreate it
-  // if (floatingAssertRoot && !rootEl) {
-  //   floatingAssertRoot = null; // stale ref, kill it
-  // }
-
-  // if (!rootEl) {
-  //   rootEl = doc.createElement("div");
-  //   rootEl.id = "floating-assert-dock-root";
-  //   doc.documentElement.appendChild(rootEl);
-  // }
-
-  // // ✅ Re-create React root if needed
-  // if (!floatingAssertRoot) {
-  //   floatingAssertRoot = ReactDOM.createRoot(rootEl);
-  // }
   ensureFloatingRoot(doc);
 
+  if (!floatingAssertRoot || !floatingAssertRoot._internalRoot) {
+    console.error("⚠️ React root is not initialized correctly");
+  }
+
   let textValue = "";
-  if (
-    el
-    // !(
-    //   type === ASSERTIONMODES.ADDCOOKIES ||
-    //   type === ASSERTIONMODES.DELETECOOKIES ||
-    //   type === ASSERTIONMODES.DELETECOOKIES
-    // )
-  ) {
+  if (el) {
     textValue = el.innerText?.trim() || "";
   }
 
@@ -525,160 +505,164 @@ window.showFloatingAssert = (mode, el, e, type) => {
     await closeDock();
   };
 
-  if (
-    type === ASSERTIONMODES.TEXT ||
-    type === ASSERTIONMODES.VALUE ||
-    type === ASSERTIONMODES.ASSERTTEXTINPAGESOURCE
-  ) {
-    floatingAssertRoot.render(
-      <FloatingAssertDock
-        mode={mode}
-        el={el}
-        onCancel={closeDock}
-        onConfirm={floatingAssertDockOnConfirm}
-      />
-    );
-  } else if (type === ASSERTIONMODES.ASSERTCURRENTURL) {
-    floatingAssertRoot.render(
-      <CurrentUrlAssertDock
-        mode={mode}
-        onCancel={closeDock}
-        onConfirm={floatingAssertCurrentUrlConfirm}
-      />
-    );
-  } else if (type === ASSERTIONMODES.ATTRIBUTEVALUE) {
-    floatingAssertRoot.render(
-      <AssertAttributeValueDock
-        getAttributes={getElementAttributes}
-        mode={mode}
-        el={el}
-        onCancel={closeDock}
-        onConfirm={recordAttributesAssert}
-      />
-    );
-  } else if (type === ASSERTIONMODES.ASSERTCOOKIEVALUE) {
-    floatingAssertRoot.render(
-      <AssertCookieValueDock
-        getCookies={getCookies}
-        mode={mode}
-        onCancel={closeDock}
-        onConfirm={recordCookiesAssert}
-      />
-    );
-  } else if (
-    type === ASSERTIONMODES.CHECKBOXSTATE ||
-    type === ASSERTIONMODES.RADIOSTATE
-  ) {
-    floatingAssertRoot.render(
-      <AssertCheckedStateDock
-        getAttributes={getElementAttributes}
-        mode={mode}
-        el={el}
-        onCancel={closeDock}
-        onConfirm={recordCheckboxRadioAssert}
-        label={type === ASSERTIONMODES.CHECKBOXSTATE ? "Checkbox" : "Radio"}
-      />
-    );
-  } else if (
-    type === ASSERTIONMODES.VISIBILITY ||
-    type === ASSERTIONMODES.ENABLED ||
-    type === ASSERTIONMODES.PRSENECE
-  ) {
-    floatingAssertRoot.render(
-      <FloatingAssertDockNonText
-        mode={mode}
-        el={el}
-        onCancel={closeDock}
-        onConfirm={floatingAssertDockNonTextConfirm}
-      />
-    );
-  } else if (type === ASSERTIONMODES.ADDCOOKIES) {
-    floatingAssertRoot.render(
-      <FloatingCookieListDock
-        onCancel={closeDock}
-        onConfirm={floatingCookieListDockConfirm}
-      />
-    );
-  } else if (type === ASSERTIONMODES.DELETECOOKIES) {
-    floatingAssertRoot.render(
-      <FloatingDeleteCookieDock
-        onCancel={closeDock}
-        onConfirm={floatingDeleteCookieDockConfirm}
-      />
-    );
-  } else if (
-    type === ASSERTIONMODES.DROPDOWNCONTAINS ||
-    type === ASSERTIONMODES.DROPDOWNCOUNTIS ||
-    type === ASSERTIONMODES.DROPDOWNCOUNTISNOT ||
-    // type === ASSERTIONMODES.DROPDOWNINALPHABETICORDER ||
-    type === ASSERTIONMODES.DROPDOWNNOTSELECTED ||
-    type === ASSERTIONMODES.DROPDOWNSELECTED ||
-    type === ASSERTIONMODES.DROPDOWNVALUESARE ||
-    type === ASSERTIONMODES.DROPDOWNDUPLICATECOUNT ||
-    type === ASSERTIONMODES.DROPDOWNDUPLICATECOUNT
-  ) {
-    if (el && el.tagName && el.tagName.toLowerCase().includes("select")) {
+  try {
+    if (
+      type === ASSERTIONMODES.TEXT ||
+      type === ASSERTIONMODES.VALUE ||
+      type === ASSERTIONMODES.ASSERTTEXTINPAGESOURCE
+    ) {
       floatingAssertRoot.render(
-        <FloatingDropdownAssertDock
+        <FloatingAssertDock
           mode={mode}
           el={el}
           onCancel={closeDock}
-          onConfirm={recordDropdownAssert}
+          onConfirm={floatingAssertDockOnConfirm}
         />
       );
-    } else {
+    } else if (type === ASSERTIONMODES.ASSERTCURRENTURL) {
       floatingAssertRoot.render(
-        <FloatingAssertDockNotSupported
+        <CurrentUrlAssertDock
+          mode={mode}
+          onCancel={closeDock}
+          onConfirm={floatingAssertCurrentUrlConfirm}
+        />
+      );
+    } else if (type === ASSERTIONMODES.ATTRIBUTEVALUE) {
+      floatingAssertRoot.render(
+        <AssertAttributeValueDock
+          getAttributes={getElementAttributes}
           mode={mode}
           el={el}
           onCancel={closeDock}
+          onConfirm={recordAttributesAssert}
+        />
+      );
+    } else if (type === ASSERTIONMODES.ASSERTCOOKIEVALUE) {
+      floatingAssertRoot.render(
+        <AssertCookieValueDock
+          getCookies={getCookies}
+          mode={mode}
+          onCancel={closeDock}
+          onConfirm={recordCookiesAssert}
+        />
+      );
+    } else if (
+      type === ASSERTIONMODES.CHECKBOXSTATE ||
+      type === ASSERTIONMODES.RADIOSTATE
+    ) {
+      floatingAssertRoot.render(
+        <AssertCheckedStateDock
+          getAttributes={getElementAttributes}
+          mode={mode}
+          el={el}
+          onCancel={closeDock}
+          onConfirm={recordCheckboxRadioAssert}
+          label={type === ASSERTIONMODES.CHECKBOXSTATE ? "Checkbox" : "Radio"}
+        />
+      );
+    } else if (
+      type === ASSERTIONMODES.VISIBILITY ||
+      type === ASSERTIONMODES.ENABLED ||
+      type === ASSERTIONMODES.PRSENECE
+    ) {
+      floatingAssertRoot.render(
+        <FloatingAssertDockNonText
+          mode={mode}
+          el={el}
+          onCancel={closeDock}
+          onConfirm={floatingAssertDockNonTextConfirm}
+        />
+      );
+    } else if (type === ASSERTIONMODES.ADDCOOKIES) {
+      floatingAssertRoot.render(
+        <FloatingCookieListDock
+          onCancel={closeDock}
+          onConfirm={floatingCookieListDockConfirm}
+        />
+      );
+    } else if (type === ASSERTIONMODES.DELETECOOKIES) {
+      floatingAssertRoot.render(
+        <FloatingDeleteCookieDock
+          onCancel={closeDock}
+          onConfirm={floatingDeleteCookieDockConfirm}
+        />
+      );
+    } else if (
+      type === ASSERTIONMODES.DROPDOWNCONTAINS ||
+      type === ASSERTIONMODES.DROPDOWNCOUNTIS ||
+      type === ASSERTIONMODES.DROPDOWNCOUNTISNOT ||
+      // type === ASSERTIONMODES.DROPDOWNINALPHABETICORDER ||
+      type === ASSERTIONMODES.DROPDOWNNOTSELECTED ||
+      type === ASSERTIONMODES.DROPDOWNSELECTED ||
+      type === ASSERTIONMODES.DROPDOWNVALUESARE ||
+      type === ASSERTIONMODES.DROPDOWNDUPLICATECOUNT ||
+      type === ASSERTIONMODES.DROPDOWNDUPLICATECOUNT
+    ) {
+      if (el && el.tagName && el.tagName.toLowerCase().includes("select")) {
+        floatingAssertRoot.render(
+          <FloatingDropdownAssertDock
+            mode={mode}
+            el={el}
+            onCancel={closeDock}
+            onConfirm={recordDropdownAssert}
+          />
+        );
+      } else {
+        floatingAssertRoot.render(
+          <FloatingAssertDockNotSupported
+            mode={mode}
+            el={el}
+            onCancel={closeDock}
+          />
+        );
+      }
+    } else if (type === ASSERTIONMODES.DROPDOWNINALPHABETICORDER) {
+      if (el && el.tagName && el.tagName.toLowerCase().includes("select")) {
+        floatingAssertRoot.render(
+          <FloatingDropdownOrderAssertDock
+            el={el}
+            onCancel={closeDock}
+            onConfirm={recordDropdownOrderAssert}
+          />
+        );
+      } else {
+        floatingAssertRoot.render(
+          <FloatingAssertDockNotSupported
+            mode={mode}
+            el={el}
+            onCancel={closeDock}
+          />
+        );
+      }
+    } else if (type === ASSERTIONMODES.ADDREUSESTEP) {
+      floatingAssertRoot.render(
+        <AddReuseTextBoxDock
+          onCancel={closeDock}
+          onConfirm={recordAddReuseStep}
+          // onConfirm={(fileName, params) => recordAddReuseStep(fileName, params)}
+        />
+      );
+    } else if (type === ASSERTIONMODES.ASSERTTEXTINPDF) {
+      floatingAssertRoot.render(
+        <FloatingAssertTextInPdf
+          onCancel={closeDock}
+          onConfirm={recordTextInPdfStep}
+        />
+      );
+    } else if (
+      type === ASSERTIONMODES.ASSERTPDFCOMPARISON ||
+      type === ASSERTIONMODES.ASSERTTEXTIMAGESINPDF ||
+      type === ASSERTIONMODES.ASSERTCPDPDF
+    ) {
+      floatingAssertRoot.render(
+        <FloatingAssertPdfCompare
+          type={type}
+          onCancel={closeDock}
+          onConfirm={recordPdfCompareStep}
         />
       );
     }
-  } else if (type === ASSERTIONMODES.DROPDOWNINALPHABETICORDER) {
-    if (el && el.tagName && el.tagName.toLowerCase().includes("select")) {
-      floatingAssertRoot.render(
-        <FloatingDropdownOrderAssertDock
-          el={el}
-          onCancel={closeDock}
-          onConfirm={recordDropdownOrderAssert}
-        />
-      );
-    } else {
-      floatingAssertRoot.render(
-        <FloatingAssertDockNotSupported
-          mode={mode}
-          el={el}
-          onCancel={closeDock}
-        />
-      );
-    }
-  } else if (type === ASSERTIONMODES.ADDREUSESTEP) {
-    floatingAssertRoot.render(
-      <AddReuseTextBoxDock
-        onCancel={closeDock}
-        onConfirm={recordAddReuseStep}
-        // onConfirm={(fileName, params) => recordAddReuseStep(fileName, params)}
-      />
-    );
-  } else if (type === ASSERTIONMODES.ASSERTTEXTINPDF) {
-    floatingAssertRoot.render(
-      <FloatingAssertTextInPdf
-        onCancel={closeDock}
-        onConfirm={recordTextInPdfStep}
-      />
-    );
-  } else if (
-    type === ASSERTIONMODES.ASSERTPDFCOMPARISON ||
-    type === ASSERTIONMODES.ASSERTTEXTIMAGESINPDF ||
-    type === ASSERTIONMODES.ASSERTCPDPDF
-  ) {
-    floatingAssertRoot.render(
-      <FloatingAssertPdfCompare
-        type={type}
-        onCancel={closeDock}
-        onConfirm={recordPdfCompareStep}
-      />
-    );
+  } catch (err) {
+    console.error("❌ React render failed:", err);
   }
 };
