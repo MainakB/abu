@@ -113,6 +113,18 @@ export const FUNCTIONMAPPER = {
     key: "assertCurentUrlEquals",
     name: "assertCurentUrlEquals",
   },
+  ASSERTCURRENTURLNOTEQUALS: {
+    key: "assertCurentUrlNotEquals",
+    name: "assertCurentUrlNotEquals",
+  },
+  ASSERTCURRENTURLCONTAINS: {
+    key: "assertCurentUrlContains",
+    name: "assertCurentUrlContains",
+  },
+  ASSERTCURRENTURLNOTCONTAINS: {
+    key: "assertCurentUrlNotContains",
+    name: "assertCurentUrlNotContains",
+  },
   CLICK: { key: "click", name: "click" },
   INPUT: { key: "input", name: "input" },
   TEXT: { key: "toHaveText", name: "elementTextEquals" },

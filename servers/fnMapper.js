@@ -178,7 +178,10 @@ const constructLocators = (arg, locatorIndex) => {
 
 export const ACTION_HANDLERS = {
   [FUNCTIONMAPPER.NAVIGATE.key]: (arg, idx) => [
-    { step: `Given ${FUNCTIONMAPPER.NAVIGATE.name} "${arg.url}"` },
+    {
+      step: `Given ${FUNCTIONMAPPER.NAVIGATE.name} "${arg.url}"`,
+      aiStep: `Given navigate to "${arg.url}"`,
+    },
     idx,
   ],
 
@@ -187,6 +190,9 @@ export const ACTION_HANDLERS = {
       step: `And ${FUNCTIONMAPPER.SWITCHTOWINDOW.name}("${
         arg.attributes.url || arg.attributes.title
       }")`,
+      aiStep: `And switch to window with ${
+        arg.attributes.url ? "url" : "title"
+      } "${arg.attributes.url || arg.attributes.title}"`,
     },
     idx,
   ],
@@ -216,6 +222,7 @@ export const ACTION_HANDLERS = {
     return [
       {
         step: `And ${FUNCTIONMAPPER.CLICK.name}({po:"${loc.locKeyName}"})`,
+        aiStep: arg.text ? `And click on "${arg.text}"` : null,
         locator: loc.result,
       },
       loc.newIdx,
@@ -362,6 +369,44 @@ export const ACTION_HANDLERS = {
         locator: loc.result,
       },
       loc.newIdx,
+    ];
+  },
+
+  //
+  [FUNCTIONMAPPER.ASSERTCURRENTURLEQUALS.key]: (arg, idx) => {
+    const soft = arg.isSoftAssert ? ", isSoftAssert: true" : "";
+    return [
+      {
+        step: `And ${FUNCTIONMAPPER.ASSERTCURRENTURLEQUALS.name}({et:"${arg.expected}"${soft}})`,
+      },
+      idx,
+    ];
+  },
+  [FUNCTIONMAPPER.ASSERTCURRENTURLNOTEQUALS.key]: (arg, idx) => {
+    const soft = arg.isSoftAssert ? ", isSoftAssert: true" : "";
+    return [
+      {
+        step: `And ${FUNCTIONMAPPER.ASSERTCURRENTURLNOTEQUALS.name}({et:"${arg.expected}"${soft}})`,
+      },
+      idx,
+    ];
+  },
+  [FUNCTIONMAPPER.ASSERTCURRENTURLCONTAINS.key]: (arg, idx) => {
+    const soft = arg.isSoftAssert ? ", isSoftAssert: true" : "";
+    return [
+      {
+        step: `And ${FUNCTIONMAPPER.ASSERTCURRENTURLCONTAINS.name}({et:"${arg.expected}"${soft}})`,
+      },
+      idx,
+    ];
+  },
+  [FUNCTIONMAPPER.ASSERTCURRENTURLNOTCONTAINS.key]: (arg, idx) => {
+    const soft = arg.isSoftAssert ? ", isSoftAssert: true" : "";
+    return [
+      {
+        step: `And ${FUNCTIONMAPPER.ASSERTCURRENTURLNOTCONTAINS.name}({et:"${arg.expected}"${soft}})`,
+      },
+      idx,
     ];
   },
 };

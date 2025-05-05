@@ -37,7 +37,7 @@ export default function FloatingAssertDockNonText({
   };
 
   const handleConfirm = () => {
-    onConfirm(softAssert, isNegative, locatorName, mode);
+    onConfirm(softAssert, isNegative, locatorName);
     setSoftAssert(false);
   };
 

@@ -82,6 +82,35 @@ window.showFloatingAssert = (mode, el, e, type) => {
         negative: ASSERTIONNAMES.VALUECONTAINS,
       },
     },
+    [ASSERTIONMODES.PRSENECE]: {
+      exact: {
+        positive: ASSERTIONNAMES.PRSENECE,
+        negative: ASSERTIONNAMES.NOTPRESENT,
+      },
+    },
+    [ASSERTIONMODES.ENABLED]: {
+      exact: {
+        positive: ASSERTIONNAMES.ENABLED,
+        negative: ASSERTIONNAMES.DISABLED,
+      },
+    },
+    [ASSERTIONMODES.VISIBILITY]: {
+      exact: {
+        positive: ASSERTIONNAMES.VISIBILITY,
+        negative: ASSERTIONNAMES.INVISIBILITY,
+      },
+    },
+
+    [ASSERTIONMODES.ASSERTCURRENTURL]: {
+      exact: {
+        positive: ASSERTIONNAMES.ASSERTCURRENTURLEQUALS,
+        negative: ASSERTIONNAMES.ASSERTCURRENTURLNOTEQUALS,
+      },
+      contains: {
+        positive: ASSERTIONNAMES.ASSERTCURRENTURLCONTAINS,
+        negative: ASSERTIONNAMES.ASSERTCURRENTURLNOTCONTAINS,
+      },
+    },
     [ASSERTIONMODES.ASSERTTEXTINPAGESOURCE]: {
       exact: {
         positive: ASSERTIONNAMES.ASSERTTEXTINPAGESOURCE,
@@ -350,17 +379,21 @@ window.showFloatingAssert = (mode, el, e, type) => {
     isNegative,
     exactMatch
   ) => {
-    let assertionName =
-      ASSERTIONNAMES[
-        !exactMatch ? "ASSERTCURRENTURLCONTAINS" : "ASSERTCURRENTURLEQUALS"
-      ];
-    if (isNegative) {
-      if (!exactMatch) {
-        assertionName = ASSERTIONNAMES.ASSERTCURRENTURLNOTCONTAINS;
-      } else {
-        assertionName = ASSERTIONNAMES.ASSERTCURRENTURLNOTEQUALS;
-      }
-    }
+    // let assertionName =
+    //   ASSERTIONNAMES[
+    //     !exactMatch ? "ASSERTCURRENTURLCONTAINS" : "ASSERTCURRENTURLEQUALS"
+    //   ];
+    // if (isNegative) {
+    //   if (!exactMatch) {
+    //     assertionName = ASSERTIONNAMES.ASSERTCURRENTURLNOTCONTAINS;
+    //   } else {
+    //     assertionName = ASSERTIONNAMES.ASSERTCURRENTURLNOTEQUALS;
+    //   }
+    // }
+    const assertionMapping = ASSERTION_NAME_LOOKUP[mode];
+    const category = exactMatch ? "exact" : "contains";
+    const polarity = isNegative ? "negative" : "positive";
+    const assertionName = assertionMapping[category][polarity];
 
     window.__recordAction(
       window.__buildData({
@@ -378,23 +411,17 @@ window.showFloatingAssert = (mode, el, e, type) => {
     isNegative,
     locatorName
   ) => {
-    let modeVal = mode;
-    if (isNegative) {
-      if (mode === ASSERTIONMODES.PRSENECE) {
-        modeVal = ASSERTIONNAMES.NOTPRESENT;
-      } else if (mode === ASSERTIONMODES.ENABLED) {
-        modeVal = ASSERTIONNAMES.DISABLED;
-      } else if (mode === ASSERTIONMODES.VISIBILITY) {
-        modeVal = ASSERTIONNAMES.INVISIBILITY;
-      }
-    }
+    const assertionMapping = ASSERTION_NAME_LOOKUP[mode];
+    const category = "exact";
+    const polarity = isNegative ? "negative" : "positive";
+    const assertName = assertionMapping[category][polarity];
 
     window.__recordAction(
       window.__buildData({
         action: "assert",
         locatorName,
         isSoftAssert,
-        assertion: modeVal,
+        assertion: assertName,
         el,
         e,
         text: textValue,

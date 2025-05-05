@@ -29,6 +29,9 @@ app.post("/record", (req, res) => {
   locIndex = data[1] === locIndex ? locIndex : data[1];
   // writeLiveToFile(req.body.step, "steps.json");
   writeLiveToFile(data[0].step, "steps.feature");
+  if (data[0].aiStep) {
+    writeLiveToFile(data[0].aiStep, "aiSteps.feature", true);
+  }
   if (data[0].locator) {
     const locKey = Object.keys(data[0].locator)[0];
     writeLocatorObject(
@@ -54,7 +57,7 @@ app.listen(PORT, () => {
   console.log(`🟢 Recorder Store Server running at http://localhost:${PORT}`);
 });
 
-const writeLiveToFile = (action, fileName) => {
+const writeLiveToFile = (action, fileName, ai) => {
   const basePath = process.cwd();
   const recordingsDir = path.join(basePath, "recordings");
   const filePath = path.join(recordingsDir, fileName);
