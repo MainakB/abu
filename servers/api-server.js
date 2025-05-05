@@ -10,7 +10,6 @@ let liveActions = [];
 const liveSteps = [];
 let locIndex = 1;
 let currentActiveTabId = null;
-
 const EXPORT_VAR_NAME = "abc";
 const IMPORT_LINE = `import {Types} from '../index';`;
 
@@ -57,15 +56,31 @@ app.listen(PORT, () => {
   console.log(`🟢 Recorder Store Server running at http://localhost:${PORT}`);
 });
 
+const getFilePath = (FILE_NAME, isLocatorFile) => {
+  const recordingsDir = path.join(
+    process.cwd(),
+    "src",
+    "recordings",
+    isLocatorFile ? "locators" : "features"
+  );
+  // return path.join(process.cwd(), "recordings", FILE_NAME);
+  const filePath = path.join(recordingsDir, FILE_NAME);
+  const dir = path.dirname(filePath);
+  if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+  return filePath;
+};
+
 const writeLiveToFile = (action, fileName, ai) => {
-  const basePath = process.cwd();
-  const recordingsDir = path.join(basePath, "recordings");
-  const filePath = path.join(recordingsDir, fileName);
+  // const basePath = process.cwd();
+  // const recordingsDir = path.join(basePath, "recordings");
+  // const filePath = path.join(recordingsDir, fileName);
   let output = "";
   // Ensure the directory exists
-  if (!fs.existsSync(recordingsDir)) {
-    fs.mkdirSync(recordingsDir, { recursive: true });
-  }
+  // if (!fs.existsSync(recordingsDir)) {
+  //   fs.mkdirSync(recordingsDir, { recursive: true });
+  // }
+
+  const filePath = getFilePath(fileName, false);
 
   let existing = "";
   if (fs.existsSync(filePath)) {
@@ -83,64 +98,10 @@ const writeLiveToFile = (action, fileName, ai) => {
   fs.writeFileSync(filePath, output + updated);
 };
 
-const getFilePath = (FILE_NAME) =>
-  path.join(process.cwd(), "recordings", FILE_NAME);
-
-// const writeLocatorObject = (locatorId, locatorBlock, fileName) => {
-//   const filePath = getFilePath(fileName);
-
-//   // Step 1: Ensure directory exists
-//   const dir = path.dirname(filePath);
-//   if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
-
-//   let locators = {};
-//   let existing = "";
-
-//   if (fs.existsSync(filePath)) {
-//     existing = fs.readFileSync(filePath, "utf-8");
-
-//     // Step 2: Extract the existing JSON object using regex
-//     const match = existing.match(/export const \w+: [\w.]+ = ({[\s\S]*});?/);
-
-//     if (match) {
-//       try {
-//         locators = eval(
-//           `(${match[1]
-//             .replace(/__fileName/g, '"__fileName"')
-//             .replace(
-//               /Types\.LocatorTypes\.(\w+)/g,
-//               "__ENUM__Types.LocatorTypes.$1"
-//             )})`
-//         );
-//       } catch (err) {
-//         console.error("⚠️ Failed to parse existing locator object:", err);
-//       }
-//     }
-//   }
-
-//   // Step 3: Add or update the locator
-//   locators[locatorId] = locatorBlock;
-
-//   // Stringify and unquote "__fileName"
-//   let objectStr = JSON.stringify(locators, null, 2);
-//   objectStr = objectStr
-//     .replace(/"__fileName"/g, "__fileName")
-//     .replace(/"__ENUM__(Types\.[\w.]+)"/g, "$1");
-
-//   // Step 4: Rebuild the .ts content
-//   const output = `${IMPORT_LINE}
-
-// export const ${EXPORT_VAR_NAME}: Types.ILocatorMetadataObject = ${objectStr};
-// `;
-
-//   fs.writeFileSync(filePath, output);
-//   console.log(`✅ Locator "${locatorId}" written to ${fileName}`);
-// };
-
 const writeLocatorObject = (locatorId, locatorBlock, fileName) => {
-  const filePath = getFilePath(fileName);
-  const dir = path.dirname(filePath);
-  if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+  const filePath = getFilePath(fileName, true);
+  // const dir = path.dirname(filePath);
+  // if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
 
   let locators = {};
   let existing = "";

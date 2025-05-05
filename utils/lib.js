@@ -207,13 +207,26 @@ export const exposeRecorderControls = async (
       ...steps.filter((a) => a.action !== "navigate"),
     ];
 
-    const filePath = path.join(
-      dirName,
+    const recordingsDir = path.join(
+      process.cwd(),
+      "src",
       "recordings",
-      `test-${Date.now()}.json`
+      "jsonMetadata"
     );
+    const filePath = path.join(recordingsDir, `test-${Date.now()}.json`);
+    const dir = path.dirname(filePath);
+    if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+    //   return filePath;
+
+    // const filePath = path.join(
+    //   dirName,
+    //   "recordings",
+    //   `test-${Date.now()}.json`
+    // );
     await fs.promises.writeFile(filePath, JSON.stringify(sorted, null, 2));
-    console.log(`✅ ${steps.length} steps saved to ${filePath}`);
+    console.log(
+      `✅ ${steps.length} steps saved to ${filePath}. Run recorded test with the coomand "npx abc --customer=recordings --tags=@recordedTest --platform=dev"`
+    );
 
     await browser.close();
     stopServers();
