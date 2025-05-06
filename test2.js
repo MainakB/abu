@@ -10,8 +10,10 @@ const sentence =
   // `Go to "https://amazon.com" three times`;
   // 'Enter "john" in "login" field';
   // 'Assert that title equals "abc"';
-  'Enter "abc" in the fifth input field 3 times';
-//   'Type "abc" in the add to cart field';
+  //   'Enter "abc" in the fifth input field 3 times';
+  //   'Type "abc" in the add to cart field';
+  //   "Clear the third input field";
+  'Go to to "amazon.com"';
 
 const [classifier, slotExtractor] = await Promise.all([
   pipeline("zero-shot-classification", "Xenova/mobilebert-uncased-mnli"),
@@ -25,6 +27,8 @@ const candidateIntents = [
   "input",
   "enter",
   "type",
+  "clear",
+  "empty",
   "navigate",
   "go to",
   "validate",
@@ -173,214 +177,6 @@ for (const ent of nerResult) {
   }
 }
 
-// async function extractFieldName(sentence, intent) {
-//   // Define compound UI element identifiers (multi-word ones first)
-//   const compoundFieldIdentifiers = [
-//     "input field",
-//     "input box",
-//     "text field",
-//     "text box",
-//     "text area",
-//     "text input",
-//     "form field",
-//     "entry field",
-//     "textarea",
-//     "search box",
-//   ];
-
-//   // Define single-word UI element identifiers
-//   const singleFieldIdentifiers = [
-//     "field",
-//     "box",
-//     "input",
-//     "textarea",
-//     "entry",
-//     "textbox",
-//     "form",
-//   ];
-
-//   // Combined list for comprehensive matching
-//   const allFieldIdentifiers = [
-//     ...compoundFieldIdentifiers,
-//     ...singleFieldIdentifiers,
-//   ];
-
-//   // Button identifiers
-//   const buttonIdentifiers = [
-//     "button",
-//     "link",
-//     "tab",
-//     "icon",
-//     "menu",
-//     "option",
-//     "dropdown",
-//     "select",
-//   ];
-
-//   // Position-related words to exclude
-//   const positionWords = [
-//     "first",
-//     "second",
-//     "third",
-//     "fourth",
-//     "fifth",
-//     "sixth",
-//     "seventh",
-//     "eighth",
-//     "ninth",
-//     "tenth",
-//     "1st",
-//     "2nd",
-//     "3rd",
-//     "4th",
-//     "5th",
-//   ];
-
-//   // Command verbs to exclude
-//   const commandVerbs = [
-//     "click",
-//     "tap",
-//     "press",
-//     "select",
-//     "choose",
-//     "enter",
-//     "input",
-//     "type",
-//   ];
-
-//   // Extract quoted texts from the sentence
-//   const quotedTexts = [];
-//   let match;
-//   const quoteRegex = /"([^"]+)"|'([^']+)'/g;
-
-//   while ((match = quoteRegex.exec(sentence)) !== null) {
-//     const quoted = match[1] || match[2];
-//     if (quoted) {
-//       quotedTexts.push(quoted);
-//     }
-//   }
-
-//   // For input/enter intents
-//   if (intent === "input" || intent === "enter" || intent === "type") {
-//     const sentenceLower = sentence.toLowerCase();
-
-//     // Try compound identifiers first (to avoid partial matches)
-//     for (const identifier of compoundFieldIdentifiers) {
-//       const pattern = new RegExp(
-//         `in\\s+(?:the\\s+)?([\\w\\s]+?)\\s+${identifier}\\b`,
-//         "i"
-//       );
-//       const match = sentenceLower.match(pattern);
-
-//       if (match && match[1]) {
-//         // Found a match with a compound identifier
-//         return match[1].trim();
-//       }
-//     }
-
-//     // Then try single-word identifiers
-//     for (const identifier of singleFieldIdentifiers) {
-//       const pattern = new RegExp(
-//         `in\\s+(?:the\\s+)?([\\w\\s]+?)\\s+${identifier}\\b`,
-//         "i"
-//       );
-//       const match = sentenceLower.match(pattern);
-
-//       if (match && match[1]) {
-//         // Found a match with a single-word identifier
-//         const fieldName = match[1].trim();
-
-//         // Check if the extracted name ends with a word that's part of compound identifiers
-//         // e.g., "add to cart input" where "input" is part of "input field"
-//         const fieldNameWords = fieldName.split(/\s+/);
-//         if (fieldNameWords.length > 1) {
-//           const lastWord = fieldNameWords[fieldNameWords.length - 1];
-
-//           // Check if the last word is a potential identifier
-//           if (singleFieldIdentifiers.includes(lastWord)) {
-//             // Remove the last word as it's likely part of the identifier
-//             return fieldNameWords.slice(0, -1).join(" ");
-//           }
-//         }
-
-//         return fieldName;
-//       }
-//     }
-//   }
-
-//   // For click/tap intents, handle button patterns
-//   if (intent === "click" || intent === "tap") {
-//     // Look for a pattern like: [position word] [field] [button identifier]
-//     // This direct matching approach is best for examples like "Click third add button hundred times"
-//     const words = sentence.toLowerCase().split(/\s+/);
-//     for (let i = 0; i < words.length - 1; i++) {
-//       if (
-//         positionWords.includes(words[i]) &&
-//         i + 2 < words.length &&
-//         buttonIdentifiers.includes(words[i + 2])
-//       ) {
-//         // We found a pattern like "third add button"
-//         return words[i + 1];
-//       }
-//     }
-
-//     // Check for general button patterns
-//     for (const identifier of buttonIdentifiers) {
-//       const buttonPattern = new RegExp(
-//         `\\b([\\w\\s]+?)\\s+${identifier}\\b`,
-//         "i"
-//       );
-//       const buttonMatch = sentence.match(buttonPattern);
-
-//       if (buttonMatch && buttonMatch[1]) {
-//         let buttonName = buttonMatch[1].trim();
-//         let words = buttonName.toLowerCase().split(/\s+/);
-
-//         // Filter out command verbs if they're at the beginning
-//         if (words.length > 0 && commandVerbs.includes(words[0])) {
-//           words = words.slice(1);
-//         }
-
-//         // Check if the button name starts with a position word
-//         if (words.length > 0 && positionWords.includes(words[0])) {
-//           // Remove the position word
-//           words = words.slice(1);
-//         }
-
-//         if (words.length > 0) {
-//           return words.join(" ");
-//         }
-//       }
-//     }
-//   }
-
-//   // If we've reached here and have quoted text, use it as a fallback
-//   if (quotedTexts.length > 0) {
-//     // If we have multiple quoted strings, try to guess which one is the field name
-//     if (quotedTexts.length >= 2 && (intent === "input" || intent === "enter")) {
-//       // Assume the second quoted string might be the field name in input scenarios
-//       return quotedTexts[1];
-//     }
-//     return quotedTexts[0];
-//   }
-
-//   const entities = await slotExtractor(sentence, {
-//     aggregation_strategy: "simple",
-//   });
-
-//   // Extract potential entities
-//   const entityCandidates = entities
-//     .filter((entity) => ["ORG", "MISC", "LOC"].includes(entity.entity_group))
-//     .sort((a, b) => b.score - a.score);
-
-//   if (entityCandidates.length > 0) {
-//     return entityCandidates[0].word;
-//   }
-
-//   // No field name found
-//   return null;
-// }
-
 async function extractFieldName(sentence, intent) {
   // Define compound UI element identifiers (multi-word ones first)
   const compoundFieldIdentifiers = [
@@ -454,6 +250,8 @@ async function extractFieldName(sentence, intent) {
     "enter",
     "input",
     "type",
+    "clear",
+    "empty",
   ];
 
   // Extract quoted texts from the sentence
@@ -544,6 +342,23 @@ async function extractFieldName(sentence, intent) {
         }
 
         return fieldName;
+      }
+    }
+  }
+
+  if (intent === "clear" || intent === "empty") {
+    const sentenceLower = sentence.toLowerCase();
+
+    // Handle pattern like "Clear the [fieldname] [identifier]"
+    for (const identifier of allFieldIdentifiers) {
+      const clearPattern = new RegExp(
+        `(?:clear|empty)\\s+(?:the\\s+)?([\\w\\s]+?)\\s+${identifier}\\b`,
+        "i"
+      );
+      const match = sentenceLower.match(clearPattern);
+
+      if (match && match[1]) {
+        return match[1].trim();
       }
     }
   }
