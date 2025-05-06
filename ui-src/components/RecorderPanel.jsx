@@ -162,6 +162,8 @@ export default function RecorderPanel() {
 
   const toggleModeLaunchDock = async (nextMode) => {
     const isSame = mode === nextMode;
+    console.log("mode: ", mode);
+    console.log("nextMode: ", nextMode);
     const newMode = isSame ? "record" : nextMode;
     await window.__recorderStore.setMode(newMode);
     const evt = new MouseEvent("mousemove", { bubbles: true });

@@ -379,17 +379,6 @@ window.showFloatingAssert = (mode, el, e, type) => {
     isNegative,
     exactMatch
   ) => {
-    // let assertionName =
-    //   ASSERTIONNAMES[
-    //     !exactMatch ? "ASSERTCURRENTURLCONTAINS" : "ASSERTCURRENTURLEQUALS"
-    //   ];
-    // if (isNegative) {
-    //   if (!exactMatch) {
-    //     assertionName = ASSERTIONNAMES.ASSERTCURRENTURLNOTCONTAINS;
-    //   } else {
-    //     assertionName = ASSERTIONNAMES.ASSERTCURRENTURLNOTEQUALS;
-    //   }
-    // }
     const assertionMapping = ASSERTION_NAME_LOOKUP[mode];
     const category = exactMatch ? "exact" : "contains";
     const polarity = isNegative ? "negative" : "positive";
