@@ -171,7 +171,7 @@ window.showFloatingAssert = (mode, el, e, type) => {
       floatingAssertRoot = null;
     }
     doc.getElementById("floating-assert-dock-root")?.remove();
-    await window.__recorderStore.setMode("record");
+    await window.__recorderStore.setMode("record", false);
   };
 
   const getElementAttributes = async (el) => {

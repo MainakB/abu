@@ -146,26 +146,28 @@ export default function RecorderPanel() {
     window.__stopRecording();
   };
 
-  const getClassNameForAssert = (savedMode, selecetMode) => {
+  const getClassNameForAssert = (savedMode, selectedMode) => {
     return `recorder-button${
-      savedMode === selecetMode ? " active blinking" : ""
+      savedMode === selectedMode
+        ? " active blinking"
+        : window.__isPaused()
+        ? " disabled"
+        : ""
     }`;
   };
 
   const toggleMode = async (nextMode) => {
     const isSame = mode === nextMode;
     const newMode = isSame ? "record" : nextMode;
-    await window.__recorderStore.setMode(newMode);
+    await window.__recorderStore.setMode(newMode, false);
     const evt = new MouseEvent("mousemove", { bubbles: true });
     document.dispatchEvent(evt);
   };
 
   const toggleModeLaunchDock = async (nextMode) => {
     const isSame = mode === nextMode;
-    console.log("mode: ", mode);
-    console.log("nextMode: ", nextMode);
     const newMode = isSame ? "record" : nextMode;
-    await window.__recorderStore.setMode(newMode);
+    await window.__recorderStore.setMode(newMode, false);
     const evt = new MouseEvent("mousemove", { bubbles: true });
     document.dispatchEvent(evt);
     await window.top.showFloatingAssert(newMode, undefined, undefined, newMode);
@@ -175,7 +177,7 @@ export default function RecorderPanel() {
   const toggleModeOnMonoStep = async (nextMode, value) => {
     const isSame = mode === nextMode;
     const newMode = isSame ? "record" : nextMode;
-    await window.__recorderStore.setMode(newMode);
+    await window.__recorderStore.setMode(newMode, false);
     const evt = new MouseEvent("mousemove", { bubbles: true });
     document.dispatchEvent(evt);
     if (newMode === ASSERTIONMODES.TAKESCREENSHOT) {
@@ -185,7 +187,7 @@ export default function RecorderPanel() {
             action: "takeScreenshot",
           })
         ),
-        window.__recorderStore.setMode("record"),
+        window.__recorderStore.setMode("record", false),
       ]);
     } else if (newMode === ASSERTIONMODES.PAGERELOAD) {
       await Promise.all([
@@ -194,7 +196,7 @@ export default function RecorderPanel() {
             action: "pageReload",
           })
         ),
-        window.__recorderStore.setMode("record"),
+        window.__recorderStore.setMode("record", false),
       ]);
       await window.__pageReload();
     }
@@ -231,7 +233,7 @@ export default function RecorderPanel() {
         <div className="recorder-drag-handle" title="Drag toolbar">
           ⠿
         </div>
-        <button onClick={async () => await toggleRecording()}>
+        <button onClick={toggleRecording}>
           {mode === "pause" ? "▶️" : "⏸"}
           {/* {mode !== "pause" ? "⏸" : "▶️"} */}
         </button>
@@ -250,6 +252,7 @@ export default function RecorderPanel() {
           title="Assert visibility"
           className={getClassNameForAssert(mode, ASSERTIONMODES.VISIBILITY)}
           onClick={async () => await toggleMode(ASSERTIONMODES.VISIBILITY)}
+          disabled={window.__isPaused()}
         >
           {tickMap.visibility ? "✅" : "👁️"}
         </button>
@@ -257,6 +260,7 @@ export default function RecorderPanel() {
           title="Assert text"
           className={getClassNameForAssert(mode, ASSERTIONMODES.TEXT)}
           onClick={async () => await toggleMode(ASSERTIONMODES.TEXT)}
+          disabled={window.__isPaused()}
         >
           {tickMap.text ? "✅" : "🆎"}
         </button>
@@ -264,11 +268,16 @@ export default function RecorderPanel() {
           title="Assert value"
           className={getClassNameForAssert(mode, "value")}
           onClick={async () => await toggleMode("value")}
+          disabled={window.__isPaused()}
         >
           {tickMap.value ? "✅" : "📝"}
         </button>
 
-        <button title="More assertions" onClick={toggleDrawer}>
+        <button
+          title="More assertions"
+          onClick={toggleDrawer}
+          disabled={window.__isPaused()}
+        >
           ⋮
         </button>
         {isDrawerOpen && (

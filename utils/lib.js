@@ -70,13 +70,16 @@ export const updateInitialRecorderState = async (
   globalRecorderMode,
   initialPage = false
 ) => {
+  console.log("globalRecorderMode: ", globalRecorderMode, initialPage);
   const recorderState = initialPage
     ? globalRecorderMode.value
     : globalRecorderMode.value === "pause"
     ? "record"
     : "pause";
+  console.log("recorderState: ", recorderState);
   globalRecorderMode.value = recorderState;
   await page.evaluate((value) => {
+    console.log("setting recorderMode value: ", value);
     localStorage.setItem("recorderMode", value);
   }, globalRecorderMode.value);
 };
@@ -184,6 +187,7 @@ export const exposeRecorderControls = async (
         ? "▶️ Resumed recording"
         : "⏸️ Paused recording"
     );
+    console.log("Returning: ", globalRecorderMode.value);
     return globalRecorderMode.value;
   });
 

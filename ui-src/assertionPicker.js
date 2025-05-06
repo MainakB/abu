@@ -125,7 +125,7 @@
         // as this will be done from docked pane on confirm/cancel
         // if (!["text", "value"].includes(mode)) {
         if (!Object.values(nonDockAsserts).includes(mode)) {
-          window.__recorderStore.setMode("record");
+          window.__recorderStore.setMode("record", false);
         }
       },
       true

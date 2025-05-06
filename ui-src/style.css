@@ -120,6 +120,37 @@
   color: var(--recorder-text-color);
 }
 
+
+button:disabled,
+button.disabled {
+  /* background-color: #ddd !important; */
+  /* Gray background */
+  color: #888 !important;
+  /* Dimmed text/icon */
+  /* border: 1px solid #bbb !important; */
+  /* Subtle border */
+  cursor: default !important;
+  /* Normal cursor */
+  pointer-events: none !important;
+  /* Prevent interaction */
+  opacity: 0.6 !important;
+  /* Optional: makes it visually disabled */
+  box-shadow: none !important;
+  transform: none !important;
+}
+
+button:disabled:hover,
+button.disabled:hover,
+button:disabled:active,
+button.disabled:active,
+button:disabled:focus,
+button.disabled:focus {
+  background-color: #ddd !important;
+  color: #888 !important;
+  box-shadow: none !important;
+  transform: none !important;
+}
+
 .recorder-panel {
   font-size: 14px;
   font-weight: 400;
