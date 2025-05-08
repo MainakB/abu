@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { ASSERTIONMODES } from "../../../constants/index.js";
 import ConfirmCancelFooter from "../confirm-cancel-footer/ConfirmCancelFooter.jsx";
+import { useModeSocket } from "../../../hooks/useModeSocket.js";
 
 export default function FloatingAssertPdfCompare({
   type,
@@ -16,6 +17,7 @@ export default function FloatingAssertPdfCompare({
   const [pageRange, setPageRange] = useState("");
   const [softAssert, setSoftAssert] = useState(false);
 
+  useModeSocket(onCancel);
   useEffect(() => {
     if (basePdfInputRef.current) {
       basePdfInputRef.current.focus();

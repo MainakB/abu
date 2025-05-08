@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useMemo } from "react";
 import ConfirmCancelFooter from "../confirm-cancel-footer/ConfirmCancelFooter.jsx";
+import { useModeSocket } from "../../../hooks/useModeSocket.js";
 
 export default function FloatingDropdownOrderAssertDock({
   el,
@@ -10,6 +11,8 @@ export default function FloatingDropdownOrderAssertDock({
   const [isChecked, setIsChecked] = useState(true);
   const [softAssert, setSoftAssert] = useState(false);
   const [locatorName, setLocatorName] = useState("");
+
+  useModeSocket(onCancel);
 
   useEffect(() => {
     if (el && typeof el.checked === "boolean") {

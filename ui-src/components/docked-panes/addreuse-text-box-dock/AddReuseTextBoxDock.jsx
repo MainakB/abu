@@ -1,12 +1,13 @@
 import React, { useState, useEffect, useRef } from "react";
 import { ASSERTIONMODES } from "../../../constants/index.js";
-
 import ConfirmCancelFooter from "../confirm-cancel-footer/ConfirmCancelFooter.jsx";
+import { useModeSocket } from "../../../hooks/useModeSocket.js";
 
 export default function AddReuseTextBoxDock({ onConfirm, onCancel }) {
   const inputRef = useRef(null);
   const textBoxRef = useRef(null);
 
+  useModeSocket(onCancel);
   useEffect(() => {
     if (inputRef.current) {
       inputRef.current.focus();

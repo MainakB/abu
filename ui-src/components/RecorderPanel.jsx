@@ -21,6 +21,19 @@ export default function RecorderPanel() {
     networkAssertions: false,
     genericAssertions: false,
     actions: false,
+    varAssignments: false,
+  });
+
+  const socket = new WebSocket("ws://localhost:8787");
+
+  socket.addEventListener("message", (event) => {
+    try {
+      const data = JSON.parse(event.data);
+      console.log("Event received: ", data);
+      if (data.type === "mode") {
+        setMode(data.mode);
+      }
+    } catch {}
   });
 
   const previousMode = useRef(window.__recorderStore.getMode());
@@ -122,6 +135,7 @@ export default function RecorderPanel() {
         !drawer.contains(e.target)
       ) {
         setDrawerOpen(false);
+        resetExpanded();
       }
     };
 
@@ -136,9 +150,25 @@ export default function RecorderPanel() {
     document.dispatchEvent(evt);
   };
 
+  const resetExpanded = () => {
+    setExpanded({
+      assertions: false,
+      elementAssertions: false,
+      pdfAssertions: false,
+      dropdownAssertions: false,
+      networkAssertions: false,
+      genericAssertions: false,
+      actions: false,
+      varAssignments: false,
+    });
+  };
+
   const toggleRecording = async () => {
     const recorderState = await window.__toggleRecording();
+    console.log("Setting mode in toggle: ", recorderState);
     await window.__recorderStore.setMode(recorderState, false);
+    setDrawerOpen(false);
+    resetExpanded();
     dispatchEvent();
   };
 
@@ -162,6 +192,8 @@ export default function RecorderPanel() {
     await window.__recorderStore.setMode(newMode, false);
     const evt = new MouseEvent("mousemove", { bubbles: true });
     document.dispatchEvent(evt);
+    // setDrawerOpen(false);
+    // resetExpanded();
   };
 
   const toggleModeLaunchDock = async (nextMode) => {
@@ -171,7 +203,8 @@ export default function RecorderPanel() {
     const evt = new MouseEvent("mousemove", { bubbles: true });
     document.dispatchEvent(evt);
     await window.top.showFloatingAssert(newMode, undefined, undefined, newMode);
-    setDrawerOpen(false);
+    // setDrawerOpen(false);
+    // resetExpanded();
   };
 
   const toggleModeOnMonoStep = async (nextMode, value) => {
@@ -202,6 +235,7 @@ export default function RecorderPanel() {
     }
 
     setDrawerOpen(false);
+    resetExpanded();
   };
 
   const toggleDrawer = () => setDrawerOpen(!isDrawerOpen);
@@ -221,6 +255,7 @@ export default function RecorderPanel() {
         dropdownAssertions: section === "dropdownAssertions",
         networkAssertions: section === "networkAssertions",
         genericAssertions: section === "genericAssertions",
+        varAssignments: section === "varAssignments",
       };
     });
   };
@@ -235,7 +270,6 @@ export default function RecorderPanel() {
         </div>
         <button onClick={toggleRecording}>
           {mode === "pause" ? "▶️" : "⏸"}
-          {/* {mode !== "pause" ? "⏸" : "▶️"} */}
         </button>
         <button onClick={stop} title="Stop Recording">
           ❌

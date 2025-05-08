@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { ASSERTIONMODES } from "../../../constants/index.js";
-
 import ConfirmCancelFooter from "../confirm-cancel-footer/ConfirmCancelFooter.jsx";
+import { useModeSocket } from "../../../hooks/useModeSocket.js";
 
 function getOwnText(el) {
   return [...el.childNodes]
@@ -26,6 +26,8 @@ export default function FloatingAssertDockNonText({
   const [softAssert, setSoftAssert] = useState(false);
   const [isNegative, setIsNegative] = useState(false);
   const [locatorName, setLocatorName] = useState("");
+
+  useModeSocket(onCancel);
 
   useEffect(() => {
     if (!el) return;

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import ConfirmCancelFooter from "../confirm-cancel-footer/ConfirmCancelFooter.jsx";
+import { useModeSocket } from "../../../hooks/useModeSocket.js";
 
 export default function AssertAttributeValueDock({
   getAttributes,
@@ -15,6 +16,7 @@ export default function AssertAttributeValueDock({
   const [softAssert, setSoftAssert] = useState(false);
   const [locatorName, setLocatorName] = useState("");
 
+  useModeSocket(onCancel);
   useEffect(() => {
     const fetchAttributes = async () => {
       try {

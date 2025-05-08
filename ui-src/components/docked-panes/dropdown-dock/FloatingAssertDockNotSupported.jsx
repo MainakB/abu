@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { ASSERTIONMODES, ASSERTIONNAMES } from "../../../constants/index.js";
+import { useModeSocket } from "../../../hooks/useModeSocket.js";
 
 function getHeader(modeValue) {
   if (modeValue === ASSERTIONMODES.DROPDOWNCONTAINS) {
@@ -31,7 +32,7 @@ function getHeader(modeValue) {
 
 export default function FloatingAssertDockNotSupported({ el, mode, onCancel }) {
   const [header, setHeader] = useState(() => getHeader(mode));
-
+  useModeSocket(onCancel);
   return (
     <div
       id="floating-assert-dock-root-container"

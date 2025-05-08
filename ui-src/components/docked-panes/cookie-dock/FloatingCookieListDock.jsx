@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import { TransitionGroup, CSSTransition } from "react-transition-group";
 import ConfirmCancelFooter from "../confirm-cancel-footer/ConfirmCancelFooter.jsx";
+import { useModeSocket } from "../../../hooks/useModeSocket.js";
 
 const defaultCookie = () => ({
   name: "",
@@ -17,7 +18,7 @@ export default function FloatingCookieListDock({ onConfirm, onCancel }) {
   const inputRefs = useRef([]);
   const [cookies, setCookies] = useState([defaultCookie()]);
   const [touched, setTouched] = useState([{ name: false, value: false }]);
-
+  useModeSocket(onCancel);
   useEffect(() => {
     if (inputRefs.current.length) {
       const lastInput = inputRefs.current[inputRefs.current.length - 1];

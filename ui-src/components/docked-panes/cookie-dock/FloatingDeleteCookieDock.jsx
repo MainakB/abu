@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import { TransitionGroup, CSSTransition } from "react-transition-group";
 import ConfirmCancelFooter from "../confirm-cancel-footer/ConfirmCancelFooter.jsx";
+import { useModeSocket } from "../../../hooks/useModeSocket.js";
 
 export default function FloatingDeleteCookieDock({ onConfirm, onCancel }) {
   const inputRefs = useRef([]);
@@ -8,7 +9,7 @@ export default function FloatingDeleteCookieDock({ onConfirm, onCancel }) {
   const [names, setNames] = useState([""]);
   const [touched, setTouched] = useState([false]);
   const [deleteAll, setDeleteAll] = useState(false);
-
+  useModeSocket(onCancel);
   useEffect(() => {
     if (!deleteAll && inputRefs.current.length) {
       const lastInput = inputRefs.current[inputRefs.current.length - 1];

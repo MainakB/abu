@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { ASSERTIONMODES } from "../../../constants/index.js";
 import ConfirmCancelFooter from "../confirm-cancel-footer/ConfirmCancelFooter.jsx";
+import { useModeSocket } from "../../../hooks/useModeSocket.js";
 
 async function getCurrentUrl() {
   try {
@@ -21,6 +22,8 @@ export default function CurrentUrlAssertDock({
   const [isNegative, setIsNegative] = useState(false);
   const [softAssert, setSoftAssert] = useState(false);
   const [exactMatch, setExactMatch] = useState(true);
+
+  useModeSocket(onCancel);
 
   useEffect(() => {
     async function fetchUrl() {

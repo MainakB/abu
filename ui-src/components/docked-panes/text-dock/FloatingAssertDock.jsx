@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { ASSERTIONMODES } from "../../../constants/index.js";
 import ConfirmCancelFooter from "../confirm-cancel-footer/ConfirmCancelFooter.jsx";
+import { useModeSocket } from "../../../hooks/useModeSocket.js";
 
 function getOwnText(el) {
   try {
@@ -20,6 +21,7 @@ function getOwnText(el) {
 }
 
 export default function FloatingAssertDock({ el, mode, onConfirm, onCancel }) {
+  useModeSocket(onCancel);
   const [expected, setExpected] = useState(() => {
     if (mode === ASSERTIONMODES.TEXT) return getOwnText(el);
     if (mode === ASSERTIONMODES.VALUE)

@@ -4,6 +4,7 @@ import ElementAssertionsList from "./ElementAssertionsList.jsx";
 import DropdownAssertionsList from "./DropdownAssertionsList.jsx";
 import NetworkAssertionsList from "./NetworkAssertionsList.jsx";
 import GenericAssertionsList from "./GenericAssertionsList.jsx";
+import VariableAssignmentList from "./VariableAssignmentList.jsx";
 import { ASSERTIONMODES } from "../../constants/index.js";
 
 export default function MoreOptionsDrawer({
@@ -45,6 +46,7 @@ export default function MoreOptionsDrawer({
 
   const getAssertDock = (modeVal, label, useLaunch = false) => (
     <li
+      key={label}
       role="button"
       tabIndex={0}
       onKeyDown={(e) => e.key === "Enter" && handler()}
@@ -73,7 +75,7 @@ export default function MoreOptionsDrawer({
             className="drawer-title"
             onClick={() => onToggleSection("actions")}
           >
-            Actions {expanded.actions ? "▲" : "▼"}
+            Actions {expanded.actions ? "▲" : "►"}
           </div>
           {expanded.actions && (
             <ul className="drawer-list">
@@ -109,6 +111,7 @@ export default function MoreOptionsDrawer({
             </ul>
           )}
         </div>
+        <VariableAssignmentList {...sharedProps} />
         <ElementAssertionsList {...sharedProps} />
         <DropdownAssertionsList {...sharedProps} />
         <NetworkAssertionsList {...sharedProps} />

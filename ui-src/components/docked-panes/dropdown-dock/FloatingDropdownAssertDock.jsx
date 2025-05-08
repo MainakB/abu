@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { ASSERTIONMODES, ASSERTIONNAMES } from "../../../constants/index.js";
 import ConfirmCancelFooter from "../confirm-cancel-footer/ConfirmCancelFooter.jsx";
+import { useModeSocket } from "../../../hooks/useModeSocket.js";
 
 function getDropdownCount(el) {
   try {
@@ -154,6 +155,8 @@ export default function FloatingDropdownAssertDock({
   const [softAssert, setSoftAssert] = useState(false);
   const [locatorName, setLocatorName] = useState("");
   const [isNegative, setIsNegative] = useState(false);
+
+  useModeSocket(onCancel);
 
   const handleConfirm = () => {
     onConfirm(expected, softAssert, isNegative, assertName, mode, locatorName);

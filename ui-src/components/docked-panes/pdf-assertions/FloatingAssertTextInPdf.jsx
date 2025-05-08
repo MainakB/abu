@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { ASSERTIONMODES } from "../../../constants/index.js";
 import ConfirmCancelFooter from "../confirm-cancel-footer/ConfirmCancelFooter.jsx";
+import { useModeSocket } from "../../../hooks/useModeSocket.js";
 
 export default function FloatingAssertTextInPdf({ onConfirm, onCancel }) {
   const inputRef = useRef(null);
@@ -10,6 +11,7 @@ export default function FloatingAssertTextInPdf({ onConfirm, onCancel }) {
   const [expected, setExpected] = useState("");
   const [softAssert, setSoftAssert] = useState(false);
 
+  useModeSocket(onCancel);
   useEffect(() => {
     if (inputRef.current) {
       inputRef.current.focus();

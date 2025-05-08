@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import ConfirmCancelFooter from "../confirm-cancel-footer/ConfirmCancelFooter.jsx";
+import { useModeSocket } from "../../../hooks/useModeSocket.js";
 
 export default function AssertCookieValueDock({
   getCookies,
@@ -13,6 +14,7 @@ export default function AssertCookieValueDock({
   const [error, setError] = useState(null);
   const [softAssert, setSoftAssert] = useState(false);
 
+  useModeSocket(onCancel);
   useEffect(() => {
     const fetchCookies = async () => {
       try {

@@ -171,7 +171,11 @@ window.showFloatingAssert = (mode, el, e, type) => {
       floatingAssertRoot = null;
     }
     doc.getElementById("floating-assert-dock-root")?.remove();
-    await window.__recorderStore.setMode("record", false);
+    const currentMode = window.__recorderStore.getMode?.();
+    if (currentMode !== "pause") {
+      await window.__recorderStore.setMode("record", false);
+    }
+    // await window.__recorderStore.setMode("record", false);
   };
 
   const getElementAttributes = async (el) => {
