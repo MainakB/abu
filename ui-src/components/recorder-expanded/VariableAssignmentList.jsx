@@ -18,10 +18,9 @@ export default function VariableAssignmentList({
     [ASSERTIONMODES.ISCHECKBOXSELECTED, "Is Checkbox Selected"],
     [ASSERTIONMODES.ISRADIOBUTTONSELECTED, "Is Radio Button Selected"],
     [ASSERTIONMODES.GETDROPDOWNSELECTEDOPTION, "Get Dropdown Selection"],
-    [ASSERTIONMODES.GETDROPDOWNCOUNTWITHTEXT, "Get Dropdown Count With Text"],
-    [ASSERTIONMODES.GETTOOLTIPTEXT, "Get Tooltip Text"],
+    // [ASSERTIONMODES.GETDROPDOWNCOUNTWITHTEXT, "Get Dropdown Count With Text"], TO DO
+    // [ASSERTIONMODES.GETTOOLTIPTEXT, "Get Tooltip Text"], TO DO
     [ASSERTIONMODES.GETINNERHTML, "Get Element's Inner HTML"],
-    // [ASSERTIONMODES.GETDROPDOWNCOUNTWITHSUBTEXT, "Assert Text In Page Source"],
   ];
 
   return (
