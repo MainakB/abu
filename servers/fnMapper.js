@@ -414,8 +414,9 @@ export const ACTION_HANDLERS = {
     return [
       {
         step: `* def ${arg.varName} = ${FUNCTIONMAPPER.GETATTRIBUTE.name}({po:"${loc.locKeyName}", atr:"${arg.expected}"})`,
+        locator: loc.result,
       },
-      idx,
+      loc.newIdx,
     ];
   },
   [FUNCTIONMAPPER.ISATTRIBUTEEQUALS.key]: (arg, idx) => {
@@ -423,8 +424,9 @@ export const ACTION_HANDLERS = {
     return [
       {
         step: `* def ${arg.varName} = ${FUNCTIONMAPPER.ISATTRIBUTEEQUALS.name}({po:"${loc.locKeyName}", atr:"${arg.expected}", ea: "${arg.expectedAttribute}"})`,
+        locator: loc.result,
       },
-      idx,
+      loc.newIdx,
     ];
   },
   [FUNCTIONMAPPER.ISATTRIBUTENOTEQUALS.key]: (arg, idx) => {
@@ -432,8 +434,9 @@ export const ACTION_HANDLERS = {
     return [
       {
         step: `* def ${arg.varName} = ${FUNCTIONMAPPER.ISATTRIBUTENOTEQUALS.name}({po:"${loc.locKeyName}", atr:"${arg.expected}", ea: "${arg.expectedAttribute}"})`,
+        locator: loc.result,
       },
-      idx,
+      loc.newIdx,
     ];
   },
   [FUNCTIONMAPPER.ISATTRIBUTECONTAINS.key]: (arg, idx) => {
@@ -441,8 +444,9 @@ export const ACTION_HANDLERS = {
     return [
       {
         step: `* def ${arg.varName} = ${FUNCTIONMAPPER.ISATTRIBUTECONTAINS.name}({po:"${loc.locKeyName}", atr:"${arg.expected}", ea: "${arg.expectedAttribute}"})`,
+        locator: loc.result,
       },
-      idx,
+      loc.newIdx,
     ];
   },
   [FUNCTIONMAPPER.ISATTRIBUTENOTCONTAINS.key]: (arg, idx) => {
@@ -450,8 +454,9 @@ export const ACTION_HANDLERS = {
     return [
       {
         step: `* def ${arg.varName} = ${FUNCTIONMAPPER.ISATTRIBUTENOTCONTAINS.name}({po:"${loc.locKeyName}", atr:"${arg.expected}", ea: "${arg.expectedAttribute}"})`,
+        locator: loc.result,
       },
-      idx,
+      loc.newIdx,
     ];
   },
 
@@ -461,8 +466,9 @@ export const ACTION_HANDLERS = {
     return [
       {
         step: `* def ${arg.varName} = ${FUNCTIONMAPPER.ISENABLED.name}({po:"${loc.locKeyName}"})`,
+        locator: loc.result,
       },
-      idx,
+      loc.newIdx,
     ];
   },
   [FUNCTIONMAPPER.ISNOTENABLED.key]: (arg, idx) => {
@@ -470,8 +476,9 @@ export const ACTION_HANDLERS = {
     return [
       {
         step: `* def ${arg.varName} = ${FUNCTIONMAPPER.ISNOTENABLED.name}({po:"${loc.locKeyName}"})`,
+        locator: loc.result,
       },
-      idx,
+      loc.newIdx,
     ];
   },
   [FUNCTIONMAPPER.ISPRESENT.key]: (arg, idx) => {
@@ -479,8 +486,9 @@ export const ACTION_HANDLERS = {
     return [
       {
         step: `* def ${arg.varName} = ${FUNCTIONMAPPER.ISPRESENT.name}({po:"${loc.locKeyName}"})`,
+        locator: loc.result,
       },
-      idx,
+      loc.newIdx,
     ];
   },
   [FUNCTIONMAPPER.ISNOTPRESENT.key]: (arg, idx) => {
@@ -488,8 +496,9 @@ export const ACTION_HANDLERS = {
     return [
       {
         step: `* def ${arg.varName} = ${FUNCTIONMAPPER.ISNOTPRESENT.name}({po:"${loc.locKeyName}"})`,
+        locator: loc.result,
       },
-      idx,
+      loc.newIdx,
     ];
   },
   [FUNCTIONMAPPER.ISELEMENTCLICKABLE.key]: (arg, idx) => {
@@ -497,8 +506,9 @@ export const ACTION_HANDLERS = {
     return [
       {
         step: `* def ${arg.varName} = ${FUNCTIONMAPPER.ISELEMENTCLICKABLE.name}({po:"${loc.locKeyName}"})`,
+        locator: loc.result,
       },
-      idx,
+      loc.newIdx,
     ];
   },
   [FUNCTIONMAPPER.ISELEMENTNOTCLICKABLE.key]: (arg, idx) => {
@@ -506,8 +516,9 @@ export const ACTION_HANDLERS = {
     return [
       {
         step: `* def ${arg.varName} = ${FUNCTIONMAPPER.ISELEMENTNOTCLICKABLE.name}({po:"${loc.locKeyName}"})`,
+        locator: loc.result,
       },
-      idx,
+      loc.newIdx,
     ];
   },
   [FUNCTIONMAPPER.ISDISPLAYED.key]: (arg, idx) => {
@@ -515,8 +526,9 @@ export const ACTION_HANDLERS = {
     return [
       {
         step: `* def ${arg.varName} = ${FUNCTIONMAPPER.ISDISPLAYED.name}({po:"${loc.locKeyName}"})`,
+        locator: loc.result,
       },
-      idx,
+      loc.newIdx,
     ];
   },
   [FUNCTIONMAPPER.ISNOTDISPLAYED.key]: (arg, idx) => {
@@ -524,8 +536,9 @@ export const ACTION_HANDLERS = {
     return [
       {
         step: `* def ${arg.varName} = ${FUNCTIONMAPPER.ISNOTDISPLAYED.name}({po:"${loc.locKeyName}"})`,
+        locator: loc.result,
       },
-      idx,
+      loc.newIdx,
     ];
   },
   [FUNCTIONMAPPER.GETTEXT.key]: (arg, idx) => {
@@ -533,8 +546,9 @@ export const ACTION_HANDLERS = {
     return [
       {
         step: `* def ${arg.varName} = ${FUNCTIONMAPPER.GETTEXT.name}({po:"${loc.locKeyName}"})`,
+        locator: loc.result,
       },
-      idx,
+      loc.newIdx,
     ];
   },
   [FUNCTIONMAPPER.VALUE.key]: (arg, idx) => {
@@ -542,8 +556,9 @@ export const ACTION_HANDLERS = {
     return [
       {
         step: `* def ${arg.varName} = ${FUNCTIONMAPPER.VALUE.name}({po:"${loc.locKeyName}", atr:"value"})`,
+        locator: loc.result,
       },
-      idx,
+      loc.newIdx,
     ];
   },
   [FUNCTIONMAPPER.GETINNERHTML.key]: (arg, idx) => {
@@ -551,8 +566,9 @@ export const ACTION_HANDLERS = {
     return [
       {
         step: `* def ${arg.varName} = ${FUNCTIONMAPPER.GETINNERHTML.name}({po:"${loc.locKeyName}"})`,
+        locator: loc.result,
       },
-      idx,
+      loc.newIdx,
     ];
   },
   [FUNCTIONMAPPER.ISCHECKBOXSELECTED.key]: (arg, idx) => {
@@ -560,8 +576,9 @@ export const ACTION_HANDLERS = {
     return [
       {
         step: `* def ${arg.varName} = ${FUNCTIONMAPPER.ISCHECKBOXSELECTED.name}({po:"${loc.locKeyName}"})`,
+        locator: loc.result,
       },
-      idx,
+      loc.newIdx,
     ];
   },
   [FUNCTIONMAPPER.ISCHECKBOXNOTSELECTED.key]: (arg, idx) => {
@@ -569,8 +586,9 @@ export const ACTION_HANDLERS = {
     return [
       {
         step: `* def ${arg.varName} = ${FUNCTIONMAPPER.ISCHECKBOXNOTSELECTED.name}({po:"${loc.locKeyName}"})`,
+        locator: loc.result,
       },
-      idx,
+      loc.newIdx,
     ];
   },
   [FUNCTIONMAPPER.ISRADIOBUTTONSELECTED.key]: (arg, idx) => {
@@ -578,8 +596,9 @@ export const ACTION_HANDLERS = {
     return [
       {
         step: `* def ${arg.varName} = ${FUNCTIONMAPPER.ISRADIOBUTTONSELECTED.name}({po:"${loc.locKeyName}"})`,
+        locator: loc.result,
       },
-      idx,
+      loc.newIdx,
     ];
   },
   [FUNCTIONMAPPER.ISRADIOBUTTONNOTSELECTED.key]: (arg, idx) => {
@@ -587,8 +606,39 @@ export const ACTION_HANDLERS = {
     return [
       {
         step: `* def ${arg.varName} = ${FUNCTIONMAPPER.ISRADIOBUTTONNOTSELECTED.name}({po:"${loc.locKeyName}"})`,
+        locator: loc.result,
       },
-      idx,
+      loc.newIdx,
+    ];
+  },
+  [FUNCTIONMAPPER.GETDROPDOWNSELECTEDOPTION.key]: (arg, idx) => {
+    const loc = constructLocators(arg, idx);
+    return [
+      {
+        step: `* def ${arg.varName} = ${FUNCTIONMAPPER.GETDROPDOWNSELECTEDOPTION.name}({po:"${loc.locKeyName}"})`,
+        locator: loc.result,
+      },
+      loc.newIdx,
+    ];
+  },
+  [FUNCTIONMAPPER.GETDROPDOWNCOUNTWITHTEXT.key]: (arg, idx) => {
+    const loc = constructLocators(arg, idx);
+    return [
+      {
+        step: `* def ${arg.varName} = ${FUNCTIONMAPPER.GETDROPDOWNCOUNTWITHTEXT.name}({po:"${loc.locKeyName}", txt: "${arg.expected}" })`,
+        locator: loc.result,
+      },
+      loc.newIdx,
+    ];
+  },
+  [FUNCTIONMAPPER.GETDROPDOWNCOUNTWITHSUBTEXT.key]: (arg, idx) => {
+    const loc = constructLocators(arg, idx);
+    return [
+      {
+        step: `* def ${arg.varName} = ${FUNCTIONMAPPER.GETDROPDOWNCOUNTWITHSUBTEXT.name}({po:"${loc.locKeyName}", txt: "${arg.expected}" })`,
+        locator: loc.result,
+      },
+      loc.newIdx,
     ];
   },
 };

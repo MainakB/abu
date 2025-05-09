@@ -31,6 +31,7 @@ app.post("/record", (req, res) => {
   if (data[0].aiStep) {
     writeLiveToFile(data[0].aiStep, "aiSteps.feature", true);
   }
+  console.log("data[0]: ", data[0]);
   if (data[0].locator) {
     const locKey = Object.keys(data[0].locator)[0];
     writeLocatorObject(

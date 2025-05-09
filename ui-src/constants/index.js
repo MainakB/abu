@@ -329,6 +329,19 @@ export const FUNCTIONMAPPER = {
     key: ASSERTIONMODES.ISRADIOBUTTONNOTSELECTED,
     name: "isRadioNotSelected",
   },
+
+  GETDROPDOWNSELECTEDOPTION: {
+    key: ASSERTIONMODES.GETDROPDOWNSELECTEDOPTION,
+    name: "getDropdownSelectedOption",
+  },
+  GETDROPDOWNCOUNTWITHTEXT: {
+    key: ASSERTIONMODES.GETDROPDOWNCOUNTWITHTEXT,
+    name: "getDropdownCountWithText",
+  },
+  GETDROPDOWNCOUNTWITHSUBTEXT: {
+    key: ASSERTIONMODES.GETDROPDOWNCOUNTWITHSUBTEXT,
+    name: "getSubTextInDropdownCount",
+  },
 };
 
 export const NONDOCKASSERTIONNAMES = {

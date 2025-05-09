@@ -19,6 +19,8 @@ import FloatingElementTextAssignmentDock from "./components/docked-panes/element
 import FloatingElementGetAttrAssignDock from "./components/docked-panes/element-based-assignment/FloatingElementGetAttrAssignDock.jsx";
 import FloatingElementAttrEqualsAssignDock from "./components/docked-panes/element-based-assignment/FloatingElementAttrEqualsAssignDock.jsx";
 import FloatingElementCheckboxRadioAssignDock from "./components/docked-panes/element-based-assignment/FloatingElementCheckboxRadioAssignDock.jsx";
+import FloatingDrodownSelectedAssignDock from "./components/docked-panes/element-based-assignment/FloatingDrodownSelectedAssignDock.jsx";
+
 import { ASSERTIONMODES, ASSERTIONNAMES } from "./constants/index.js";
 
 let floatingAssertRoot = null;
@@ -529,6 +531,11 @@ window.showFloatingAssert = (mode, el, e, type) => {
   };
 
   try {
+    console.log(
+      "type is: ",
+      type,
+      type === ASSERTIONMODES.GETDROPDOWNSELECTEDOPTION
+    );
     if (
       type === ASSERTIONMODES.TEXT ||
       type === ASSERTIONMODES.VALUE ||
@@ -735,6 +742,26 @@ window.showFloatingAssert = (mode, el, e, type) => {
           textValue={textValue}
         />
       );
+    } else if (type === ASSERTIONMODES.GETDROPDOWNSELECTEDOPTION) {
+      if (el && el.tagName && el.tagName.toLowerCase().includes("select")) {
+        floatingAssertRoot.render(
+          <FloatingDrodownSelectedAssignDock
+            mode={mode}
+            el={el}
+            onCancel={closeDock}
+            e={e}
+            textValue={textValue}
+          />
+        );
+      } else {
+        floatingAssertRoot.render(
+          <FloatingAssertDockNotSupported
+            mode={mode}
+            el={el}
+            onCancel={closeDock}
+          />
+        );
+      }
     }
   } catch (err) {
     console.error("❌ React render failed:", err);

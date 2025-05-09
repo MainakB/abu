@@ -29,7 +29,6 @@ export default function RecorderPanel() {
   socket.addEventListener("message", (event) => {
     try {
       const data = JSON.parse(event.data);
-      console.log("Event received: ", data);
       if (data.type === "mode") {
         setMode(data.mode);
       }

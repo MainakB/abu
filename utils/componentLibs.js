@@ -170,6 +170,19 @@ const ASSERTION_NAME_LOOKUP = {
       negative: ASSERTIONMODES.ISRADIOBUTTONNOTSELECTED,
     },
   },
+  [ASSERTIONMODES.GETDROPDOWNSELECTEDOPTION]: {
+    exact: {
+      positive: ASSERTIONMODES.GETDROPDOWNSELECTEDOPTION,
+    },
+  },
+  [ASSERTIONMODES.GETDROPDOWNCOUNTWITHTEXT]: {
+    exact: {
+      positive: ASSERTIONMODES.GETDROPDOWNCOUNTWITHTEXT,
+    },
+    contains: {
+      positive: ASSERTIONMODES.GETDROPDOWNCOUNTWITHSUBTEXT,
+    },
+  },
 };
 
 export const getElementAttributes = async (el) => {
@@ -314,6 +327,74 @@ export const onConfirmRadioCheckboxAssignment = async ({
       el,
       e,
       text: textValue,
+    })
+  );
+  await onCancel();
+};
+
+export const onConfirmGetDropdownOptionSelected = async ({
+  varName,
+  locatorName,
+  onCancel,
+  el,
+  e,
+  textValue,
+  mode,
+}) => {
+  const assertionMapping = ASSERTION_NAME_LOOKUP[mode];
+  const category = "exact";
+  const polarity = "positive";
+  const assertName = assertionMapping[category][polarity];
+  console.log("sending: ", {
+    action: "assert",
+    locatorName,
+    assertion: assertName,
+    varName,
+    el,
+    e,
+    text: textValue,
+  });
+
+  window.__recordAction(
+    window.__buildData({
+      action: "assert",
+      locatorName,
+      assertion: assertName,
+      varName,
+      el,
+      e,
+      text: textValue,
+    })
+  );
+  await onCancel();
+};
+
+export const onConfirmGetDropdownCountWithText = async ({
+  varName,
+  locatorName,
+  onCancel,
+  el,
+  e,
+  textValue,
+  mode,
+  substr,
+  expected,
+}) => {
+  const assertionMapping = ASSERTION_NAME_LOOKUP[mode];
+  const category = !substr ? "exact" : "contains";
+  const polarity = "positive";
+  const assertName = assertionMapping[category][polarity];
+
+  window.__recordAction(
+    window.__buildData({
+      action: "assert",
+      locatorName,
+      assertion: assertName,
+      varName,
+      el,
+      e,
+      text: textValue,
+      expected,
     })
   );
   await onCancel();
