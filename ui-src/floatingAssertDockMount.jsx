@@ -15,7 +15,9 @@ import CurrentUrlAssertDock from "./components/docked-panes/current-url-dock/Cur
 import AddReuseTextBoxDock from "./components/docked-panes/addreuse-text-box-dock/AddReuseTextBoxDock.jsx";
 import FloatingAssertTextInPdf from "./components/docked-panes/pdf-assertions/FloatingAssertTextInPdf.jsx";
 import FloatingAssertPdfCompare from "./components/docked-panes/pdf-assertions/FloatingAssertPdfCompare.jsx";
-
+import FloatingElementTextAssignmentDock from "./components/docked-panes/element-based-assignment/FloatingElementTextAssignmentDock.jsx";
+import FloatingElementGetAttrAssignDock from "./components/docked-panes/element-based-assignment/FloatingElementGetAttrAssignDock.jsx";
+import FloatingElementAttrEqualsAssignDock from "./components/docked-panes/element-based-assignment/FloatingElementAttrEqualsAssignDock.jsx";
 import { ASSERTIONMODES, ASSERTIONNAMES } from "./constants/index.js";
 
 let floatingAssertRoot = null;
@@ -178,18 +180,18 @@ window.showFloatingAssert = (mode, el, e, type) => {
     // await window.__recorderStore.setMode("record", false);
   };
 
-  const getElementAttributes = async (el) => {
-    const attrList = await el.getAttributeNames();
-    const attributes = {};
+  // const getElementAttributes = async (el) => {
+  //   const attrList = await el.getAttributeNames();
+  //   const attributes = {};
 
-    for (let i = 0; i < attrList.length; i++) {
-      const attr = attrList[i];
-      const attrValue = await el.getAttribute(attr);
-      attributes[attr] = attrValue;
-    }
+  //   for (let i = 0; i < attrList.length; i++) {
+  //     const attr = attrList[i];
+  //     const attrValue = await el.getAttribute(attr);
+  //     attributes[attr] = attrValue;
+  //   }
 
-    return attributes;
-  };
+  //   return attributes;
+  // };
 
   const getCookies = async () => {
     const cookies = await window.__getCookies();
@@ -550,7 +552,7 @@ window.showFloatingAssert = (mode, el, e, type) => {
     } else if (type === ASSERTIONMODES.ATTRIBUTEVALUE) {
       floatingAssertRoot.render(
         <AssertAttributeValueDock
-          getAttributes={getElementAttributes}
+          // getAttributes={getElementAttributes}
           mode={mode}
           el={el}
           onCancel={closeDock}
@@ -572,8 +574,8 @@ window.showFloatingAssert = (mode, el, e, type) => {
     ) {
       floatingAssertRoot.render(
         <AssertCheckedStateDock
-          getAttributes={getElementAttributes}
-          mode={mode}
+          // getAttributes={getElementAttributes}
+          // mode={mode}
           el={el}
           onCancel={closeDock}
           onConfirm={recordCheckboxRadioAssert}
@@ -679,6 +681,44 @@ window.showFloatingAssert = (mode, el, e, type) => {
           type={type}
           onCancel={closeDock}
           onConfirm={recordPdfCompareStep}
+        />
+      );
+    } else if (
+      type === ASSERTIONMODES.GETTEXT ||
+      type === ASSERTIONMODES.GETVALUE ||
+      type === ASSERTIONMODES.ISENABLED ||
+      type === ASSERTIONMODES.ISPRESENT ||
+      type === ASSERTIONMODES.ISELEMENTCLICKABLE ||
+      type === ASSERTIONMODES.ISDISPLAYED ||
+      type === ASSERTIONMODES.GETINNERHTML
+    ) {
+      floatingAssertRoot.render(
+        <FloatingElementTextAssignmentDock
+          mode={mode}
+          el={el}
+          onCancel={closeDock}
+          e={e}
+          textValue={textValue}
+        />
+      );
+    } else if (type === ASSERTIONMODES.GETATTRIBUTE) {
+      floatingAssertRoot.render(
+        <FloatingElementGetAttrAssignDock
+          mode={mode}
+          el={el}
+          onCancel={closeDock}
+          e={e}
+          textValue={textValue}
+        />
+      );
+    } else if (type === ASSERTIONMODES.ISATTRIBUTEEQUALS) {
+      floatingAssertRoot.render(
+        <FloatingElementAttrEqualsAssignDock
+          mode={mode}
+          el={el}
+          onCancel={closeDock}
+          e={e}
+          textValue={textValue}
         />
       );
     }

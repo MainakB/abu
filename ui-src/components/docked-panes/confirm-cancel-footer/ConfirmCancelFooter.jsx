@@ -13,6 +13,7 @@ export default function ConfirmCancelFooter({
   disabled,
   exactMatch,
   setExactMatch,
+  disableAutoFocus,
 }) {
   const updateLocatorName = (e) => {
     setLocatorName(e.target.value);
@@ -26,6 +27,7 @@ export default function ConfirmCancelFooter({
             <LocatorName
               locatorName={locatorName}
               setLocatorName={setLocatorName}
+              disableAutoFocus={disableAutoFocus || false}
             />
           </div>
         )}

@@ -33,7 +33,6 @@
         currentInput = null;
         initialValue = null;
       }
-
       if (Object.values(assertionModes).includes(mode)) {
         e.preventDefault();
         e.stopPropagation();

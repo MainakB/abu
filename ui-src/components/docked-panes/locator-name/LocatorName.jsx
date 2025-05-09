@@ -1,10 +1,14 @@
 import React, { useEffect, useRef } from "react";
 
-export default function LocatorName({ locatorName, setLocatorName }) {
+export default function LocatorName({
+  locatorName,
+  setLocatorName,
+  disableAutoFocus,
+}) {
   const inputRef = useRef(null);
 
   useEffect(() => {
-    if (inputRef.current) {
+    if (!disableAutoFocus && inputRef.current) {
       inputRef.current.focus();
     }
   }, []);

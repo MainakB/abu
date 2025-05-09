@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from "react";
 import ConfirmCancelFooter from "../confirm-cancel-footer/ConfirmCancelFooter.jsx";
 import { useModeSocket } from "../../../hooks/useModeSocket.js";
+import { getElementAttributes } from "../../../../utils/componentLibs.js";
 
 export default function AssertAttributeValueDock({
-  getAttributes,
+  // getAttributes,
   el,
   mode,
   onConfirm,
@@ -21,7 +22,7 @@ export default function AssertAttributeValueDock({
     const fetchAttributes = async () => {
       try {
         setLoading(true);
-        const attributes = await getAttributes(el);
+        const attributes = await getElementAttributes(el);
         // Handle both object and array formats
         let processedAttributes;
         if (Array.isArray(attributes)) {
@@ -56,7 +57,7 @@ export default function AssertAttributeValueDock({
     };
 
     fetchAttributes();
-  }, [getAttributes]);
+  }, [el]);
 
   // const updateAttribute = (index, field, value) => {
   //   const updated = [...attributeStates];

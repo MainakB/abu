@@ -71,6 +71,8 @@
     referencePdfFileName,
     pdfComparisonPages,
     preComputedSelectors,
+    varName,
+    expectedAttribute,
   }) => {
     let selectors = null;
     let attributes = null;
@@ -93,6 +95,8 @@
       ...buildOptionalField("basePdfFileName", basePdfFileName),
       ...buildOptionalField("referencePdfFileName", referencePdfFileName),
       ...buildOptionalField("pdfComparisonPages", pdfComparisonPages),
+      ...buildOptionalField("varName", varName),
+      ...buildOptionalField("expectedAttribute", expectedAttribute),
       ...buildOptionalField(
         "selectOptionIndex",
         selectOptionIndex !== undefined && selectOptionIndex !== null
