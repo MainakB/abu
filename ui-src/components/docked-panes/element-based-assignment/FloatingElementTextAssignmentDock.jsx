@@ -28,7 +28,8 @@ const getLabel = (mode) => {
 };
 
 const getTextAreaData = (el, mode, textvalue) => {
-  if (mode === ASSERTIONMODES.GETINNERHTML) return el.innerHTML?.trim() || "";
+  if (shouldDisplayTextArea(mode) || mode === ASSERTIONMODES.GETINNERHTML)
+    return el.innerHTML?.trim() || el.outerHTML?.trim() || "";
   return textvalue;
 };
 
@@ -70,6 +71,8 @@ export default function FloatingElementTextAssignmentDock({
     });
   };
 
+  const textAreaContent = getTextAreaData(el, mode, textValue).trim();
+
   return (
     <div
       id={
@@ -80,7 +83,6 @@ export default function FloatingElementTextAssignmentDock({
           ? "assert-dock-textarea"
           : "floating-cookie-list-dock"
       }
-      // id="floating-assert-dock-root-container"
       onClick={(e) => e.stopPropagation()}
       onMouseDown={(e) => e.stopPropagation()}
     >
@@ -102,16 +104,14 @@ export default function FloatingElementTextAssignmentDock({
             placeholder="Enter variable name.."
           />
         </div>
-        {shouldDisplayTextArea(mode) && (
+        {textAreaContent !== "" && (
           <div className="locator-name-container">
             <label>Text Value Retrieved (Read Only)</label>
             <textarea
               className="assert-pdf-text-textarea"
-              value={getTextAreaData(el, mode, textValue)}
+              value={textAreaContent}
               readOnly={true}
               disabled={true}
-              // onChange={(e) => setExpected(e.target.value)}
-              // placeholder="Enter expected value..."
             />
           </div>
         )}
