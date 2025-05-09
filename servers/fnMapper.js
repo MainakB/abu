@@ -555,4 +555,40 @@ export const ACTION_HANDLERS = {
       idx,
     ];
   },
+  [FUNCTIONMAPPER.ISCHECKBOXSELECTED.key]: (arg, idx) => {
+    const loc = constructLocators(arg, idx);
+    return [
+      {
+        step: `* def ${arg.varName} = ${FUNCTIONMAPPER.ISCHECKBOXSELECTED.name}({po:"${loc.locKeyName}"})`,
+      },
+      idx,
+    ];
+  },
+  [FUNCTIONMAPPER.ISCHECKBOXNOTSELECTED.key]: (arg, idx) => {
+    const loc = constructLocators(arg, idx);
+    return [
+      {
+        step: `* def ${arg.varName} = ${FUNCTIONMAPPER.ISCHECKBOXNOTSELECTED.name}({po:"${loc.locKeyName}"})`,
+      },
+      idx,
+    ];
+  },
+  [FUNCTIONMAPPER.ISRADIOBUTTONSELECTED.key]: (arg, idx) => {
+    const loc = constructLocators(arg, idx);
+    return [
+      {
+        step: `* def ${arg.varName} = ${FUNCTIONMAPPER.ISRADIOBUTTONSELECTED.name}({po:"${loc.locKeyName}"})`,
+      },
+      idx,
+    ];
+  },
+  [FUNCTIONMAPPER.ISRADIOBUTTONNOTSELECTED.key]: (arg, idx) => {
+    const loc = constructLocators(arg, idx);
+    return [
+      {
+        step: `* def ${arg.varName} = ${FUNCTIONMAPPER.ISRADIOBUTTONNOTSELECTED.name}({po:"${loc.locKeyName}"})`,
+      },
+      idx,
+    ];
+  },
 };

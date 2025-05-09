@@ -18,6 +18,7 @@ import FloatingAssertPdfCompare from "./components/docked-panes/pdf-assertions/F
 import FloatingElementTextAssignmentDock from "./components/docked-panes/element-based-assignment/FloatingElementTextAssignmentDock.jsx";
 import FloatingElementGetAttrAssignDock from "./components/docked-panes/element-based-assignment/FloatingElementGetAttrAssignDock.jsx";
 import FloatingElementAttrEqualsAssignDock from "./components/docked-panes/element-based-assignment/FloatingElementAttrEqualsAssignDock.jsx";
+import FloatingElementCheckboxRadioAssignDock from "./components/docked-panes/element-based-assignment/FloatingElementCheckboxRadioAssignDock.jsx";
 import { ASSERTIONMODES, ASSERTIONNAMES } from "./constants/index.js";
 
 let floatingAssertRoot = null;
@@ -714,6 +715,19 @@ window.showFloatingAssert = (mode, el, e, type) => {
     } else if (type === ASSERTIONMODES.ISATTRIBUTEEQUALS) {
       floatingAssertRoot.render(
         <FloatingElementAttrEqualsAssignDock
+          mode={mode}
+          el={el}
+          onCancel={closeDock}
+          e={e}
+          textValue={textValue}
+        />
+      );
+    } else if (
+      type === ASSERTIONMODES.ISCHECKBOXSELECTED ||
+      type === ASSERTIONMODES.ISRADIOBUTTONSELECTED
+    ) {
+      floatingAssertRoot.render(
+        <FloatingElementCheckboxRadioAssignDock
           mode={mode}
           el={el}
           onCancel={closeDock}

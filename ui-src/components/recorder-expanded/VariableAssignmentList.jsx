@@ -16,6 +16,7 @@ export default function VariableAssignmentList({
     [ASSERTIONMODES.GETATTRIBUTE, "Get Element's Attribute"],
     [ASSERTIONMODES.ISATTRIBUTEEQUALS, "Get Attribute Equality/Contains"],
     [ASSERTIONMODES.ISCHECKBOXSELECTED, "Is Checkbox Selected"],
+    [ASSERTIONMODES.ISRADIOBUTTONSELECTED, "Is Radio Button Selected"],
     [ASSERTIONMODES.GETDROPDOWNSELECTEDOPTION, "Get Dropdown Selection"],
     [ASSERTIONMODES.GETDROPDOWNCOUNTWITHTEXT, "Get Dropdown Count With Text"],
     [ASSERTIONMODES.GETTOOLTIPTEXT, "Get Tooltip Text"],

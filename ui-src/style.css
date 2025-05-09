@@ -327,6 +327,9 @@ button.disabled:focus {
   margin-right: 0 !important;
 }
 
+#floating-assert-dock-root .invalid-tag-error {
+  color: var(--recorder-error-color) !important;
+}
 
 .docked-pane-footer-assert-container {
   /* display: flex;
@@ -850,7 +853,8 @@ button.disabled:focus {
 
 /* Fix error messages */
 .cookie-error,
-.delete-cookie-error {
+.delete-cookie-error,
+.invalid-tag-error {
   /* color: red !important; */
   color: var(--recorder-error-color) !important;
   font-size: 12px !important;

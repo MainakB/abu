@@ -158,6 +158,18 @@ const ASSERTION_NAME_LOOKUP = {
       negative: ASSERTIONMODES.ISATTRIBUTENOTCONTAINS,
     },
   },
+  [ASSERTIONMODES.ISCHECKBOXSELECTED]: {
+    exact: {
+      positive: ASSERTIONMODES.ISCHECKBOXSELECTED,
+      negative: ASSERTIONMODES.ISCHECKBOXNOTSELECTED,
+    },
+  },
+  [ASSERTIONMODES.ISRADIOBUTTONSELECTED]: {
+    exact: {
+      positive: ASSERTIONMODES.ISRADIOBUTTONSELECTED,
+      negative: ASSERTIONMODES.ISRADIOBUTTONNOTSELECTED,
+    },
+  },
 };
 
 export const getElementAttributes = async (el) => {
@@ -273,6 +285,35 @@ export const onConfirmAttrEqlValAssignment = async ({
       text: textValue,
       expected: selectedAssertions.attributeName,
       expectedAttribute: selectedAssertions.value,
+    })
+  );
+  await onCancel();
+};
+
+export const onConfirmRadioCheckboxAssignment = async ({
+  varName,
+  locatorName,
+  onCancel,
+  el,
+  e,
+  textValue,
+  mode,
+  isNegative,
+}) => {
+  const assertionMapping = ASSERTION_NAME_LOOKUP[mode];
+  const category = "exact";
+  const polarity = isNegative ? "negative" : "positive";
+  const assertName = assertionMapping[category][polarity];
+
+  window.__recordAction(
+    window.__buildData({
+      action: "assert",
+      locatorName,
+      assertion: assertName,
+      varName,
+      el,
+      e,
+      text: textValue,
     })
   );
   await onCancel();
