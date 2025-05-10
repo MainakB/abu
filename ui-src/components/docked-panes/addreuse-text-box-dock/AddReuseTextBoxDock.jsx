@@ -2,8 +2,9 @@ import React, { useState, useEffect, useRef } from "react";
 import { ASSERTIONMODES } from "../../../constants/index.js";
 import ConfirmCancelFooter from "../confirm-cancel-footer/ConfirmCancelFooter.jsx";
 import { useModeSocket } from "../../../hooks/useModeSocket.js";
+import { recordAddReuseStep } from "../../../../utils/componentLibs.js";
 
-export default function AddReuseTextBoxDock({ onConfirm, onCancel }) {
+export default function AddReuseTextBoxDock({ onCancel }) {
   const inputRef = useRef(null);
   const textBoxRef = useRef(null);
 
@@ -31,8 +32,7 @@ export default function AddReuseTextBoxDock({ onConfirm, onCancel }) {
   };
 
   const handleConfirm = () => {
-    onConfirm(fileName, expected);
-    closeDockReset();
+    recordAddReuseStep(fileName, expected, handleCancel);
   };
 
   const updateReuseFileName = (e) => {

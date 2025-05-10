@@ -5,6 +5,7 @@ import DropdownAssertionsList from "./DropdownAssertionsList.jsx";
 import NetworkAssertionsList from "./NetworkAssertionsList.jsx";
 import GenericAssertionsList from "./GenericAssertionsList.jsx";
 import VariableAssignmentList from "./VariableAssignmentList.jsx";
+import DBAssignmentList from "./DBAssignmentList.jsx";
 import { ASSERTIONMODES } from "../../constants/index.js";
 
 export default function MoreOptionsDrawer({
@@ -112,6 +113,7 @@ export default function MoreOptionsDrawer({
           )}
         </div>
         <VariableAssignmentList {...sharedProps} />
+        <DBAssignmentList {...sharedProps} />
         <ElementAssertionsList {...sharedProps} />
         <DropdownAssertionsList {...sharedProps} />
         <NetworkAssertionsList {...sharedProps} />

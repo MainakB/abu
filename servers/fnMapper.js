@@ -641,4 +641,136 @@ export const ACTION_HANDLERS = {
       loc.newIdx,
     ];
   },
+
+  [FUNCTIONMAPPER.ADDREUSESTEP.key]: (arg, idx) => {
+    return [
+      {
+        step: `And ${arg.expected}`,
+      },
+      idx,
+    ];
+  },
+
+  [FUNCTIONMAPPER.ASSERTTEXTINPDF.key]: (arg, idx) => {
+    const soft = arg.isSoftAssert ? ", isSoftAssert: true" : "";
+    const aiSoft = soft !== "" ? "soft " : "";
+    return [
+      {
+        step: `And ${FUNCTIONMAPPER.ASSERTTEXTINPDF.name}({basePath: "${arg.basePdfFileName}", et: "${arg.expected}"${soft} })`,
+        aiStep: `And ${aiSoft}assert pdf "${arg.referencePdfFileName}" contains text "${arg.expected}"`,
+      },
+      idx,
+    ];
+  },
+  [FUNCTIONMAPPER.ASSERTPDFCOMPARISON.key]: (arg, idx) => {
+    const soft = arg.isSoftAssert ? ", isSoftAssert: true" : "";
+    const aiSoft = soft !== "" ? "soft " : "";
+    const pagesToCompare =
+      arg.pdfComparisonPages &&
+      Array.isArray(arg.pdfComparisonPages) &&
+      arg.pdfComparisonPages.length
+        ? `, pagesToCompare: [${arg.pdfComparisonPages}]`
+        : "";
+
+    return [
+      {
+        step: `And ${FUNCTIONMAPPER.ASSERTPDFCOMPARISON.name}({referencePath: "${arg.referencePdfFileName}", basePath: "${arg.basePdfFileName}"${pagesToCompare}${soft} })`,
+        aiStep:
+          pagesToCompare === ""
+            ? `And ${aiSoft}compare pdf "${arg.referencePdfFileName}" with "${arg.basePdfFileName}"`
+            : `And ${aiSoft}compare pdf "${arg.referencePdfFileName}" with "${arg.basePdfFileName}" for pages ${arg.pdfComparisonPages}`,
+      },
+      idx,
+    ];
+  },
+  [FUNCTIONMAPPER.ASSERTTEXTIMAGESINPDF.key]: (arg, idx) => {
+    const soft = arg.isSoftAssert ? ", isSoftAssert: true" : "";
+    const aiSoft = soft !== "" ? "soft " : "";
+    const pagesToCompare =
+      arg.pdfComparisonPages &&
+      Array.isArray(arg.pdfComparisonPages) &&
+      arg.pdfComparisonPages.length
+        ? `, pagesToCompare: ${arg.pdfComparisonPages}`
+        : "";
+    return [
+      {
+        step: `And ${FUNCTIONMAPPER.ASSERTTEXTIMAGESINPDF.name}({referencePath: "${arg.referencePdfFileName}", basePath: "${arg.basePdfFileName}"${pagesToCompare}${soft} })`,
+        aiStep:
+          pagesToCompare === ""
+            ? `And ${aiSoft}compare text and images in pdf "${arg.referencePdfFileName}" with "${arg.basePdfFileName}"`
+            : `And ${aiSoft}compare text and images in pdf "${arg.referencePdfFileName}" with "${arg.basePdfFileName}" for pages ${arg.pdfComparisonPages}`,
+      },
+      idx,
+    ];
+  },
+  [FUNCTIONMAPPER.ASSERTCPDPDF.key]: (arg, idx) => {
+    const soft = arg.isSoftAssert ? ", isSoftAssert: true" : "";
+    const aiSoft = soft !== "" ? "soft " : "";
+    const pagesToCompare =
+      arg.pdfComparisonPages &&
+      Array.isArray(arg.pdfComparisonPages) &&
+      arg.pdfComparisonPages.length
+        ? `, pagesToCompare: ${arg.pdfComparisonPages}`
+        : "";
+    return [
+      {
+        step: `And ${FUNCTIONMAPPER.GETDROPDOWNCOUNTWITHSUBTEXT.name}({referencePath: "${arg.referencePdfFileName}", fileToDownload: "${arg.basePdfFileName}" ${soft}})`,
+        aiStep:
+          pagesToCompare === ""
+            ? `And ${aiSoft}compare cpd pdfs "${arg.referencePdfFileName}" with "${arg.basePdfFileName}"`
+            : `And ${aiSoft}compare cpd pdfs "${arg.referencePdfFileName}" with "${arg.basePdfFileName}" for pages ${arg.pdfComparisonPages}`,
+      },
+      idx,
+    ];
+  },
+
+  [FUNCTIONMAPPER.SINGLEVARASSIGNDBCONFIG.key]: (arg, idx) => {
+    return [
+      {
+        step: `* def ${arg.varName} = {"dbType": "${arg.dbType}", "user": "${arg.dbUserName}", "dbPassword": "${arg.dbPassword}", "host": "${arg.dbHostName}", "port": ${arg.dbPortNum}}`,
+      },
+      idx,
+    ];
+  },
+  [FUNCTIONMAPPER.SINGLEVARASSIGNDBQUERY.key]: (arg, idx) => {
+    return [
+      {
+        step: `* def ${arg.varName} = {"query": "${arg.dbQuery}"}`,
+      },
+      idx,
+    ];
+  },
+  [FUNCTIONMAPPER.GETDBVALUE.key]: (arg, idx) => {
+    return [
+      {
+        step: `* def ${arg.varName} = ${FUNCTIONMAPPER.GETDBVALUE.name}(${arg.expected[0]}, ${arg.expected[1]})`,
+      },
+      idx,
+    ];
+  },
+
+  [FUNCTIONMAPPER.GETDBROW.key]: (arg, idx) => {
+    return [
+      {
+        step: `* def ${arg.varName} = ${FUNCTIONMAPPER.GETDBROW.name}(${arg.expected[0]}, ${arg.expected[1]})`,
+      },
+      idx,
+    ];
+  },
+  [FUNCTIONMAPPER.GETDBROWS.key]: (arg, idx) => {
+    return [
+      {
+        step: `* def ${arg.varName} = ${FUNCTIONMAPPER.GETDBROWS.name}(${arg.expected[0]}, ${arg.expected[1]})`,
+      },
+      idx,
+    ];
+  },
+  [FUNCTIONMAPPER.RUNDBQUERY.key]: (arg, idx) => {
+    return [
+      {
+        step: `* def ${arg.varName} = ${FUNCTIONMAPPER.RUNDBQUERY.name}(${arg.expected[0]}, ${arg.expected[1]})`,
+      },
+      idx,
+    ];
+  },
 };

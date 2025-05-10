@@ -73,6 +73,12 @@
     preComputedSelectors,
     varName,
     expectedAttribute,
+    dbType,
+    dbHostName,
+    dbUserName,
+    dbPassword,
+    dbPortNum,
+    dbQuery,
   }) => {
     let selectors = null;
     let attributes = null;
@@ -97,6 +103,13 @@
       ...buildOptionalField("pdfComparisonPages", pdfComparisonPages),
       ...buildOptionalField("varName", varName),
       ...buildOptionalField("expectedAttribute", expectedAttribute),
+      ...buildOptionalField("dbType", dbType),
+      ...buildOptionalField("dbHostName", dbHostName),
+      ...buildOptionalField("dbUserName", dbUserName),
+      ...buildOptionalField("dbPassword", dbPassword),
+      ...buildOptionalField("dbPortNum", dbPortNum),
+      ...buildOptionalField("dbQuery", dbQuery),
+
       ...buildOptionalField(
         "selectOptionIndex",
         selectOptionIndex !== undefined && selectOptionIndex !== null

@@ -102,7 +102,8 @@
           mode === assertionModes.ASSERTTEXTINPDF ||
           mode === assertionModes.ASSERTPDFCOMPARISON ||
           mode === assertionModes.ASSERTTEXTIMAGESINPDF ||
-          mode === assertionModes.ASSERTCPDPDF
+          mode === assertionModes.ASSERTCPDPDF ||
+          mode === assertionModes.GETDBVALUE
         ) {
           assertBox.style.display = "none";
           hoverTarget = null;

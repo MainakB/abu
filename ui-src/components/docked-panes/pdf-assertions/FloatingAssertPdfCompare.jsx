@@ -2,10 +2,11 @@ import React, { useState, useEffect, useRef } from "react";
 import { ASSERTIONMODES } from "../../../constants/index.js";
 import ConfirmCancelFooter from "../confirm-cancel-footer/ConfirmCancelFooter.jsx";
 import { useModeSocket } from "../../../hooks/useModeSocket.js";
+import { recordPdfCompareStep } from "../../../../utils/componentLibs.js";
 
 export default function FloatingAssertPdfCompare({
   type,
-  onConfirm,
+  // onConfirm,
   onCancel,
 }) {
   const basePdfInputRef = useRef(null);
@@ -42,8 +43,16 @@ export default function FloatingAssertPdfCompare({
   };
 
   const handleConfirm = () => {
-    onConfirm(basePdf, refPdf, pageRange, softAssert, type);
-    closeDockReset();
+    recordPdfCompareStep({
+      basePdfFileNm: basePdf,
+      referencePdfFileNm: refPdf,
+      pageRng: pageRange,
+      isSoftAssert: softAssert,
+      type,
+      onCancel: handleCancel,
+    });
+    // onConfirm(basePdf, refPdf, pageRange, softAssert, type);
+    // closeDockReset();
   };
 
   return (

@@ -1,7 +1,8 @@
-import React, { useState, useRef, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { ASSERTIONMODES } from "../../../constants/index.js";
 import { onConfirmRadioCheckboxAssignment } from "../../../../utils/componentLibs.js";
 import ConfirmCancelFooter from "../confirm-cancel-footer/ConfirmCancelFooter.jsx";
+import VarName from "../variable-name/VarName.jsx";
 import { useModeSocket } from "../../../hooks/useModeSocket.js";
 
 const getLabel = (mode) => {
@@ -18,18 +19,12 @@ export default function FloatingElementCheckboxRadioAssignDock({
   mode,
   onCancel,
 }) {
-  const varNameInputRef = useRef(null);
   const [locatorName, setLocatorName] = useState("");
   const [varName, setVarName] = useState("");
+  const [varNameError, setVarNameError] = useState("");
   const [isNegative, setIsNegative] = useState(false);
 
   useModeSocket(onCancel);
-
-  useEffect(() => {
-    if (varNameInputRef.current) {
-      varNameInputRef.current.focus();
-    }
-  }, []);
 
   const handleCancel = () => {
     onCancel();
@@ -69,26 +64,20 @@ export default function FloatingElementCheckboxRadioAssignDock({
       </div>
 
       <div className="pdf-text-container">
-        <div className="locator-name-container">
-          {isInvalidTag ? (
+        {isInvalidTag ? (
+          <div className="locator-name-container">
             <span className="invalid-tag-error">
               * Element is not an input tag. Use get value or attribute instead.
             </span>
-          ) : (
-            <>
-              <label>Variable Name (Required)</label>
-
-              <input
-                ref={varNameInputRef}
-                type="text"
-                className="cookie-input"
-                value={varName}
-                onChange={(e) => setVarName(e.target.value)}
-                placeholder="Enter variable name.."
-              />
-            </>
-          )}
-        </div>
+          </div>
+        ) : (
+          <VarName
+            varName={varName}
+            setVarName={setVarName}
+            varNameError={varNameError}
+            setVarNameError={setVarNameError}
+          />
+        )}
       </div>
 
       <ConfirmCancelFooter
@@ -99,7 +88,7 @@ export default function FloatingElementCheckboxRadioAssignDock({
         onCancel={handleCancel}
         onConfirm={handleConfirm}
         disableAutoFocus={true}
-        disabled={varName === "" || isInvalidTag}
+        disabled={varName === "" || !!varNameError || isInvalidTag}
         {...(!isInvalidTag
           ? { isNegative, setIsNegative, locatorName, setLocatorName }
           : {})}

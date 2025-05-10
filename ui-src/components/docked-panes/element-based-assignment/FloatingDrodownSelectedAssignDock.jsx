@@ -1,25 +1,9 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import { ASSERTIONMODES, ASSERTIONNAMES } from "../../../constants/index.js";
 import ConfirmCancelFooter from "../confirm-cancel-footer/ConfirmCancelFooter.jsx";
 import { useModeSocket } from "../../../hooks/useModeSocket.js";
 import { onConfirmGetDropdownOptionSelected } from "../../../../utils/componentLibs.js";
-
-// function getDropdownCount(el) {
-//   try {
-//     return (
-//       Array.from(el?.childNodes || []).filter(
-//         (v) =>
-//           v.tagName &&
-//           v.tagName.toLowerCase() === "option" &&
-//           v.textContent &&
-//           !v.disabled
-//       ).length || 0
-//     );
-//   } catch (err) {
-//     console.warn("getDropdownCount failed", err);
-//     return 0;
-//   }
-// }
+import VarName from "../variable-name/VarName.jsx";
 
 function getDropdownSelected(el) {
   try {
@@ -44,7 +28,6 @@ export default function FloatingDropdownAssertDock({
   e,
   textValue,
 }) {
-  const varNameInputRef = useRef(null);
   const [header, setHeader] = useState("Get Selected Dropdown Option");
   const [expected, setExpected] = useState(() => {
     return getDropdownSelected(el);
@@ -52,6 +35,7 @@ export default function FloatingDropdownAssertDock({
 
   const [locatorName, setLocatorName] = useState("");
   const [varName, setVarName] = useState("");
+  const [varNameError, setVarNameError] = useState("");
 
   useModeSocket(onCancel);
 
@@ -79,18 +63,12 @@ export default function FloatingDropdownAssertDock({
         </div>
       </div>
       <div className="pdf-text-container">
-        <div className="locator-name-container">
-          <label>Variable Name (Required)</label>
-
-          <input
-            ref={varNameInputRef}
-            type="text"
-            className="cookie-input"
-            value={varName}
-            onChange={(e) => setVarName(e.target.value)}
-            placeholder="Enter variable name.."
-          />
-        </div>
+        <VarName
+          varName={varName}
+          setVarName={setVarName}
+          varNameError={varNameError}
+          setVarNameError={setVarNameError}
+        />
         <div className="locator-name-container">
           <label>Text Value Retrieved (Read Only)</label>
           <textarea
@@ -107,7 +85,7 @@ export default function FloatingDropdownAssertDock({
         setLocatorName={setLocatorName}
         onCancel={onCancel}
         onConfirm={handleConfirm}
-        disabled={varName.trim() === ""}
+        disabled={varName.trim() === "" || !!varNameError}
       />
     </div>
   );

@@ -1268,3 +1268,49 @@ html body #floating-assert-attribute-dock {
   font-family: inherit !important;
   box-sizing: border-box !important;
 }
+
+/* #floating-cookie-list-dock .assert-attributes-container .db-action-types-container {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  padding: 15px;
+
+
+}
+
+
+#floating-cookie-list-dock .assert-attributes-container .db-action-types-container .db-action-types-wrapper {
+  display: flex;
+  gap: 10px;
+} */
+
+
+.db-action-types-container {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  padding: 15px !important;
+}
+
+.db-action-types-wrapper {
+  display: flex;
+  gap: 10px;
+}
+
+.db-action-type-radio {
+  margin: 2px 5px 2px 0px !important;
+}
+
+.password-toggle-eye {
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none !important;
+  border: none !important;
+  /* font-size: 16px; */
+  cursor: pointer;
+  padding: 0;
+  line-height: 1;
+  filter: grayscale(100%) brightness(0.8);
+}

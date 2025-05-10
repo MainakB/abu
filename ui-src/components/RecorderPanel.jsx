@@ -22,6 +22,7 @@ export default function RecorderPanel() {
     genericAssertions: false,
     actions: false,
     varAssignments: false,
+    dbAssignments: false,
   });
 
   const socket = new WebSocket("ws://localhost:8787");
@@ -159,12 +160,12 @@ export default function RecorderPanel() {
       genericAssertions: false,
       actions: false,
       varAssignments: false,
+      dbAssignments: false,
     });
   };
 
   const toggleRecording = async () => {
     const recorderState = await window.__toggleRecording();
-    console.log("Setting mode in toggle: ", recorderState);
     await window.__recorderStore.setMode(recorderState, false);
     setDrawerOpen(false);
     resetExpanded();
@@ -255,6 +256,7 @@ export default function RecorderPanel() {
         networkAssertions: section === "networkAssertions",
         genericAssertions: section === "genericAssertions",
         varAssignments: section === "varAssignments",
+        dbAssignments: section === "dbAssignments",
       };
     });
   };

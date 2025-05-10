@@ -1,7 +1,8 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { ASSERTIONMODES } from "../../../constants/index.js";
 import { onConfirmTextValAssignment } from "../../../../utils/componentLibs.js";
 import ConfirmCancelFooter from "../confirm-cancel-footer/ConfirmCancelFooter.jsx";
+import VarName from "../variable-name/VarName.jsx";
 import { useModeSocket } from "../../../hooks/useModeSocket.js";
 
 const shouldDisplayTextArea = (mode) => {
@@ -40,18 +41,12 @@ export default function FloatingElementTextAssignmentDock({
   mode,
   onCancel,
 }) {
-  const varNameInputRef = useRef(null);
   const [locatorName, setLocatorName] = useState("");
   const [varName, setVarName] = useState("");
+  const [varNameError, setVarNameError] = useState("");
   const [isNegative, setIsNegative] = useState(false);
 
   useModeSocket(onCancel);
-
-  useEffect(() => {
-    if (varNameInputRef.current) {
-      varNameInputRef.current.focus();
-    }
-  }, []);
 
   const handleCancel = () => {
     onCancel();
@@ -92,18 +87,12 @@ export default function FloatingElementTextAssignmentDock({
         </div>
       </div>
       <div className="pdf-text-container">
-        <div className="locator-name-container">
-          <label>Variable Name (Required)</label>
-
-          <input
-            ref={varNameInputRef}
-            type="text"
-            className="cookie-input"
-            value={varName}
-            onChange={(e) => setVarName(e.target.value)}
-            placeholder="Enter variable name.."
-          />
-        </div>
+        <VarName
+          varName={varName}
+          setVarName={setVarName}
+          varNameError={varNameError}
+          setVarNameError={setVarNameError}
+        />
         {textAreaContent !== "" && (
           <div className="locator-name-container">
             <label>Text Value Retrieved (Read Only)</label>
@@ -122,7 +111,7 @@ export default function FloatingElementTextAssignmentDock({
         onCancel={handleCancel}
         onConfirm={handleConfirm}
         disableAutoFocus={true}
-        disabled={varName === ""}
+        disabled={varName === "" || !!varNameError}
         {...(mode === ASSERTIONMODES.ISPRESENT ||
         mode === ASSERTIONMODES.ISDISPLAYED ||
         mode === ASSERTIONMODES.ISELEMENTCLICKABLE ||

@@ -20,7 +20,7 @@ import FloatingElementGetAttrAssignDock from "./components/docked-panes/element-
 import FloatingElementAttrEqualsAssignDock from "./components/docked-panes/element-based-assignment/FloatingElementAttrEqualsAssignDock.jsx";
 import FloatingElementCheckboxRadioAssignDock from "./components/docked-panes/element-based-assignment/FloatingElementCheckboxRadioAssignDock.jsx";
 import FloatingDrodownSelectedAssignDock from "./components/docked-panes/element-based-assignment/FloatingDrodownSelectedAssignDock.jsx";
-
+import FloatingDBDataAssignDock from "./components/docked-panes/db-assignments/FloatingDBDataAssignDock.jsx";
 import { ASSERTIONMODES, ASSERTIONNAMES } from "./constants/index.js";
 
 let floatingAssertRoot = null;
@@ -147,27 +147,6 @@ window.showFloatingAssert = (mode, el, e, type) => {
         negative: ASSERTIONNAMES.NOTATTRIBUTEVALUECONTAINS,
       },
     },
-    //
-    [ASSERTIONMODES.ASSERTTEXTINPDF]: {
-      exact: {
-        positive: ASSERTIONNAMES.ASSERTTEXTINPDF,
-      },
-    },
-    [ASSERTIONMODES.ASSERTPDFCOMPARISON]: {
-      exact: {
-        positive: ASSERTIONNAMES.ASSERTPDFCOMPARISON,
-      },
-    },
-    [ASSERTIONMODES.ASSERTTEXTIMAGESINPDF]: {
-      exact: {
-        positive: ASSERTIONNAMES.ASSERTTEXTIMAGESINPDF,
-      },
-    },
-    [ASSERTIONMODES.ASSERTCPDPDF]: {
-      exact: {
-        positive: ASSERTIONNAMES.ASSERTCPDPDF,
-      },
-    },
   };
 
   const closeDock = async () => {
@@ -182,19 +161,6 @@ window.showFloatingAssert = (mode, el, e, type) => {
     }
     // await window.__recorderStore.setMode("record", false);
   };
-
-  // const getElementAttributes = async (el) => {
-  //   const attrList = await el.getAttributeNames();
-  //   const attributes = {};
-
-  //   for (let i = 0; i < attrList.length; i++) {
-  //     const attr = attrList[i];
-  //     const attrValue = await el.getAttribute(attr);
-  //     attributes[attr] = attrValue;
-  //   }
-
-  //   return attributes;
-  // };
 
   const getCookies = async () => {
     const cookies = await window.__getCookies();
@@ -448,94 +414,7 @@ window.showFloatingAssert = (mode, el, e, type) => {
     await Promise.all([window.__deleteCookies(cookieList), closeDock()]);
   };
 
-  const recordAddReuseStep = async (fileName, params) => {
-    let expectedStep = params
-      ? `use(${fileName}) ${params}`
-      : `use(${fileName})`;
-
-    window.__recordAction(
-      window.__buildData({
-        action: "addReuse",
-        expected: expectedStep,
-      })
-    );
-    await closeDock();
-  };
-
-  const recordTextInPdfStep = async (
-    basePdfFileName,
-    expected,
-    isSoftAssert
-  ) => {
-    window.__recordAction(
-      window.__buildData({
-        action: "assertTextInPdf",
-        basePdfFileName: basePdfFileName.endsWith(".pdf")
-          ? basePdfFileName
-          : `${basePdfFileName}.pdf`,
-        expected,
-        isSoftAssert,
-      })
-    );
-    await closeDock();
-  };
-
-  const recordPdfCompareStep = async (
-    basePdfFileNm,
-    referencePdfFileNm,
-    pageRng,
-    isSoftAssert,
-    type
-  ) => {
-    const assertionMapping = ASSERTION_NAME_LOOKUP[type];
-    const category = "exact";
-    const polarity = "positive";
-    const assertName = assertionMapping[category][polarity];
-    let pdfComparisonPages = [];
-
-    if (pageRng && typeof pageRng === "string" && pageRng !== "") {
-      const pgs = pageRng.trim().split(",");
-
-      for (let p of pgs) {
-        if (p === "") continue;
-        if (Number.isNaN(Number(p))) {
-          console.warn(
-            `Received non-numeric value in page range. Page range passed ${pgs} and non-numeric value is: ${p}`
-          );
-          pdfComparisonPages = [];
-          break;
-        } else {
-          pdfComparisonPages.push(Number(p));
-        }
-      }
-    }
-
-    let basePdfFileName = basePdfFileNm.endsWith(".pdf")
-      ? basePdfFileNm
-      : `${basePdfFileNm}.pdf`;
-
-    const referencePdfFileName = referencePdfFileNm.endsWith(".pdf")
-      ? referencePdfFileNm
-      : `${referencePdfFileNm}.pdf`;
-
-    window.__recordAction(
-      window.__buildData({
-        action: assertName,
-        basePdfFileName,
-        referencePdfFileName,
-        pdfComparisonPages,
-        isSoftAssert,
-      })
-    );
-    await closeDock();
-  };
-
   try {
-    console.log(
-      "type is: ",
-      type,
-      type === ASSERTIONMODES.GETDROPDOWNSELECTEDOPTION
-    );
     if (
       type === ASSERTIONMODES.TEXT ||
       type === ASSERTIONMODES.VALUE ||
@@ -665,19 +544,10 @@ window.showFloatingAssert = (mode, el, e, type) => {
         );
       }
     } else if (type === ASSERTIONMODES.ADDREUSESTEP) {
-      floatingAssertRoot.render(
-        <AddReuseTextBoxDock
-          onCancel={closeDock}
-          onConfirm={recordAddReuseStep}
-          // onConfirm={(fileName, params) => recordAddReuseStep(fileName, params)}
-        />
-      );
+      floatingAssertRoot.render(<AddReuseTextBoxDock onCancel={closeDock} />);
     } else if (type === ASSERTIONMODES.ASSERTTEXTINPDF) {
       floatingAssertRoot.render(
-        <FloatingAssertTextInPdf
-          onCancel={closeDock}
-          onConfirm={recordTextInPdfStep}
-        />
+        <FloatingAssertTextInPdf onCancel={closeDock} mode={mode} />
       );
     } else if (
       type === ASSERTIONMODES.ASSERTPDFCOMPARISON ||
@@ -685,11 +555,7 @@ window.showFloatingAssert = (mode, el, e, type) => {
       type === ASSERTIONMODES.ASSERTCPDPDF
     ) {
       floatingAssertRoot.render(
-        <FloatingAssertPdfCompare
-          type={type}
-          onCancel={closeDock}
-          onConfirm={recordPdfCompareStep}
-        />
+        <FloatingAssertPdfCompare type={type} onCancel={closeDock} />
       );
     } else if (
       type === ASSERTIONMODES.GETTEXT ||
@@ -762,6 +628,10 @@ window.showFloatingAssert = (mode, el, e, type) => {
           />
         );
       }
+    } else if (type === ASSERTIONMODES.GETDBVALUE) {
+      floatingAssertRoot.render(
+        <FloatingDBDataAssignDock mode={mode} onCancel={closeDock} />
+      );
     }
   } catch (err) {
     console.error("❌ React render failed:", err);

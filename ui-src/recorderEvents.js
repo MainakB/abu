@@ -113,10 +113,12 @@
       const tag = el.tagName.toLowerCase();
       let value = null;
       let selectOptionIndex = null;
+      let selectedOption = null;
+
       if (el.type === "checkbox" || el.type === "radio") {
         value = el.checked;
       } else if (tag === "select") {
-        const selectedOption = el.options[el.selectedIndex];
+        selectedOption = el.options[el.selectedIndex];
         const selectedValue = selectedOption.value;
         const selectedText = selectedOption.textContent.trim();
         value = selectedText;
@@ -133,7 +135,7 @@
           e,
           value,
           selectOptionIndex,
-          ...(selectedOption.tagName
+          ...(selectedOption && selectedOption.tagName
             ? { selectOptionTag: selectedOption.tagName.toLowerCase() }
             : {}),
         })

@@ -2,8 +2,9 @@ import React, { useState, useEffect, useRef } from "react";
 import { ASSERTIONMODES } from "../../../constants/index.js";
 import ConfirmCancelFooter from "../confirm-cancel-footer/ConfirmCancelFooter.jsx";
 import { useModeSocket } from "../../../hooks/useModeSocket.js";
+import { recordTextInPdfStep } from "../../../../utils/componentLibs.js";
 
-export default function FloatingAssertTextInPdf({ onConfirm, onCancel }) {
+export default function FloatingAssertTextInPdf({ onCancel, mode }) {
   const inputRef = useRef(null);
   const textBoxRef = useRef(null);
 
@@ -32,8 +33,15 @@ export default function FloatingAssertTextInPdf({ onConfirm, onCancel }) {
   };
 
   const handleConfirm = () => {
-    onConfirm(basePdf, expected, softAssert);
-    closeDockReset();
+    recordTextInPdfStep({
+      basePdfFileName: basePdf,
+      expected,
+      isSoftAssert: softAssert,
+      onCancel: handleCancel,
+      mode,
+    });
+    // onConfirm(basePdf, expected, softAssert);
+    // closeDockReset();
   };
 
   return (

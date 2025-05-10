@@ -5,6 +5,7 @@ import {
   getElementAttributes,
 } from "../../../../utils/componentLibs.js";
 import ConfirmCancelFooter from "../confirm-cancel-footer/ConfirmCancelFooter.jsx";
+import VarName from "../variable-name/VarName.jsx";
 import { useModeSocket } from "../../../hooks/useModeSocket.js";
 
 export default function FloatingElementGetAttrAssignDock({
@@ -14,21 +15,15 @@ export default function FloatingElementGetAttrAssignDock({
   mode,
   onCancel,
 }) {
-  const varNameInputRef = useRef(null);
   const [locatorName, setLocatorName] = useState("");
   const [varName, setVarName] = useState("");
+  const [varNameError, setVarNameError] = useState("");
   const [attributes, setAttributes] = useState([]);
   const [selectedAttrIndex, setSelectedAttrIndex] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
   useModeSocket(onCancel);
-
-  useEffect(() => {
-    if (varNameInputRef.current) {
-      varNameInputRef.current.focus();
-    }
-  }, []);
 
   useEffect(() => {
     const fetchAttributes = async () => {
@@ -98,18 +93,12 @@ export default function FloatingElementGetAttrAssignDock({
         <div className="assert-empty">No attributes found</div>
       )}
       <div className="pdf-text-container">
-        <div className="locator-name-container">
-          <label>Variable Name (Required)</label>
-
-          <input
-            ref={varNameInputRef}
-            type="text"
-            className="cookie-input"
-            value={varName}
-            onChange={(e) => setVarName(e.target.value)}
-            placeholder="Enter variable name.."
-          />
-        </div>
+        <VarName
+          varName={varName}
+          setVarName={setVarName}
+          varNameError={varNameError}
+          setVarNameError={setVarNameError}
+        />
         {/* Attribute Selector */}
         {attributes.length > 0 && selectedAttrIndex !== null && (
           <div className="locator-name-container">
@@ -147,7 +136,9 @@ export default function FloatingElementGetAttrAssignDock({
         onCancel={onCancel}
         onConfirm={handleConfirm}
         disableAutoFocus={true}
-        disabled={varName.trim() === "" || selectedAttrIndex === null}
+        disabled={
+          varName.trim() === "" || !!varNameError || selectedAttrIndex === null
+        }
       />
     </div>
   );
