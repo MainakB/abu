@@ -1,6 +1,7 @@
 (() => {
   const initializeOverlay = () => {
-    if (!document.documentElement) {
+    // if (!document.documentElement) {
+    if (!document.documentElement || !document.body) {
       console.warn("document.documentElement not ready, retrying...");
       requestIdleCallback(initializeOverlay);
       return;
@@ -11,13 +12,17 @@
     highlightBox.style.border = "2px solid rgba(255, 0, 0, 0.5)";
     highlightBox.style.backgroundColor = "rgba(255, 0, 0, 0.15)";
     highlightBox.style.borderRadius = "4px";
-    highlightBox.style.zIndex = "999998"; // Slightly below the panel (999999)
+    // highlightBox.style.zIndex = "999998"; // Slightly below the panel (999999)
+    highlightBox.style.zIndex = "2147483646";
     highlightBox.style.pointerEvents = "none";
     highlightBox.style.display = "none";
     highlightBox.style.transition = "all 0.1s ease";
     highlightBox.style.boxSizing = "border-box";
 
-    document.documentElement.appendChild(highlightBox);
+    // document.documentElement.appendChild(highlightBox);
+    document.body.appendChild(highlightBox);
+
+    let lastHoveredEl = null;
 
     document.addEventListener("mousemove", async (e) => {
       if (window.__isPaused()) return;
@@ -31,20 +36,25 @@
         target.closest("#floating-assert-dock-root")
       ) {
         highlightBox.style.display = "none";
+        lastHoveredEl = null;
         return;
       }
 
+      if (target === lastHoveredEl) return;
       const rect = target.getBoundingClientRect();
       highlightBox.style.left = `${rect.left + window.scrollX}px`;
       highlightBox.style.top = `${rect.top + window.scrollY}px`;
       highlightBox.style.width = `${rect.width}px`;
       highlightBox.style.height = `${rect.height}px`;
       highlightBox.style.display = "block";
+
+      lastHoveredEl = target;
     });
 
     document.addEventListener("mouseout", async (e) => {
       if (window.__isPaused()) return;
       highlightBox.style.display = "none";
+      lastHoveredEl = null;
     });
 
     console.log("✅ Overlay initialized");

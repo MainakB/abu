@@ -21,13 +21,6 @@ const initializeRecorderPanel = () => {
       requestIdleCallback(initializeRecorderPanel);
       return;
     }
-    // if (document.body) {
-    //   document.body.appendChild(rootEl);
-    // } else {
-    //   console.warn("document.body not ready. Retrying...");
-    //   requestIdleCallback(initializeRecorderPanel);
-    //   return;
-    // }
   }
 
   if (!rootEl.hasChildNodes()) {

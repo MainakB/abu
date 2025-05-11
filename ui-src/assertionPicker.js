@@ -56,25 +56,25 @@
     // An sync click listener to guardrail the next click listener which is async.
     // Because of being async the preventdefault does not run on time and hence we
     // have a sync click listener before to apply preventdefault and flags.
-    document.addEventListener(
-      "click",
-      (e) => {
-        const mode = window.__recorderStore.getMode();
+    // document.addEventListener(
+    //   "click",
+    //   (e) => {
+    //     const mode = window.__recorderStore.getMode();
 
-        if (!Object.values(assertionModes).includes(mode)) return;
-        if (!(e.target instanceof Element)) return;
-        if (
-          e.target.closest("#floating-assert-dock-root") ||
-          e.target.closest("#recorder-panel-root")
-        )
-          return;
+    //     if (!Object.values(assertionModes).includes(mode)) return;
+    //     if (!(e.target instanceof Element)) return;
+    //     if (
+    //       e.target.closest("#floating-assert-dock-root") ||
+    //       e.target.closest("#recorder-panel-root")
+    //     )
+    //       return;
 
-        e.preventDefault();
-        e.stopPropagation();
-        // e.stopImmediatePropagation();
-      },
-      true
-    );
+    //     e.preventDefault();
+    //     e.stopPropagation();
+    //     // e.stopImmediatePropagation();
+    //   },
+    //   true
+    // );
 
     document.addEventListener(
       "click",
