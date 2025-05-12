@@ -7,7 +7,12 @@ export const ASSERTIONMODES = {
   // NOTPRESENT: "isAbsent",
   ASSERTPRESENCE: "ASSERTPRESENCE",
   ASSERTABSENCE: "ASSERTABSENCE",
-  ATTRIBUTEVALUE: "attrValue",
+
+  ASSERTATTRIBUTEVALUEEQUALS: "ASSERTATTRIBUTEVALUEEQUALS",
+  ASSERTATTRIBUTEVALUENOTEQUALS: "ASSERTATTRIBUTEVALUENOTEQUALS",
+  ASSERTATTRIBUTEVALUECONTAINS: "ATTRIBUTEVALUECONTAINS",
+  ASSERTATTRIBUTEVALUENOTCONTAINS: "ASSERTATTRIBUTEVALUENOTCONTAINS",
+
   ASSERTCOOKIEVALUE: "assertCookieValue",
   CHECKBOXSTATE: "checkBoxState",
   RADIOSTATE: "radioState",
@@ -162,13 +167,6 @@ export const ASSERTIONNAMES = {
   ASSERTTEXTINPAGESOURCECONTAINS: "assertTextInPageSourceContains",
   ASSERTTEXTINPAGESOURCENOTCONTAINS: "assertTextInPageSourceNotContains",
 
-  ATTRIBUTEVALUE: "attrValue",
-
-  ATTRIBUTEVALUEEQUALS: "isAttrValueEquals",
-  ATTRIBUTEVALUECONTAINS: "isAttrValueContains",
-  NOTATTRIBUTEVALUEEQUALS: "isNotAttrValueEquals",
-  NOTATTRIBUTEVALUECONTAINS: "isNotAttrValueContains",
-
   CHECKBOXCHECKED: "isCheckBoxChecked",
   CHECKBOXNOTCHECKED: "isCheckBoxNotChecked",
   RADIOCHECKED: "isRadioChecked",
@@ -186,20 +184,8 @@ export const ASSERTIONNAMES = {
 
   NETPAYLOAD: "toHaveNetPayload",
   NETREQUEST: "toHaveValue",
-  // VISIBILITY: "isVisible",
-  // INVISIBILITY: "isNotVisible",
-  // INVISIBILITY: "isNotVisible",
-  // ENABLED: "isEnabled",
-  // DISABLED: "isDisabled",
-  // PRSENECE: "isPresent",
-  // NOTPRESENT: "isAbsent",
 
-  // NOTPRESENT="isAbsent",
   ADDCOOKIES: "addCookies",
-  // DELETECOOKIES: "deleteCookies",
-  // TAKESCREENSHOT: "takeScreenshot",
-  // ADDREUSESTEP: "addReuseStep",
-  // PAGERELOAD: "pageReload",
 
   ASSERTCURRENTURLEQUALS: "assertCurentUrlEquals",
   ASSERTCURRENTURLCONTAINS: "assertCurentUrlContains",
@@ -209,19 +195,19 @@ export const ASSERTIONNAMES = {
 
 export const FUNCTIONMAPPER = {
   ASSERTCURRENTURLEQUALS: {
-    key: "assertCurentUrlEquals",
-    name: "assertCurentUrlEquals",
+    key: ASSERTIONMODES.ASSERTCURRENTURLEQUALS,
+    name: "isAttrEquals",
   },
   ASSERTCURRENTURLNOTEQUALS: {
-    key: "assertCurentUrlNotEquals",
+    key: ASSERTIONMODES.ASSERTCURRENTURLNOTEQUALS,
     name: "assertCurentUrlNotEquals",
   },
   ASSERTCURRENTURLCONTAINS: {
-    key: "assertCurentUrlContains",
-    name: "assertCurentUrlContains",
+    key: ASSERTIONMODES.ASSERTCURRENTURLCONTAINS,
+    name: "assertElementContainsAttributeValue",
   },
   ASSERTCURRENTURLNOTCONTAINS: {
-    key: "assertCurentUrlNotContains",
+    key: ASSERTIONMODES.ASSERTCURRENTURLNOTCONTAINS,
     name: "assertCurentUrlNotContains",
   },
   CLICK: { key: "click", name: "click" },
@@ -229,20 +215,21 @@ export const FUNCTIONMAPPER = {
   TEXT: { key: "toHaveText", name: "elementTextEquals" },
   VALUE: "toHaveValue",
 
-  ATTRIBUTEVALUEEQUALS: {
-    key: "isAttrValueEquals",
-    name: "assertElementEqualAttributeValue",
+  ASSERTATTRIBUTEVALUEEQUALS: {
+    key: ASSERTIONMODES.ASSERTATTRIBUTEVALUEEQUALS,
+    name: "isAttrEquals",
   },
-  ATTRIBUTEVALUECONTAINS: {
-    key: "isAttrValueContains",
+  ASSERTATTRIBUTEVALUENOTEQUALS: {
+    key: ASSERTIONMODES.ASSERTATTRIBUTEVALUENOTEQUALS,
+    name: "isAttrNotEquals",
+  },
+  ASSERTATTRIBUTEVALUECONTAINS: {
+    key: ASSERTIONMODES.ASSERTATTRIBUTEVALUECONTAINS,
     name: "assertElementContainsAttributeValue",
   },
-  NOTATTRIBUTEVALUEEQUALS: {
-    key: "isNotAttrValueEquals",
-    name: "assertElementNotEqualAttributeValue",
-  },
-  NOTATTRIBUTEVALUECONTAINS: {
-    key: "isNotAttrValueContains",
+
+  ASSERTATTRIBUTEVALUENOTCONTAINS: {
+    key: ASSERTIONMODES.ASSERTATTRIBUTEVALUENOTCONTAINS,
     name: "assertElementNotContainsAttributeValue",
   },
 

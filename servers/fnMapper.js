@@ -300,48 +300,46 @@ export const ACTION_HANDLERS = {
     ];
   },
 
-  [FUNCTIONMAPPER.ATTRIBUTEVALUEEQUALS.key]: (arg, idx) => {
+  [FUNCTIONMAPPER.ASSERTATTRIBUTEVALUEEQUALS.key]: (arg, idx) => {
     const loc = constructLocators(arg, idx);
     const soft = arg.isSoftAssert ? ", isSoftAssert: true" : "";
     return [
       {
-        step: `And ${FUNCTIONMAPPER.ATTRIBUTEVALUEEQUALS.name}({po:"${loc.locKeyName}, atr: "${arg.attributeAssertPropName}", ea: "${arg.expected}"${soft}})`,
+        step: `And ${FUNCTIONMAPPER.ASSERTATTRIBUTEVALUEEQUALS.name}({po:"${loc.locKeyName}, atr: "${arg.attributeAssertPropName}", ea: "${arg.expected}"${soft}})`,
+        locator: loc.result,
+      },
+      loc.newIdx,
+    ];
+  },
+  [FUNCTIONMAPPER.ASSERTATTRIBUTEVALUENOTEQUALS.key]: (arg, idx) => {
+    const loc = constructLocators(arg, idx);
+    const soft = arg.isSoftAssert ? ", isSoftAssert: true" : "";
+    return [
+      {
+        step: `And ${FUNCTIONMAPPER.ASSERTATTRIBUTEVALUENOTEQUALS.name}({po:"${loc.locKeyName}, atr: "${arg.attributeAssertPropName}", ea: "${arg.expected}"${soft}})`,
+        locator: loc.result,
+      },
+      loc.newIdx,
+    ];
+  },
+  [FUNCTIONMAPPER.ASSERTATTRIBUTEVALUECONTAINS.key]: (arg, idx) => {
+    const loc = constructLocators(arg, idx);
+    const soft = arg.isSoftAssert ? ", isSoftAssert: true" : "";
+    return [
+      {
+        step: `And ${FUNCTIONMAPPER.ASSERTATTRIBUTEVALUECONTAINS.name}({po:"${loc.locKeyName}, atr: "${arg.attributeAssertPropName}", ea: "${arg.expected}"${soft}})`,
         locator: loc.result,
       },
       loc.newIdx,
     ];
   },
 
-  [FUNCTIONMAPPER.NOTATTRIBUTEVALUEEQUALS.key]: (arg, idx) => {
+  [FUNCTIONMAPPER.ASSERTATTRIBUTEVALUENOTCONTAINS.key]: (arg, idx) => {
     const loc = constructLocators(arg, idx);
     const soft = arg.isSoftAssert ? ", isSoftAssert: true" : "";
     return [
       {
-        step: `And ${FUNCTIONMAPPER.NOTATTRIBUTEVALUEEQUALS.name}({po:"${loc.locKeyName}, atr: "${arg.attributeAssertPropName}", ea: "${arg.expected}"${soft}})`,
-        locator: loc.result,
-      },
-      loc.newIdx,
-    ];
-  },
-
-  [FUNCTIONMAPPER.ATTRIBUTEVALUECONTAINS.key]: (arg, idx) => {
-    const loc = constructLocators(arg, idx);
-    const soft = arg.isSoftAssert ? ", isSoftAssert: true" : "";
-    return [
-      {
-        step: `And ${FUNCTIONMAPPER.ATTRIBUTEVALUECONTAINS.name}({po:"${loc.locKeyName}, atr: "${arg.attributeAssertPropName}", ea: "${arg.expected}"${soft}})`,
-        locator: loc.result,
-      },
-      loc.newIdx,
-    ];
-  },
-
-  [FUNCTIONMAPPER.NOTATTRIBUTEVALUECONTAINS.key]: (arg, idx) => {
-    const loc = constructLocators(arg, idx);
-    const soft = arg.isSoftAssert ? ", isSoftAssert: true" : "";
-    return [
-      {
-        step: `And ${FUNCTIONMAPPER.NOTATTRIBUTEVALUECONTAINS.name}({po:"${loc.locKeyName}, atr: "${arg.attributeAssertPropName}", ea: "${arg.expected}"${soft}})`,
+        step: `And ${FUNCTIONMAPPER.ASSERTATTRIBUTEVALUENOTCONTAINS.name}({po:"${loc.locKeyName}, atr: "${arg.attributeAssertPropName}", ea: "${arg.expected}"${soft}})`,
         locator: loc.result,
       },
       loc.newIdx,

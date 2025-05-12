@@ -71,16 +71,17 @@ const ASSERTION_NAME_LOOKUP = {
     },
   },
 
-  [ASSERTIONMODES.ATTRIBUTEVALUE]: {
+  [ASSERTIONMODES.ASSERTATTRIBUTEVALUEEQUALS]: {
     exact: {
-      positive: ASSERTIONNAMES.ATTRIBUTEVALUEEQUALS,
-      negative: ASSERTIONNAMES.NOTATTRIBUTEVALUEEQUALS,
+      positive: ASSERTIONMODES.ASSERTATTRIBUTEVALUEEQUALS,
+      negative: ASSERTIONMODES.ASSERTATTRIBUTEVALUENOTEQUALS,
     },
     contains: {
-      positive: ASSERTIONNAMES.ATTRIBUTEVALUECONTAINS,
-      negative: ASSERTIONNAMES.NOTATTRIBUTEVALUECONTAINS,
+      positive: ASSERTIONMODES.ASSERTATTRIBUTEVALUECONTAINS,
+      negative: ASSERTIONMODES.ASSERTATTRIBUTEVALUENOTCONTAINS,
     },
   },
+
   //
   [ASSERTIONMODES.ASSERTTEXTINPDF]: {
     exact: {
@@ -744,5 +745,47 @@ export const floatingAssertDockNonTextConfirm = async ({
       text: textValue,
     })
   );
+  await closeDock();
+};
+
+export const recordAttributesAssert = async ({
+  selectedAssertions,
+  isSoftAssert,
+  locatorName,
+  el,
+  e,
+  closeDock,
+  textValue,
+  mode,
+}) => {
+  const assertionMapping = ASSERTION_NAME_LOOKUP[mode];
+
+  for (let i = 0; i < selectedAssertions.length; i++) {
+    const attrObj = selectedAssertions[i];
+    const category = attrObj.isSubstringMatch ? "contains" : "exact";
+    const polarity = attrObj.isNegative ? "negative" : "positive";
+    const attrMode = assertionMapping[category][polarity];
+
+    const locSubstring = attrObj.attributeName
+      .replace(/[ -]/g, "_")
+      .toLowerCase();
+
+    window.__recordAction(
+      window.__buildData({
+        action: "assert",
+        ...(locatorName && locatorName !== ""
+          ? { locatorName: `${locatorName}_${locSubstring}` }
+          : locatorName),
+        isSoftAssert,
+        assertion: attrMode,
+        attributeAssertPropName: attrObj.attributeName,
+        expected: attrObj.value,
+        el,
+        e,
+        textValue,
+      })
+    );
+  }
+
   await closeDock();
 };

@@ -119,17 +119,6 @@ window.showFloatingAssert = (mode, el, e, type) => {
         negative: ASSERTIONNAMES.ASSERTCOOKIEVALUENOTCONTAINS,
       },
     },
-
-    [ASSERTIONMODES.ATTRIBUTEVALUE]: {
-      exact: {
-        positive: ASSERTIONNAMES.ATTRIBUTEVALUEEQUALS,
-        negative: ASSERTIONNAMES.NOTATTRIBUTEVALUEEQUALS,
-      },
-      contains: {
-        positive: ASSERTIONNAMES.ATTRIBUTEVALUECONTAINS,
-        negative: ASSERTIONNAMES.NOTATTRIBUTEVALUECONTAINS,
-      },
-    },
   };
 
   const closeDock = async () => {
@@ -148,42 +137,6 @@ window.showFloatingAssert = (mode, el, e, type) => {
   const getCookies = async () => {
     const cookies = await window.__getCookies();
     return cookies;
-  };
-
-  const recordAttributesAssert = async (
-    selectedAssertions = [],
-    isSoftAssert,
-    locatorName
-  ) => {
-    const assertionMapping = ASSERTION_NAME_LOOKUP[mode];
-
-    for (let i = 0; i < selectedAssertions.length; i++) {
-      const attrObj = selectedAssertions[i];
-      const category = attrObj.isSubstringMatch ? "contains" : "exact";
-      const polarity = attrObj.isNegative ? "negative" : "positive";
-      const attrMode = assertionMapping[category][polarity];
-
-      const locSubstring = attrObj.attributeName
-        .replace(/[ -]/g, "_")
-        .toLowerCase();
-
-      window.__recordAction(
-        window.__buildData({
-          action: "assert",
-          ...(locatorName && locatorName !== ""
-            ? { locatorName: `${locatorName}_${locSubstring}` }
-            : locatorName),
-          isSoftAssert,
-          assertion: attrMode,
-          attributeAssertPropName: attrObj.attributeName,
-          expected: attrObj.value,
-          el,
-          e,
-        })
-      );
-    }
-
-    await closeDock();
   };
 
   const recordCookiesAssert = async (selectedAssertions, isSoftAssert) => {
@@ -385,14 +338,14 @@ window.showFloatingAssert = (mode, el, e, type) => {
           onConfirm={floatingAssertCurrentUrlConfirm}
         />
       );
-    } else if (type === ASSERTIONMODES.ATTRIBUTEVALUE) {
+    } else if (type === ASSERTIONMODES.ASSERTATTRIBUTEVALUEEQUALS) {
       floatingAssertRoot.render(
         <AssertAttributeValueDock
-          // getAttributes={getElementAttributes}
           mode={mode}
           el={el}
+          e={e}
           onCancel={closeDock}
-          onConfirm={recordAttributesAssert}
+          textValue={textValue}
         />
       );
     } else if (type === ASSERTIONMODES.ASSERTCOOKIEVALUE) {

@@ -1,14 +1,18 @@
 import React, { useState, useEffect } from "react";
 import ConfirmCancelFooter from "../confirm-cancel-footer/ConfirmCancelFooter.jsx";
 import { useModeSocket } from "../../../hooks/useModeSocket.js";
-import { getElementAttributes } from "../../../../utils/componentLibs.js";
+import {
+  getElementAttributes,
+  recordAttributesAssert,
+} from "../../../../utils/componentLibs.js";
 
 export default function AssertAttributeValueDock({
   // getAttributes,
   el,
   mode,
-  onConfirm,
+  e,
   onCancel,
+  textValue,
 }) {
   // Initialize state for each attribute
   const [attributeStates, setAttributeStates] = useState([]);
@@ -98,8 +102,18 @@ export default function AssertAttributeValueDock({
         isNegative: attr.isNegative,
         isSubstringMatch: attr.isSubstringMatch,
       }));
-    onConfirm(selectedAssertions, softAssert, locatorName);
-    setSoftAssert(false);
+    recordAttributesAssert({
+      el,
+      e,
+      selectedAssertions: selectedAssertions,
+      softAssert,
+      locatorName,
+      closeDock: handleCancel,
+      textValue,
+      mode,
+    });
+    // onConfirm(selectedAssertions, softAssert, locatorName);
+    // setSoftAssert(false);
   };
 
   return (

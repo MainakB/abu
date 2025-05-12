@@ -7,7 +7,7 @@ export default function ElementAssertionsList({
   getAssertDock,
 }) {
   const elmentAssertionItems = [
-    [ASSERTIONMODES.ATTRIBUTEVALUE, "Assert Attribute Value"],
+    [ASSERTIONMODES.ASSERTATTRIBUTEVALUEEQUALS, "Assert Attribute Value"],
     [ASSERTIONMODES.ASSERTVISIBILITY, "Assert Element Visible"],
     [ASSERTIONMODES.ASSERTPRESENCE, "Assert Element Present"],
     [ASSERTIONMODES.ASSERTENABLED, "Assert Element Enabled"],
