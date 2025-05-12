@@ -8,8 +8,9 @@ export default function ElementAssertionsList({
 }) {
   const elmentAssertionItems = [
     [ASSERTIONMODES.ATTRIBUTEVALUE, "Assert Attribute Value"],
-    [ASSERTIONMODES.PRSENECE, "Assert Element Present"],
-    [ASSERTIONMODES.ENABLED, "Assert Element Enabled"],
+    [ASSERTIONMODES.ASSERTVISIBILITY, "Assert Element Visible"],
+    [ASSERTIONMODES.ASSERTPRESENCE, "Assert Element Present"],
+    [ASSERTIONMODES.ASSERTENABLED, "Assert Element Enabled"],
     [ASSERTIONMODES.RADIOSTATE, "Assert Radio State"],
     [ASSERTIONMODES.CHECKBOXSTATE, "Assert Checkbox State"],
   ];

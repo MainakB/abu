@@ -21,22 +21,22 @@ const ASSERTION_NAME_LOOKUP = {
       negative: ASSERTIONNAMES.VALUECONTAINS,
     },
   },
-  [ASSERTIONMODES.PRSENECE]: {
+  [ASSERTIONMODES.ASSERTPRESENCE]: {
     exact: {
-      positive: ASSERTIONNAMES.PRSENECE,
-      negative: ASSERTIONNAMES.NOTPRESENT,
+      positive: ASSERTIONMODES.ASSERTPRESENCE,
+      negative: ASSERTIONMODES.ASSERTABSENCE,
     },
   },
-  [ASSERTIONMODES.ENABLED]: {
+  [ASSERTIONMODES.ASSERTENABLED]: {
     exact: {
-      positive: ASSERTIONNAMES.ENABLED,
-      negative: ASSERTIONNAMES.DISABLED,
+      positive: ASSERTIONMODES.ASSERTENABLED,
+      negative: ASSERTIONMODES.ASSERTDISABLED,
     },
   },
-  [ASSERTIONMODES.VISIBILITY]: {
+  [ASSERTIONMODES.ASSERTVISIBILITY]: {
     exact: {
-      positive: ASSERTIONNAMES.VISIBILITY,
-      negative: ASSERTIONNAMES.INVISIBILITY,
+      positive: ASSERTIONMODES.ASSERTVISIBILITY,
+      negative: ASSERTIONMODES.ASSERTINVISIBILITY,
     },
   },
 
@@ -716,4 +716,33 @@ export const onConfirmElemMatch = ({
     })
   );
   onCancel();
+};
+
+export const floatingAssertDockNonTextConfirm = async ({
+  isSoftAssert,
+  isNegative,
+  locatorName,
+  closeDock,
+  mode,
+  textValue,
+  el,
+  e,
+}) => {
+  const assertionMapping = ASSERTION_NAME_LOOKUP[mode];
+  const category = "exact";
+  const polarity = isNegative ? "negative" : "positive";
+  const assertName = assertionMapping[category][polarity];
+
+  window.__recordAction(
+    window.__buildData({
+      action: "assert",
+      locatorName,
+      isSoftAssert,
+      assertion: assertName,
+      el,
+      e,
+      text: textValue,
+    })
+  );
+  await closeDock();
 };

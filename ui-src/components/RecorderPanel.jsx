@@ -285,8 +285,13 @@ export default function RecorderPanel() {
         </button>
         <button
           title="Assert visibility"
-          className={getClassNameForAssert(mode, ASSERTIONMODES.VISIBILITY)}
-          onClick={async () => await toggleMode(ASSERTIONMODES.VISIBILITY)}
+          className={getClassNameForAssert(
+            mode,
+            ASSERTIONMODES.ASSERTVISIBILITY
+          )}
+          onClick={async () =>
+            await toggleMode(ASSERTIONMODES.ASSERTVISIBILITY)
+          }
           disabled={window.__isPaused()}
         >
           {tickMap.visibility ? "✅" : "👁️"}

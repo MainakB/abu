@@ -89,25 +89,6 @@ window.showFloatingAssert = (mode, el, e, type) => {
         negative: ASSERTIONNAMES.VALUECONTAINS,
       },
     },
-    [ASSERTIONMODES.PRSENECE]: {
-      exact: {
-        positive: ASSERTIONNAMES.PRSENECE,
-        negative: ASSERTIONNAMES.NOTPRESENT,
-      },
-    },
-    [ASSERTIONMODES.ENABLED]: {
-      exact: {
-        positive: ASSERTIONNAMES.ENABLED,
-        negative: ASSERTIONNAMES.DISABLED,
-      },
-    },
-    [ASSERTIONMODES.VISIBILITY]: {
-      exact: {
-        positive: ASSERTIONNAMES.VISIBILITY,
-        negative: ASSERTIONNAMES.INVISIBILITY,
-      },
-    },
-
     [ASSERTIONMODES.ASSERTCURRENTURL]: {
       exact: {
         positive: ASSERTIONNAMES.ASSERTCURRENTURLEQUALS,
@@ -372,30 +353,6 @@ window.showFloatingAssert = (mode, el, e, type) => {
     await closeDock();
   };
 
-  const floatingAssertDockNonTextConfirm = async (
-    isSoftAssert,
-    isNegative,
-    locatorName
-  ) => {
-    const assertionMapping = ASSERTION_NAME_LOOKUP[mode];
-    const category = "exact";
-    const polarity = isNegative ? "negative" : "positive";
-    const assertName = assertionMapping[category][polarity];
-
-    window.__recordAction(
-      window.__buildData({
-        action: "assert",
-        locatorName,
-        isSoftAssert,
-        assertion: assertName,
-        el,
-        e,
-        text: textValue,
-      })
-    );
-    await closeDock();
-  };
-
   const floatingCookieListDockConfirm = async (cookieList) => {
     window.__recordAction(
       window.__buildData({
@@ -462,16 +419,17 @@ window.showFloatingAssert = (mode, el, e, type) => {
         />
       );
     } else if (
-      type === ASSERTIONMODES.VISIBILITY ||
-      type === ASSERTIONMODES.ENABLED ||
-      type === ASSERTIONMODES.PRSENECE
+      type === ASSERTIONMODES.ASSERTVISIBILITY ||
+      type === ASSERTIONMODES.ASSERTENABLED ||
+      type === ASSERTIONMODES.ASSERTPRESENCE
     ) {
       floatingAssertRoot.render(
         <FloatingAssertDockNonText
           mode={mode}
           el={el}
+          e={e}
           onCancel={closeDock}
-          onConfirm={floatingAssertDockNonTextConfirm}
+          textValue={textValue}
         />
       );
     } else if (type === ASSERTIONMODES.ADDCOOKIES) {

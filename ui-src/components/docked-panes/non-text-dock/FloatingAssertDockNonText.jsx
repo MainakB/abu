@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { ASSERTIONMODES } from "../../../constants/index.js";
 import ConfirmCancelFooter from "../confirm-cancel-footer/ConfirmCancelFooter.jsx";
 import { useModeSocket } from "../../../hooks/useModeSocket.js";
+import { floatingAssertDockNonTextConfirm } from "../../../../utils/componentLibs.js";
 
 function getOwnText(el) {
   return [...el.childNodes]
@@ -13,15 +14,17 @@ function getOwnText(el) {
 
 function getHeader(type) {
   const base = "Assert Element Is";
-  if (type === ASSERTIONMODES.VISIBILITY) return `${base} Visible`;
-  if (type === ASSERTIONMODES.ENABLED) return `${base} Enabled`;
-  if (type === ASSERTIONMODES.PRSENECE) return `${base} Present`;
+  if (type === ASSERTIONMODES.ASSERTVISIBILITY) return `${base} Visible`;
+  if (type === ASSERTIONMODES.ASSERTENABLED) return `${base} Enabled`;
+  if (type === ASSERTIONMODES.ASSERTPRESENCE) return `${base} Present`;
 }
 export default function FloatingAssertDockNonText({
   el,
+  e,
   mode,
   onConfirm,
   onCancel,
+  textValue,
 }) {
   const [softAssert, setSoftAssert] = useState(false);
   const [isNegative, setIsNegative] = useState(false);
@@ -39,8 +42,18 @@ export default function FloatingAssertDockNonText({
   };
 
   const handleConfirm = () => {
-    onConfirm(softAssert, isNegative, locatorName);
-    setSoftAssert(false);
+    floatingAssertDockNonTextConfirm({
+      isSoftAssert: softAssert,
+      isNegative,
+      locatorName,
+      closeDock: onCancel,
+      mode,
+      textValue,
+      el,
+      e,
+    });
+    // onConfirm(softAssert, isNegative, locatorName);
+    // setSoftAssert(false);
   };
 
   return (

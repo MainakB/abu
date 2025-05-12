@@ -252,24 +252,48 @@ export const ACTION_HANDLERS = {
     ];
   },
 
-  [FUNCTIONMAPPER.VISIBILITY.key]: (arg, idx) => {
+  [FUNCTIONMAPPER.ASSERTVISIBILITY.key]: (arg, idx) => {
     const loc = constructLocators(arg, idx);
     const soft = arg.isSoftAssert ? ", isSoftAssert: true" : "";
     return [
       {
-        step: `And ${FUNCTIONMAPPER.VISIBILITY.name}({po:"${loc.locKeyName}"${soft}})`,
+        step: `And ${FUNCTIONMAPPER.ASSERTVISIBILITY.name}({po:"${loc.locKeyName}"${soft}})`,
         locator: loc.result,
       },
       loc.newIdx,
     ];
   },
 
-  [FUNCTIONMAPPER.INVISIBILITY.key]: (arg, idx) => {
+  [FUNCTIONMAPPER.ASSERTINVISIBILITY.key]: (arg, idx) => {
     const loc = constructLocators(arg, idx);
     const soft = arg.isSoftAssert ? ", isSoftAssert: true" : "";
     return [
       {
-        step: `And ${FUNCTIONMAPPER.INVISIBILITY.name}({po:"${loc.locKeyName}"${soft}})`,
+        step: `And ${FUNCTIONMAPPER.ASSERTINVISIBILITY.name}({po:"${loc.locKeyName}"${soft}})`,
+        locator: loc.result,
+      },
+      loc.newIdx,
+    ];
+  },
+
+  [FUNCTIONMAPPER.ASSERTENABLED.key]: (arg, idx) => {
+    const loc = constructLocators(arg, idx);
+    const soft = arg.isSoftAssert ? ", isSoftAssert: true" : "";
+    return [
+      {
+        step: `And ${FUNCTIONMAPPER.ASSERTENABLED.name}({po:"${loc.locKeyName}"${soft}})`,
+        locator: loc.result,
+      },
+      loc.newIdx,
+    ];
+  },
+
+  [FUNCTIONMAPPER.ASSERTDISABLED.key]: (arg, idx) => {
+    const loc = constructLocators(arg, idx);
+    const soft = arg.isSoftAssert ? ", isSoftAssert: true" : "";
+    return [
+      {
+        step: `And ${FUNCTIONMAPPER.ASSERTDISABLED.name}({po:"${loc.locKeyName}"${soft}})`,
         locator: loc.result,
       },
       loc.newIdx,
@@ -1173,6 +1197,29 @@ export const ACTION_HANDLERS = {
         step: `And ${FUNCTIONMAPPER.DELETECOOKIE.name}("${arg.cookieName}")`,
       },
       idx,
+    ];
+  },
+
+  [FUNCTIONMAPPER.ASSERTPRESENCE.key]: (arg, idx) => {
+    const loc = constructLocators(arg, idx);
+    const soft = arg.isSoftAssert ? ", isSoftAssert: true" : "";
+    return [
+      {
+        step: `And ${FUNCTIONMAPPER.ASSERTPRESENCE.name}({po:"${loc.locKeyName}"${soft}})`,
+        locator: loc.result,
+      },
+      loc.newIdx,
+    ];
+  },
+  [FUNCTIONMAPPER.ASSERTABSENCE.key]: (arg, idx) => {
+    const loc = constructLocators(arg, idx);
+    const soft = arg.isSoftAssert ? ", isSoftAssert: true" : "";
+    return [
+      {
+        step: `And ${FUNCTIONMAPPER.ASSERTABSENCE.name}({po:"${loc.locKeyName}"${soft}})`,
+        locator: loc.result,
+      },
+      loc.newIdx,
     ];
   },
 };
