@@ -217,7 +217,7 @@ export default function RecorderPanel() {
       await Promise.all([
         window.__recordAction(
           window.__buildData({
-            action: "takeScreenshot",
+            action: ASSERTIONMODES.TAKESCREENSHOT,
           })
         ),
         window.__recorderStore.setMode("record", false),
@@ -226,7 +226,7 @@ export default function RecorderPanel() {
       await Promise.all([
         window.__recordAction(
           window.__buildData({
-            action: "pageReload",
+            action: ASSERTIONMODES.PAGERELOAD,
           })
         ),
         window.__recorderStore.setMode("record", false),

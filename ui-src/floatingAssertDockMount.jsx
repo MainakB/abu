@@ -21,6 +21,8 @@ import FloatingElementAttrEqualsAssignDock from "./components/docked-panes/eleme
 import FloatingElementCheckboxRadioAssignDock from "./components/docked-panes/element-based-assignment/FloatingElementCheckboxRadioAssignDock.jsx";
 import FloatingDrodownSelectedAssignDock from "./components/docked-panes/element-based-assignment/FloatingDrodownSelectedAssignDock.jsx";
 import FloatingDBDataAssignDock from "./components/docked-panes/db-assignments/FloatingDBDataAssignDock.jsx";
+import TabbedAssertionDock from "./components/docked-panes/tabbed-assign-match/TabbedAssertionDock.jsx";
+import FloatingElementTextMatchDock from "./components/docked-panes/element-based-match/FloatingElementTextMatchDock.jsx";
 import { ASSERTIONMODES, ASSERTIONNAMES } from "./constants/index.js";
 
 let floatingAssertRoot = null;
@@ -404,16 +406,6 @@ window.showFloatingAssert = (mode, el, e, type) => {
     await Promise.all([window.__addCookies(cookieList), closeDock()]);
   };
 
-  const floatingDeleteCookieDockConfirm = async (cookieList) => {
-    window.__recordAction(
-      window.__buildData({
-        action: "deleteCookies",
-        cookies: cookieList,
-      })
-    );
-    await Promise.all([window.__deleteCookies(cookieList), closeDock()]);
-  };
-
   try {
     if (
       type === ASSERTIONMODES.TEXT ||
@@ -491,16 +483,12 @@ window.showFloatingAssert = (mode, el, e, type) => {
       );
     } else if (type === ASSERTIONMODES.DELETECOOKIES) {
       floatingAssertRoot.render(
-        <FloatingDeleteCookieDock
-          onCancel={closeDock}
-          onConfirm={floatingDeleteCookieDockConfirm}
-        />
+        <FloatingDeleteCookieDock onCancel={closeDock} />
       );
     } else if (
       type === ASSERTIONMODES.DROPDOWNCONTAINS ||
       type === ASSERTIONMODES.DROPDOWNCOUNTIS ||
       type === ASSERTIONMODES.DROPDOWNCOUNTISNOT ||
-      // type === ASSERTIONMODES.DROPDOWNINALPHABETICORDER ||
       type === ASSERTIONMODES.DROPDOWNNOTSELECTED ||
       type === ASSERTIONMODES.DROPDOWNSELECTED ||
       type === ASSERTIONMODES.DROPDOWNVALUESARE ||
@@ -567,12 +555,39 @@ window.showFloatingAssert = (mode, el, e, type) => {
       type === ASSERTIONMODES.GETINNERHTML
     ) {
       floatingAssertRoot.render(
-        <FloatingElementTextAssignmentDock
-          mode={mode}
-          el={el}
-          onCancel={closeDock}
-          e={e}
-          textValue={textValue}
+        <TabbedAssertionDock
+          defaultTab="assignment"
+          tabs={[
+            {
+              key: "assignment",
+              label: "Assignment",
+              component: (
+                <FloatingElementTextAssignmentDock
+                  mode={mode}
+                  el={el}
+                  onCancel={closeDock}
+                  e={e}
+                  textValue={textValue}
+                  tabbed={true}
+                  overrideConfirmCancelFlexEnd={true}
+                />
+              ),
+            },
+            {
+              key: "match",
+              label: "Match",
+              component: (
+                <FloatingElementTextMatchDock
+                  mode={mode}
+                  el={el}
+                  onCancel={closeDock}
+                  e={e}
+                  textValue={textValue}
+                  tabbed={true}
+                />
+              ),
+            },
+          ]}
         />
       );
     } else if (type === ASSERTIONMODES.GETATTRIBUTE) {

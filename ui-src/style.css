@@ -18,6 +18,7 @@
   --recorder-success-border: #c8e6c9;
   --recorder-scrollbar: #c0c0c0;
   --recorder-scrollbar-hover: #999;
+  --recorder-info-color: #007bff;
 }
 
 /* Media query to detect dark mode preference */
@@ -40,6 +41,7 @@
     --recorder-success-border: #3a4c3c;
     --recorder-scrollbar: #555;
     --recorder-scrollbar-hover: #777;
+    --recorder-info-color: #007bff;
   }
 }
 
@@ -59,6 +61,8 @@
 .drawer *,
 #floating-cookie-list-dock,
 #floating-cookie-list-dock *,
+#floating-tab-list-dock,
+#floating-tab-list-dock *,
 #floating-cookie-delete-dock,
 #floating-cookie-delete-dock *,
 #floating-assert-dock-root,
@@ -77,6 +81,7 @@
 
 #floating-assert-dock-root,
 #floating-cookie-list-dock,
+#floating-tab-list-dock,
 #floating-cookie-delete-dock,
 #floating-assert-attribute-dock {
   background: var(--recorder-bg-color) !important;
@@ -85,6 +90,7 @@
 
 #floating-assert-dock-root .docked-pane-footer-confirm-cancel,
 #floating-cookie-list-dock .docked-pane-footer-confirm-cancel,
+#floating-tab-list-dock .docked-pane-footer-confirm-cancel,
 #floating-cookie-delete-dock .docked-pane-footer-confirm-cancel,
 .docked-pane-locator-container {
   background: var(--recorder-panel-footer) !important;
@@ -118,6 +124,7 @@
 .recorder-panel *,
 .drawer *,
 #floating-cookie-list-dock *,
+#floating-tab-list-dock *,
 #floating-cookie-delete-dock *,
 #floating-assert-dock-root *,
 #floating-assert-attribute-dock * {
@@ -212,6 +219,7 @@ button.disabled:focus {
 .recorder-panel button,
 .drawer button,
 #floating-cookie-list-dock button,
+#floating-tab-list-dock button,
 #floating-cookie-delete-dock button {
   appearance: none;
   -webkit-appearance: none;
@@ -258,7 +266,8 @@ button.disabled:focus {
 }
 
 /* Compact footer */
-#floating-assert-dock-root .docked-pane-footer-confirm-cancel {
+#floating-assert-dock-root .docked-pane-footer-confirm-cancel,
+#floating-tab-list-dock .docked-pane-footer-confirm-cancel {
   border-top: 1px solid #eee !important;
   background: #fafafa !important;
   padding: 10px 16px !important;
@@ -268,6 +277,20 @@ button.disabled:focus {
   justify-content: space-between !important;
   align-items: center !important;
   gap: 12px !important;
+  border-radius: 0 0 10px 10px !important;
+}
+
+#floating-tab-list-dock-justifyend .docked-pane-footer-confirm-cancel {
+  border-top: 1px solid #eee !important;
+  background: #fafafa !important;
+  padding: 10px 16px !important;
+  margin: 0 !important;
+  display: flex !important;
+  flex-direction: row !important;
+  justify-content: flex-end !important;
+  gap: 10px !important;
+  align-items: center !important;
+  border-radius: 0 0 10px 10px !important;
 }
 
 /* Cookie footer specific as it will not have soft assert checkbox in footer */
@@ -687,6 +710,46 @@ button.disabled:focus {
   box-sizing: border-box !important;
 }
 
+#floating-tab-list-dock {
+  position: static !important;
+  /* margin-top: 40px !important; */
+  bottom: 20px !important;
+  left: 20px !important;
+  padding: 0 !important;
+  background: #fff !important;
+  border: 1px solid #ccc !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3) !important;
+  z-index: 999999 !important;
+  min-width: 420px !important;
+  max-height: 80vh !important;
+  font-size: 14px !important;
+  /* border-radius: 10px !important; */
+  border-radius: 0 0 10px 10px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  box-sizing: border-box !important;
+}
+
+#floating-tab-list-dock-justifyend {
+  position: static !important;
+  /* margin-top: 40px !important; */
+  bottom: 20px !important;
+  left: 20px !important;
+  padding: 0 !important;
+  background: #fff !important;
+  border: 1px solid #ccc !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3) !important;
+  z-index: 999999 !important;
+  min-width: 420px !important;
+  max-height: 80vh !important;
+  font-size: 14px !important;
+  /* border-radius: 10px !important; */
+  border-radius: 0 0 10px 10px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  box-sizing: border-box !important;
+}
+
 /* Fix input styling */
 .cookie-input,
 .delete-cookie-input {
@@ -941,16 +1004,20 @@ button.disabled:focus {
 
 /* Override any inherited styles */
 #floating-cookie-list-dock *,
+#floating-tab-list-dock *,
 #floating-cookie-delete-dock * {
   box-sizing: border-box !important;
 }
 
 /* Ensure consistent layout */
 #floating-cookie-list-dock input[type="text"],
+#floating-tab-list-dock input[type="text"],
 #floating-cookie-delete-dock input[type="text"],
 #floating-cookie-list-dock input[type="checkbox"],
+#floating-tab-list-dock input[type="checkbox"],
 #floating-cookie-delete-dock input[type="checkbox"],
 #floating-cookie-list-dock select,
+#floating-tab-list-dock select,
 #floating-cookie-delete-dock select {
   appearance: auto !important;
   background: var(--recorder-checkbox-bg) !important;
@@ -1201,6 +1268,7 @@ gap: 12px !important; */
 html body .recorder-panel,
 html body .drawer,
 html body #floating-cookie-list-dock,
+html body #floating-tab-list-dock,
 html body #floating-cookie-delete-dock,
 html body #floating-assert-dock-root,
 html body #floating-assert-attribute-dock {
@@ -1323,4 +1391,31 @@ html body #floating-assert-attribute-dock {
   padding: 0;
   line-height: 1;
   filter: grayscale(100%) brightness(0.8);
+}
+
+
+/* Tabbed dock */
+.tabbed-dock-tabs-wrapper {
+  position: fixed;
+  min-width: 420px;
+  max-height: 80vh;
+  left: 20px;
+  z-index: 2147483647 !important;
+  background: var(--recorder-bg-color) !important;
+  border: 1px solid var(--recorder-border-color) !important;
+  border-radius: 10px 10px 0 0;
+  display: flex;
+  overflow: hidden !important;
+}
+
+label .info-tooltip-icon {
+  all: unset;
+  display: inline;
+  /* padding-left: 3px !important; */
+  margin-left: 3px !important;
+  font-size: 14px;
+  cursor: help;
+  /* color: var(--recorder-info-color) !important; */
+  color: var(--recorder-subtle-color) !important;
+  transition: color 0.2s ease;
 }

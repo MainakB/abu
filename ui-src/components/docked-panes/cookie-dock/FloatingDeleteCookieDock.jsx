@@ -1,9 +1,10 @@
 import React, { useState, useRef, useEffect } from "react";
 import { TransitionGroup, CSSTransition } from "react-transition-group";
 import ConfirmCancelFooter from "../confirm-cancel-footer/ConfirmCancelFooter.jsx";
+import { floatingDeleteCookieDockConfirm } from "../../../../utils/componentLibs.js";
 import { useModeSocket } from "../../../hooks/useModeSocket.js";
 
-export default function FloatingDeleteCookieDock({ onConfirm, onCancel }) {
+export default function FloatingDeleteCookieDock({ onCancel }) {
   const inputRefs = useRef([]);
 
   const [names, setNames] = useState([""]);
@@ -53,11 +54,11 @@ export default function FloatingDeleteCookieDock({ onConfirm, onCancel }) {
 
   const handleDeleteAllToggle = () => {
     const next = !deleteAll;
+    setDeleteAll(next);
     if (next) {
       setNames([""]);
       setTouched([false]);
     }
-    setDeleteAll(next);
   };
 
   const handleCancel = () => {
@@ -66,7 +67,12 @@ export default function FloatingDeleteCookieDock({ onConfirm, onCancel }) {
   };
 
   const handleConfirm = () => {
-    onConfirm(deleteAll ? [] : names);
+    // onConfirm(deleteAll ? [] : names);
+    floatingDeleteCookieDockConfirm(
+      deleteAll ? [] : names,
+      onCancel,
+      window.__deleteCookies
+    );
     reset();
   };
 
@@ -89,7 +95,7 @@ export default function FloatingDeleteCookieDock({ onConfirm, onCancel }) {
           <span>Delete all cookies</span>
         </label>
 
-        <TransitionGroup>
+        <TransitionGroup key={deleteAll ? "no-inputs" : "inputs"}>
           {!deleteAll &&
             names.map((name, index) => (
               <CSSTransition
@@ -112,9 +118,14 @@ export default function FloatingDeleteCookieDock({ onConfirm, onCancel }) {
                       onChange={(e) => update(index, e.target.value)}
                       onBlur={() => markTouched(index)}
                     />
-                    {touched[index] && !name.trim() && (
-                      <div className="delete-cookie-error">Name required</div>
-                    )}
+                    {!deleteAll &&
+                      touched[index] &&
+                      !name.trim() &&
+                      names.length > 0 && (
+                        <div className="delete-cookie-error">
+                          * Name required
+                        </div>
+                      )}
                   </label>
 
                   <button

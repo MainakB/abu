@@ -182,6 +182,127 @@ const ASSERTION_NAME_LOOKUP = {
       positive: ASSERTIONMODES.GETDROPDOWNCOUNTWITHSUBTEXT,
     },
   },
+
+  [ASSERTIONMODES.MATCHGETTEXTEQUALS]: {
+    exact: {
+      positive: ASSERTIONMODES.MATCHGETTEXTEQUALS,
+      negative: ASSERTIONMODES.MATCHGETTEXTNOTEQUALS,
+    },
+    contains: {
+      positive: ASSERTIONMODES.MATCHGETTEXTCONTAINS,
+      negative: ASSERTIONMODES.MATCHGETTEXTNOTCONTAINS,
+    },
+  },
+  [ASSERTIONMODES.MATCHGETTEXTSTARTSWITH]: {
+    exact: {
+      positive: ASSERTIONMODES.MATCHGETTEXTSTARTSWITH,
+      negative: ASSERTIONMODES.MATCHGETTEXTNOTSTARTSWITH,
+    },
+  },
+  [ASSERTIONMODES.MATCHGETTEXTENDSWITH]: {
+    exact: {
+      positive: ASSERTIONMODES.MATCHGETTEXTENDSWITH,
+      negative: ASSERTIONMODES.MATCHGETTEXTNOTENDSWITH,
+    },
+  },
+  [ASSERTIONMODES.MATCHGETVALUEEQUALS]: {
+    exact: {
+      positive: ASSERTIONMODES.MATCHGETVALUEEQUALS,
+      negative: ASSERTIONMODES.MATCHGETVALUENOTEQUALS,
+    },
+    contains: {
+      positive: ASSERTIONMODES.MATCHGETVALUECONTAINS,
+      negative: ASSERTIONMODES.MATCHGETVALUENOTCONTAINS,
+    },
+  },
+  [ASSERTIONMODES.MATCHGETVALUESTARTSWITH]: {
+    exact: {
+      positive: ASSERTIONMODES.MATCHGETVALUESTARTSWITH,
+      negative: ASSERTIONMODES.MATCHGETVALUENOTSTARTSWITH,
+    },
+  },
+  [ASSERTIONMODES.MATCHGETVALUEENDSWITH]: {
+    exact: {
+      positive: ASSERTIONMODES.MATCHGETVALUEENDSWITH,
+      negative: ASSERTIONMODES.MATCHGETVALUENOTENDSWITH,
+    },
+  },
+  [ASSERTIONMODES.MATCHGETINNERHTMLEQUALS]: {
+    exact: {
+      positive: ASSERTIONMODES.MATCHGETINNERHTMLEQUALS,
+      negative: ASSERTIONMODES.MATCHGETINNERHTMLNOTEQUALS,
+    },
+    contains: {
+      positive: ASSERTIONMODES.MATCHGETINNERHTMLCONTAINS,
+      negative: ASSERTIONMODES.MATCHGETINNERHTMLNOTCONTAINS,
+    },
+  },
+
+  [ASSERTIONMODES.MATCHGETINNERHTMLSTARTSWITH]: {
+    exact: {
+      positive: ASSERTIONMODES.MATCHGETINNERHTMLSTARTSWITH,
+      negative: ASSERTIONMODES.MATCHGETINNERHTMLNOTSTARTSWITH,
+    },
+  },
+
+  [ASSERTIONMODES.MATCHGETINNERHTMLENDSWITH]: {
+    exact: {
+      positive: ASSERTIONMODES.MATCHGETINNERHTMLENDSWITH,
+      negative: ASSERTIONMODES.MATCHGETINNERHTMLNOTENDSWITH,
+    },
+  },
+
+  [ASSERTIONMODES.MATCHISENABLEDEQUALS]: {
+    exact: {
+      positive: ASSERTIONMODES.MATCHISENABLEDEQUALS,
+      negative: ASSERTIONMODES.MATCHISENABLEDNOTEQUALS,
+    },
+  },
+  [ASSERTIONMODES.MATCHISPRESENTEQUALS]: {
+    exact: {
+      positive: ASSERTIONMODES.MATCHISPRESENTEQUALS,
+      negative: ASSERTIONMODES.MATCHISPRESENTNOTEQUALS,
+    },
+  },
+  [ASSERTIONMODES.MATCHISELEMENTCLICKABLEEQUALS]: {
+    exact: {
+      positive: ASSERTIONMODES.MATCHISELEMENTCLICKABLEEQUALS,
+      negative: ASSERTIONMODES.MATCHISELEMENTCLICKABLENOTEQUALS,
+    },
+  },
+  [ASSERTIONMODES.MATCHISDISPLAYEDEQUALS]: {
+    exact: {
+      positive: ASSERTIONMODES.MATCHISDISPLAYEDEQUALS,
+      negative: ASSERTIONMODES.MATCHISDISPLAYEDNOTEQUALS,
+    },
+  },
+};
+
+export const floatingDeleteCookieDockConfirm = (
+  cookieList,
+  closeDock,
+  windowDeleteCookies
+) => {
+  if (Array.isArray(cookieList) && cookieList.length === 0) {
+    window.__recordAction(
+      window.__buildData({
+        action: ASSERTIONMODES.DELETECOOKIES,
+        cookies: cookieList,
+      })
+    );
+  } else {
+    for (let cookie of cookieList) {
+      window.__recordAction(
+        window.__buildData({
+          action: ASSERTIONMODES.DELETECOOKIE,
+          cookieName: cookie,
+        })
+      );
+    }
+  }
+  windowDeleteCookies(cookieList);
+  closeDock();
+  // await Promise.all([windowDeleteCookies(cookieList), closeDock()]);
 };
 
 export const getElementAttributes = async (el) => {
@@ -563,4 +684,36 @@ export const onConfirmDbAction = async ({
   );
 
   await onCancel();
+};
+
+export const onConfirmElemMatch = ({
+  expected,
+  softAssert,
+  locatorName,
+  onCancel,
+  el,
+  e,
+  textValue,
+  mode,
+  isNegative,
+  exactMatch,
+}) => {
+  const assertionMapping = ASSERTION_NAME_LOOKUP[mode];
+  const category = exactMatch ? "exact" : "contains";
+  const polarity = isNegative ? "negative" : "positive";
+  const assertName = assertionMapping[category][polarity];
+
+  window.__recordAction(
+    window.__buildData({
+      action: "assert",
+      locatorName,
+      assertion: assertName,
+      el,
+      e,
+      text: textValue,
+      expected,
+      isSoftAssert: softAssert,
+    })
+  );
+  onCancel();
 };

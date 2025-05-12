@@ -14,9 +14,43 @@ export default function ConfirmCancelFooter({
   exactMatch,
   setExactMatch,
   disableAutoFocus,
+  startsWith,
+  setStartsWith,
+  endsWith,
+  setEndsWith,
 }) {
   const updateLocatorName = (e) => {
     setLocatorName(e.target.value);
+  };
+
+  const handleSetStartsWith = (e) => {
+    if (setEndsWith) {
+      setEndsWith(false);
+    }
+    if (setExactMatch) {
+      setExactMatch(true);
+    }
+    setStartsWith((prev) => !prev);
+  };
+
+  const handleSetEndsWith = (e) => {
+    if (setStartsWith) {
+      setStartsWith(false);
+    }
+    if (setExactMatch) {
+      setExactMatch(true);
+    }
+    setEndsWith((prev) => !prev);
+  };
+
+  const handleSetExactMatch = (e) => {
+    if (setStartsWith) {
+      setStartsWith(false);
+    }
+    if (setEndsWith) {
+      setEndsWith(false);
+    }
+    setExactMatch((prev) => !prev);
   };
 
   return (
@@ -41,7 +75,15 @@ export default function ConfirmCancelFooter({
                 checked={isNegative}
                 onChange={() => setIsNegative((prev) => !prev)}
               ></input>
-              <label htmlFor="inverse-checkbox">Inverse</label>
+              <label htmlFor="inverse-checkbox">
+                Inverse
+                <span
+                  className="info-tooltip-icon"
+                  title="Negates the action with a NOT"
+                >
+                  ⓘ
+                </span>
+              </label>
             </div>
           )}
         {typeof exactMatch !== "undefined" &&
@@ -51,11 +93,49 @@ export default function ConfirmCancelFooter({
                 id="exactMatch-checkbox"
                 type="checkbox"
                 checked={exactMatch}
-                onChange={() => setExactMatch((prev) => !prev)}
+                onChange={handleSetExactMatch}
+                // onChange={() => setExactMatch((prev) => !prev)}
               ></input>
-              <label htmlFor="exactMatch-checkbox">Exact</label>
+              <label htmlFor="exactMatch-checkbox">
+                Exact
+                <span
+                  className="info-tooltip-icon"
+                  title="Exact or Substring match"
+                >
+                  ⓘ
+                </span>
+              </label>
             </div>
           )}
+
+        {typeof startsWith !== "undefined" &&
+          typeof setStartsWith !== "undefined" && (
+            <div className="docked-pane-footer-assert-container">
+              <input
+                id="startswith-checkbox"
+                type="checkbox"
+                checked={startsWith}
+                onChange={handleSetStartsWith}
+                // onChange={() => setStartsWith((prev) => !prev)}
+              ></input>
+              <label htmlFor="startswith-checkbox">Starts With</label>
+            </div>
+          )}
+
+        {typeof endsWith !== "undefined" &&
+          typeof setEndsWith !== "undefined" && (
+            <div className="docked-pane-footer-assert-container">
+              <input
+                id="endswith-checkbox"
+                type="checkbox"
+                checked={endsWith}
+                onChange={handleSetEndsWith}
+                // onChange={() => setEndsWith((prev) => !prev)}
+              ></input>
+              <label htmlFor="endswith-checkbox">Ends With</label>
+            </div>
+          )}
+
         {typeof softAssert !== "undefined" &&
           typeof setSoftAssert !== "undefined" && (
             <div className="docked-pane-footer-assert-container">

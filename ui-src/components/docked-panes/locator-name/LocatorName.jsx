@@ -19,7 +19,7 @@ export default function LocatorName({
 
   return (
     <div className="locator-name-container">
-      <label>Enter Locator Name: </label>
+      <label>Enter Locator Name (Optional) </label>
       <input
         ref={inputRef}
         type="text"

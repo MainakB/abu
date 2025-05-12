@@ -8,7 +8,6 @@
     if (!window.__recorderStore) return;
     const assertionModes = window.__ASSERTIONMODES;
     const assertionNames = window.__ASSERTIONNAMES;
-    const nonDockAsserts = window.__NONDOCKASSERTIONNAMES;
 
     const assertBox = document.createElement("div");
     assertBox.style.position = "absolute";
@@ -125,9 +124,9 @@
         // For docked assert mode, do not reset from click listener,
         // as this will be done from docked pane on confirm/cancel
         // if (!["text", "value"].includes(mode)) {
-        if (!Object.values(nonDockAsserts).includes(mode)) {
-          window.__recorderStore.setMode("record", false);
-        }
+        // if (!Object.values(nonDockAsserts).includes(mode)) {
+        window.__recorderStore.setMode("record", false);
+        // }
       },
       true
     );

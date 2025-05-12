@@ -773,4 +773,406 @@ export const ACTION_HANDLERS = {
       idx,
     ];
   },
+
+  [FUNCTIONMAPPER.MATCHISENABLEDEQUALS.key]: (arg, idx) => {
+    const loc = constructLocators(arg, idx);
+    const matchType = arg.isSoftAssert ? "sMatch" : "match";
+    return [
+      {
+        step: `And ${matchType} ${FUNCTIONMAPPER.MATCHISENABLEDEQUALS.name}({po:"${loc.locKeyName}"}) == ${arg.expected}`,
+        locator: loc.result,
+      },
+      loc.newIdx,
+    ];
+  },
+  [FUNCTIONMAPPER.MATCHISENABLEDNOTEQUALS.key]: (arg, idx) => {
+    const loc = constructLocators(arg, idx);
+    const matchType = arg.isSoftAssert ? "sMatch" : "match";
+    return [
+      {
+        step: `And ${matchType} ${FUNCTIONMAPPER.MATCHISENABLEDNOTEQUALS.name}({po:"${loc.locKeyName}"}) != ${arg.expected}`,
+        locator: loc.result,
+      },
+      loc.newIdx,
+    ];
+  },
+
+  [FUNCTIONMAPPER.MATCHISPRESENTEQUALS.key]: (arg, idx) => {
+    const loc = constructLocators(arg, idx);
+    const matchType = arg.isSoftAssert ? "sMatch" : "match";
+    return [
+      {
+        step: `And ${matchType} ${FUNCTIONMAPPER.MATCHISPRESENTEQUALS.name}({po:"${loc.locKeyName}"}) == ${arg.expected}`,
+        locator: loc.result,
+      },
+      loc.newIdx,
+    ];
+  },
+  [FUNCTIONMAPPER.MATCHISPRESENTNOTEQUALS.key]: (arg, idx) => {
+    const loc = constructLocators(arg, idx);
+    const matchType = arg.isSoftAssert ? "sMatch" : "match";
+    return [
+      {
+        step: `And ${matchType} ${FUNCTIONMAPPER.MATCHISPRESENTNOTEQUALS.name}({po:"${loc.locKeyName}"}) != ${arg.expected}`,
+        locator: loc.result,
+      },
+      loc.newIdx,
+    ];
+  },
+
+  [FUNCTIONMAPPER.MATCHISELEMENTCLICKABLEEQUALS.key]: (arg, idx) => {
+    const loc = constructLocators(arg, idx);
+    const matchType = arg.isSoftAssert ? "sMatch" : "match";
+    return [
+      {
+        step: `And ${matchType} ${FUNCTIONMAPPER.MATCHISELEMENTCLICKABLEEQUALS.name}({po:"${loc.locKeyName}"}) == ${arg.expected}`,
+        locator: loc.result,
+      },
+      loc.newIdx,
+    ];
+  },
+  [FUNCTIONMAPPER.MATCHISELEMENTCLICKABLENOTEQUALS.key]: (arg, idx) => {
+    const loc = constructLocators(arg, idx);
+    const matchType = arg.isSoftAssert ? "sMatch" : "match";
+    return [
+      {
+        step: `And ${matchType} ${FUNCTIONMAPPER.MATCHISELEMENTCLICKABLENOTEQUALS.name}({po:"${loc.locKeyName}"}) != ${arg.expected}`,
+        locator: loc.result,
+      },
+      loc.newIdx,
+    ];
+  },
+  [FUNCTIONMAPPER.MATCHISDISPLAYEDEQUALS.key]: (arg, idx) => {
+    const loc = constructLocators(arg, idx);
+    const matchType = arg.isSoftAssert ? "sMatch" : "match";
+    return [
+      {
+        step: `And ${matchType} ${FUNCTIONMAPPER.MATCHISDISPLAYEDEQUALS.name}({po:"${loc.locKeyName}"}) == ${arg.expected}`,
+        locator: loc.result,
+      },
+      loc.newIdx,
+    ];
+  },
+
+  [FUNCTIONMAPPER.MATCHISDISPLAYEDNOTEQUALS.key]: (arg, idx) => {
+    const loc = constructLocators(arg, idx);
+    const matchType = arg.isSoftAssert ? "sMatch" : "match";
+    return [
+      {
+        step: `And ${matchType} ${FUNCTIONMAPPER.MATCHISDISPLAYEDNOTEQUALS.name}({po:"${loc.locKeyName}"}) != ${arg.expected}`,
+        locator: loc.result,
+      },
+      loc.newIdx,
+    ];
+  },
+
+  [FUNCTIONMAPPER.MATCHGETTEXTEQUALS.key]: (arg, idx) => {
+    const loc = constructLocators(arg, idx);
+    const matchType = arg.isSoftAssert ? "sMatch" : "match";
+    return [
+      {
+        step: `And ${matchType} ${FUNCTIONMAPPER.MATCHGETTEXTEQUALS.name}({po:"${loc.locKeyName}"}) == "${arg.expected}"`,
+        locator: loc.result,
+      },
+      loc.newIdx,
+    ];
+  },
+  [FUNCTIONMAPPER.MATCHGETTEXTNOTEQUALS.key]: (arg, idx) => {
+    const loc = constructLocators(arg, idx);
+    const matchType = arg.isSoftAssert ? "sMatch" : "match";
+    return [
+      {
+        step: `And ${matchType} ${FUNCTIONMAPPER.MATCHGETTEXTNOTEQUALS.name}({po:"${loc.locKeyName}"}) != "${arg.expected}"`,
+        locator: loc.result,
+      },
+      loc.newIdx,
+    ];
+  },
+
+  [FUNCTIONMAPPER.MATCHGETTEXTCONTAINS.key]: (arg, idx) => {
+    const loc = constructLocators(arg, idx);
+    const matchType = arg.isSoftAssert ? "sMatch" : "match";
+    return [
+      {
+        step: `And ${matchType} ${FUNCTIONMAPPER.MATCHGETTEXTCONTAINS.name}({po:"${loc.locKeyName}"}) contains "${arg.expected}"`,
+        locator: loc.result,
+      },
+      loc.newIdx,
+    ];
+  },
+
+  [FUNCTIONMAPPER.MATCHGETTEXTNOTCONTAINS.key]: (arg, idx) => {
+    const loc = constructLocators(arg, idx);
+    const matchType = arg.isSoftAssert ? "sMatch" : "match";
+    return [
+      {
+        step: `And ${matchType} ${FUNCTIONMAPPER.MATCHGETTEXTNOTCONTAINS.name}({po:"${loc.locKeyName}"}) not contains "${arg.expected}"`,
+        locator: loc.result,
+      },
+      loc.newIdx,
+    ];
+  },
+
+  [FUNCTIONMAPPER.MATCHGETVALUEEQUALS.key]: (arg, idx) => {
+    const loc = constructLocators(arg, idx);
+    const matchType = arg.isSoftAssert ? "sMatch" : "match";
+    return [
+      {
+        step: `And ${matchType} ${FUNCTIONMAPPER.MATCHGETVALUEEQUALS.name}({po:"${loc.locKeyName}", atr: "value"}) == "${arg.expected}"`,
+        locator: loc.result,
+      },
+      loc.newIdx,
+    ];
+  },
+
+  [FUNCTIONMAPPER.MATCHGETVALUENOTEQUALS.key]: (arg, idx) => {
+    const loc = constructLocators(arg, idx);
+    const matchType = arg.isSoftAssert ? "sMatch" : "match";
+    return [
+      {
+        step: `And ${matchType} ${FUNCTIONMAPPER.MATCHGETVALUENOTEQUALS.name}({po:"${loc.locKeyName}", atr: "value"}) != "${arg.expected}"`,
+        locator: loc.result,
+      },
+      loc.newIdx,
+    ];
+  },
+  [FUNCTIONMAPPER.MATCHGETVALUECONTAINS.key]: (arg, idx) => {
+    const loc = constructLocators(arg, idx);
+    const matchType = arg.isSoftAssert ? "sMatch" : "match";
+    return [
+      {
+        step: `And ${matchType} ${FUNCTIONMAPPER.MATCHGETVALUECONTAINS.name}({po:"${loc.locKeyName}", atr: "value"}) contains "${arg.expected}"`,
+        locator: loc.result,
+      },
+      loc.newIdx,
+    ];
+  },
+  [FUNCTIONMAPPER.MATCHGETVALUENOTCONTAINS.key]: (arg, idx) => {
+    const loc = constructLocators(arg, idx);
+    const matchType = arg.isSoftAssert ? "sMatch" : "match";
+    return [
+      {
+        step: `And ${matchType} ${FUNCTIONMAPPER.MATCHGETVALUENOTCONTAINS.name}({po:"${loc.locKeyName}", atr: "value"}) not contains "${arg.expected}"`,
+        locator: loc.result,
+      },
+      loc.newIdx,
+    ];
+  },
+
+  [FUNCTIONMAPPER.MATCHGETINNERHTMLEQUALS.key]: (arg, idx) => {
+    const loc = constructLocators(arg, idx);
+    const matchType = arg.isSoftAssert ? "sMatch" : "match";
+    return [
+      {
+        step: `And ${matchType} ${FUNCTIONMAPPER.MATCHGETINNERHTMLEQUALS.name}({po:"${loc.locKeyName}"}) == "${arg.expected}"`,
+        locator: loc.result,
+      },
+      loc.newIdx,
+    ];
+  },
+
+  [FUNCTIONMAPPER.MATCHGETINNERHTMLNOTEQUALS.key]: (arg, idx) => {
+    const loc = constructLocators(arg, idx);
+    const matchType = arg.isSoftAssert ? "sMatch" : "match";
+    return [
+      {
+        step: `And ${matchType} ${FUNCTIONMAPPER.MATCHGETINNERHTMLNOTEQUALS.name}({po:"${loc.locKeyName}"}) != "${arg.expected}"`,
+        locator: loc.result,
+      },
+      loc.newIdx,
+    ];
+  },
+  [FUNCTIONMAPPER.MATCHGETINNERHTMLCONTAINS.key]: (arg, idx) => {
+    const loc = constructLocators(arg, idx);
+    const matchType = arg.isSoftAssert ? "sMatch" : "match";
+    return [
+      {
+        step: `And ${matchType} ${FUNCTIONMAPPER.MATCHGETINNERHTMLCONTAINS.name}({po:"${loc.locKeyName}"}) contains "${arg.expected}"`,
+        locator: loc.result,
+      },
+      loc.newIdx,
+    ];
+  },
+  [FUNCTIONMAPPER.MATCHGETINNERHTMLNOTCONTAINS.key]: (arg, idx) => {
+    const loc = constructLocators(arg, idx);
+    const matchType = arg.isSoftAssert ? "sMatch" : "match";
+    return [
+      {
+        step: `And ${matchType} ${FUNCTIONMAPPER.MATCHGETINNERHTMLNOTCONTAINS.name}({po:"${loc.locKeyName}"}) not contains "${arg.expected}"`,
+        locator: loc.result,
+      },
+      loc.newIdx,
+    ];
+  },
+
+  [FUNCTIONMAPPER.MATCHGETTEXTSTARTSWITH.key]: (arg, idx) => {
+    const loc = constructLocators(arg, idx);
+    const matchType = arg.isSoftAssert ? "sMatch" : "match";
+    return [
+      {
+        step: `And ${matchType} ${FUNCTIONMAPPER.MATCHGETTEXTSTARTSWITH.name}({po:"${loc.locKeyName}"}) starts with "${arg.expected}"`,
+        locator: loc.result,
+      },
+      loc.newIdx,
+    ];
+  },
+  [FUNCTIONMAPPER.MATCHGETTEXTNOTSTARTSWITH.key]: (arg, idx) => {
+    const loc = constructLocators(arg, idx);
+    const matchType = arg.isSoftAssert ? "sMatch" : "match";
+    return [
+      {
+        step: `And ${matchType} ${FUNCTIONMAPPER.MATCHGETTEXTNOTSTARTSWITH.name}({po:"${loc.locKeyName}"}) not starts with "${arg.expected}"`,
+        locator: loc.result,
+      },
+      loc.newIdx,
+    ];
+  },
+  [FUNCTIONMAPPER.MATCHGETTEXTENDSWITH.key]: (arg, idx) => {
+    const loc = constructLocators(arg, idx);
+    const matchType = arg.isSoftAssert ? "sMatch" : "match";
+    return [
+      {
+        step: `And ${matchType} ${FUNCTIONMAPPER.MATCHGETTEXTENDSWITH.name}({po:"${loc.locKeyName}"}) ends with "${arg.expected}"`,
+        locator: loc.result,
+      },
+      loc.newIdx,
+    ];
+  },
+
+  [FUNCTIONMAPPER.MATCHGETTEXTNOTENDSWITH.key]: (arg, idx) => {
+    const loc = constructLocators(arg, idx);
+    const matchType = arg.isSoftAssert ? "sMatch" : "match";
+    return [
+      {
+        step: `And ${matchType} ${FUNCTIONMAPPER.MATCHGETTEXTNOTENDSWITH.name}({po:"${loc.locKeyName}"}) not ends with "${arg.expected}"`,
+        locator: loc.result,
+      },
+      loc.newIdx,
+    ];
+  },
+
+  [FUNCTIONMAPPER.MATCHGETVALUESTARTSWITH.key]: (arg, idx) => {
+    const loc = constructLocators(arg, idx);
+    const matchType = arg.isSoftAssert ? "sMatch" : "match";
+    return [
+      {
+        step: `And ${matchType} ${FUNCTIONMAPPER.MATCHGETVALUESTARTSWITH.name}({po:"${loc.locKeyName}", atr: "value"}) starts with "${arg.expected}"`,
+        locator: loc.result,
+      },
+      loc.newIdx,
+    ];
+  },
+
+  [FUNCTIONMAPPER.MATCHGETVALUENOTSTARTSWITH.key]: (arg, idx) => {
+    const loc = constructLocators(arg, idx);
+    const matchType = arg.isSoftAssert ? "sMatch" : "match";
+    return [
+      {
+        step: `And ${matchType} ${FUNCTIONMAPPER.MATCHGETVALUENOTSTARTSWITH.name}({po:"${loc.locKeyName}", atr: "value"}) not starts with "${arg.expected}"`,
+        locator: loc.result,
+      },
+      loc.newIdx,
+    ];
+  },
+
+  [FUNCTIONMAPPER.MATCHGETVALUEENDSWITH.key]: (arg, idx) => {
+    const loc = constructLocators(arg, idx);
+    const matchType = arg.isSoftAssert ? "sMatch" : "match";
+    return [
+      {
+        step: `And ${matchType} ${FUNCTIONMAPPER.MATCHGETVALUEENDSWITH.name}({po:"${loc.locKeyName}", atr: "value"}) ends with "${arg.expected}"`,
+        locator: loc.result,
+      },
+      loc.newIdx,
+    ];
+  },
+
+  [FUNCTIONMAPPER.MATCHGETVALUENOTENDSWITH.key]: (arg, idx) => {
+    const loc = constructLocators(arg, idx);
+    const matchType = arg.isSoftAssert ? "sMatch" : "match";
+    return [
+      {
+        step: `And ${matchType} ${FUNCTIONMAPPER.MATCHGETVALUENOTENDSWITH.name}({po:"${loc.locKeyName}", atr: "value"}) not ends with "${arg.expected}"`,
+        locator: loc.result,
+      },
+      loc.newIdx,
+    ];
+  },
+
+  [FUNCTIONMAPPER.MATCHGETINNERHTMLSTARTSWITH.key]: (arg, idx) => {
+    const loc = constructLocators(arg, idx);
+    const matchType = arg.isSoftAssert ? "sMatch" : "match";
+    return [
+      {
+        step: `And ${matchType} ${FUNCTIONMAPPER.MATCHGETINNERHTMLSTARTSWITH.name}({po:"${loc.locKeyName}"}) starts with "${arg.expected}"`,
+        locator: loc.result,
+      },
+      loc.newIdx,
+    ];
+  },
+  [FUNCTIONMAPPER.MATCHGETINNERHTMLNOTSTARTSWITH.key]: (arg, idx) => {
+    const loc = constructLocators(arg, idx);
+    const matchType = arg.isSoftAssert ? "sMatch" : "match";
+    return [
+      {
+        step: `And ${matchType} ${FUNCTIONMAPPER.MATCHGETINNERHTMLNOTSTARTSWITH.name}({po:"${loc.locKeyName}"}) not starts with "${arg.expected}"`,
+        locator: loc.result,
+      },
+      loc.newIdx,
+    ];
+  },
+  [FUNCTIONMAPPER.MATCHGETINNERHTMLENDSWITH.key]: (arg, idx) => {
+    const loc = constructLocators(arg, idx);
+    const matchType = arg.isSoftAssert ? "sMatch" : "match";
+    return [
+      {
+        step: `And ${matchType} ${FUNCTIONMAPPER.MATCHGETINNERHTMLENDSWITH.name}({po:"${loc.locKeyName}"}) ends with "${arg.expected}"`,
+        locator: loc.result,
+      },
+      loc.newIdx,
+    ];
+  },
+  [FUNCTIONMAPPER.MATCHGETINNERHTMLNOTENDSWITH.key]: (arg, idx) => {
+    const loc = constructLocators(arg, idx);
+    const matchType = arg.isSoftAssert ? "sMatch" : "match";
+    return [
+      {
+        step: `And ${matchType} ${FUNCTIONMAPPER.MATCHGETINNERHTMLNOTENDSWITH.name}({po:"${loc.locKeyName}"}) not ends with "${arg.expected}"`,
+        locator: loc.result,
+      },
+      loc.newIdx,
+    ];
+  },
+  [FUNCTIONMAPPER.PAGERELOAD.key]: (arg, idx) => {
+    return [
+      {
+        step: `And ${FUNCTIONMAPPER.PAGERELOAD.name}`,
+      },
+      idx,
+    ];
+  },
+  [FUNCTIONMAPPER.TAKESCREENSHOT.key]: (arg, idx) => {
+    return [
+      {
+        step: `And ${FUNCTIONMAPPER.TAKESCREENSHOT.name}`,
+      },
+      idx,
+    ];
+  },
+  [FUNCTIONMAPPER.DELETECOOKIES.key]: (arg, idx) => {
+    return [
+      {
+        step: `And ${FUNCTIONMAPPER.DELETECOOKIES.name}()`,
+      },
+      idx,
+    ];
+  },
+  [FUNCTIONMAPPER.DELETECOOKIE.key]: (arg, idx) => {
+    return [
+      {
+        step: `And ${FUNCTIONMAPPER.DELETECOOKIE.name}("${arg.cookieName}")`,
+      },
+      idx,
+    ];
+  },
 };

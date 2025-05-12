@@ -40,6 +40,8 @@ export default function FloatingElementTextAssignmentDock({
   textValue,
   mode,
   onCancel,
+  tabbed,
+  overrideConfirmCancelFlexEnd,
 }) {
   const [locatorName, setLocatorName] = useState("");
   const [varName, setVarName] = useState("");
@@ -68,16 +70,27 @@ export default function FloatingElementTextAssignmentDock({
 
   const textAreaContent = getTextAreaData(el, mode, textValue).trim();
 
-  return (
-    <div
-      id={
+  let wrapperClassName = "floating-cookie-list-dock";
+  if (tabbed) {
+    if (
+      overrideConfirmCancelFlexEnd &&
+      !(
         mode === ASSERTIONMODES.ISPRESENT ||
         mode === ASSERTIONMODES.ISDISPLAYED ||
         mode === ASSERTIONMODES.ISELEMENTCLICKABLE ||
         mode === ASSERTIONMODES.ISENABLED
-          ? "assert-dock-textarea"
-          : "floating-cookie-list-dock"
-      }
+      )
+    ) {
+      wrapperClassName = "floating-tab-list-dock-justifyend";
+    } else {
+      wrapperClassName = "floating-tab-list-dock";
+    }
+  }
+
+  return (
+    <div
+      // id={tabbed ? "floating-tab-list-dock" : "floating-cookie-list-dock"}
+      id={wrapperClassName}
       onClick={(e) => e.stopPropagation()}
       onMouseDown={(e) => e.stopPropagation()}
     >
