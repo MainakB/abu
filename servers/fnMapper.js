@@ -553,6 +553,51 @@ export const ACTION_HANDLERS = {
     ];
   },
 
+  [FUNCTIONMAPPER.CHECKBOXCHECKED.key]: (arg, idx) => {
+    const loc = constructLocators(arg, idx);
+    const soft = arg.isSoftAssert ? ", isSoftAssert: true" : "";
+    return [
+      {
+        step: `And ${FUNCTIONMAPPER.CHECKBOXCHECKED.name}({po:"${loc.locKeyName}", checked: ${arg.expected}${soft}})`,
+        locator: loc.result,
+      },
+      loc.newIdx,
+    ];
+  },
+  [FUNCTIONMAPPER.CHECKBOXNOTCHECKED.key]: (arg, idx) => {
+    const loc = constructLocators(arg, idx);
+    const soft = arg.isSoftAssert ? ", isSoftAssert: true" : "";
+    return [
+      {
+        step: `And ${FUNCTIONMAPPER.CHECKBOXNOTCHECKED.name}({po:"${loc.locKeyName}", checked: ${arg.expected}${soft}})`,
+        locator: loc.result,
+      },
+      loc.newIdx,
+    ];
+  },
+  [FUNCTIONMAPPER.RADIOCHECKED.key]: (arg, idx) => {
+    const loc = constructLocators(arg, idx);
+    const soft = arg.isSoftAssert ? ", isSoftAssert: true" : "";
+    return [
+      {
+        step: `And ${FUNCTIONMAPPER.RADIOCHECKED.name}({po:"${loc.locKeyName}", checked: ${arg.expected}${soft}})`,
+        locator: loc.result,
+      },
+      loc.newIdx,
+    ];
+  },
+  [FUNCTIONMAPPER.RADIONOTCHECKED.key]: (arg, idx) => {
+    const loc = constructLocators(arg, idx);
+    const soft = arg.isSoftAssert ? ", isSoftAssert: true" : "";
+    return [
+      {
+        step: `And ${FUNCTIONMAPPER.RADIONOTCHECKED.name}({po:"${loc.locKeyName}", checked: ${arg.expected}${soft}})`,
+        locator: loc.result,
+      },
+      loc.newIdx,
+    ];
+  },
+
   //
   [FUNCTIONMAPPER.ASSERTCURRENTURLEQUALS.key]: (arg, idx) => {
     const soft = arg.isSoftAssert ? ", isSoftAssert: true" : "";

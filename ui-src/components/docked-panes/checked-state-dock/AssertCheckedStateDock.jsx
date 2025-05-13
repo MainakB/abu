@@ -1,14 +1,15 @@
 import React, { useState, useEffect, useMemo } from "react";
 import ConfirmCancelFooter from "../confirm-cancel-footer/ConfirmCancelFooter.jsx";
 import { useModeSocket } from "../../../hooks/useModeSocket.js";
+import { recordCheckboxRadioAssert } from "../../../../utils/componentLibs.js";
 
 export default function AssertCheckedStateDock({
   el,
-  onConfirm,
+  e,
+  mode,
   onCancel,
   label, // descriptive label like "Checkbox" or "Radio Button"
 }) {
-  // const [isChecked, setIsChecked] = useState(el.checked);
   const [isChecked, setIsChecked] = useState(false);
   const [softAssert, setSoftAssert] = useState(false);
   const [locatorName, setLocatorName] = useState("");
@@ -51,23 +52,25 @@ export default function AssertCheckedStateDock({
     return () => clearTimeout(timeout);
   }, [effectiveEl]);
 
-  // ✅ Confirm handler uses fresh effectiveEl
-  const handleConfirm = () => {
-    onConfirm(
-      {
-        type: label,
-        isChecked,
-      },
-      softAssert,
-      effectiveEl,
-      locatorName
-    );
-    setSoftAssert(false);
-  };
-
   const handleCancel = () => {
     setSoftAssert(false);
     onCancel();
+  };
+
+  // ✅ Confirm handler uses fresh effectiveEl
+  const handleConfirm = () => {
+    recordCheckboxRadioAssert({
+      el: effectiveEl,
+      e,
+      checkBoxState: {
+        type: label,
+        isChecked,
+      },
+      isSoftAssert: softAssert,
+      locatorName: locatorName,
+      mode,
+      closeDock: handleCancel,
+    });
   };
 
   return (

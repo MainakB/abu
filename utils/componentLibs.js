@@ -304,11 +304,23 @@ const ASSERTION_NAME_LOOKUP = {
       positive: ASSERTIONMODES.DROPDOWNDUPLICATECOUNT,
     },
   },
+  [ASSERTIONMODES.RADIOSTATE]: {
+    checked: {
+      positive: ASSERTIONMODES.RADIOCHECKED,
+    },
+    unchecked: {
+      positive: ASSERTIONMODES.RADIONOTCHECKED,
+    },
+  },
+  [ASSERTIONMODES.CHECKBOXSTATE]: {
+    checked: {
+      positive: ASSERTIONMODES.CHECKBOXCHECKED,
+    },
+    unchecked: {
+      positive: ASSERTIONMODES.CHECKBOXNOTCHECKED,
+    },
+  },
 };
-
-// type === ASSERTIONMODES.DROPDOWNVALUESARE ||
-// type === ASSERTIONMODES.DROPDOWNDUPLICATECOUNT ||
-// type === ASSERTIONMODES.DROPDOWNDUPLICATECOUNT
 
 export const floatingDeleteCookieDockConfirm = (
   cookieList,
@@ -878,6 +890,35 @@ export const floatingAssertCurrentUrlConfirm = ({
   closeDock();
 };
 
+export const recordCheckboxRadioAssert = ({
+  checkBoxState,
+  isSoftAssert,
+  el,
+  locatorName,
+  mode,
+  closeDock,
+  e,
+}) => {
+  const assertionMapping = ASSERTION_NAME_LOOKUP[mode];
+  const category = checkBoxState.isChecked ? "checked" : "unchecked";
+  const polarity = "positive";
+  const assertionName = assertionMapping[category][polarity];
+
+  window.__recordAction(
+    window.__buildData({
+      action: "assert",
+      locatorName,
+      isSoftAssert,
+      assertion: assertionName,
+      expected: checkBoxState.isChecked,
+      el,
+      e,
+    })
+  );
+
+  closeDock();
+};
+
 export const getCookies = async () => {
   const cookies = await window.__getCookies();
   return cookies;
@@ -949,7 +990,6 @@ export const recordDropdownOrderAssert = ({
   el,
   e,
 }) => {
-  // console.log("category and polarity: ", [category, polarity]);
   window.__recordAction(
     window.__buildData({
       action: "assert",

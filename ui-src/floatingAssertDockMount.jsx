@@ -23,7 +23,7 @@ import FloatingDrodownSelectedAssignDock from "./components/docked-panes/element
 import FloatingDBDataAssignDock from "./components/docked-panes/db-assignments/FloatingDBDataAssignDock.jsx";
 import TabbedAssertionDock from "./components/docked-panes/tabbed-assign-match/TabbedAssertionDock.jsx";
 import FloatingElementTextMatchDock from "./components/docked-panes/element-based-match/FloatingElementTextMatchDock.jsx";
-import { ASSERTIONMODES, ASSERTIONNAMES } from "./constants/index.js";
+import { ASSERTIONMODES } from "./constants/index.js";
 
 let floatingAssertRoot = null;
 
@@ -81,44 +81,6 @@ window.showFloatingAssert = (mode, el, e, type) => {
     // await window.__recorderStore.setMode("record", false);
   };
 
-  const recordCheckboxRadioAssert = async (
-    checkBoxState,
-    isSoftAssert,
-    elToUse,
-    locatorName
-  ) => {
-    const isRadio = checkBoxState.type === ASSERTIONMODES.RADIOSTATE;
-
-    let assertName = "";
-    if (isRadio) {
-      if (checkBoxState.isChecked) {
-        assertName = ASSERTIONNAMES.RADIOCHECKED;
-      } else {
-        assertName = ASSERTIONNAMES.RADIONOTCHECKED;
-      }
-    } else {
-      if (checkBoxState.isChecked) {
-        assertName = ASSERTIONNAMES.CHECKBOXCHECKED;
-      } else {
-        assertName = ASSERTIONNAMES.CHECKBOXNOTCHECKED;
-      }
-    }
-
-    await window.__recordAction(
-      window.__buildData({
-        action: "assert",
-        locatorName,
-        isSoftAssert,
-        assertion: assertName,
-        expected: checkBoxState.isChecked,
-        el: elToUse,
-        e,
-      })
-    );
-
-    await closeDock();
-  };
-
   const floatingCookieListDockConfirm = async (cookieList) => {
     window.__recordAction(
       window.__buildData({
@@ -168,9 +130,10 @@ window.showFloatingAssert = (mode, el, e, type) => {
     ) {
       floatingAssertRoot.render(
         <AssertCheckedStateDock
+          mode={mode}
           el={el}
+          e={e}
           onCancel={closeDock}
-          onConfirm={recordCheckboxRadioAssert}
           label={type === ASSERTIONMODES.CHECKBOXSTATE ? "Checkbox" : "Radio"}
         />
       );
