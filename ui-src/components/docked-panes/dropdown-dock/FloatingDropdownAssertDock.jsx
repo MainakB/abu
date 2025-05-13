@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { ASSERTIONMODES, ASSERTIONNAMES } from "../../../constants/index.js";
+import { ASSERTIONMODES } from "../../../constants/index.js";
 import ConfirmCancelFooter from "../confirm-cancel-footer/ConfirmCancelFooter.jsx";
 import { useModeSocket } from "../../../hooks/useModeSocket.js";
 import { recordDropdownAssert } from "../../../../utils/componentLibs.js";

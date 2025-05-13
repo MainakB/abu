@@ -1,4 +1,4 @@
-import { ASSERTIONMODES, ASSERTIONNAMES } from "../ui-src/constants/index.js";
+import { ASSERTIONMODES } from "../ui-src/constants/index.js";
 
 const ASSERTION_NAME_LOOKUP = {
   [ASSERTIONMODES.ASSERTTEXTEQUALS]: {

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { ASSERTIONMODES, ASSERTIONNAMES } from "../../../constants/index.js";
+import { ASSERTIONMODES } from "../../../constants/index.js";
 import { useModeSocket } from "../../../hooks/useModeSocket.js";
 
 function getHeader(modeValue) {
