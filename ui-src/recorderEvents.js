@@ -21,14 +21,21 @@
         shouldUpdateInput = finalValue !== initialValue;
         if (shouldUpdateInput) {
           window.__maybeRecordTabSwitch?.("recorder-click-input");
-          window.__recordAction(
-            window.__buildData({
-              action: "input",
-              el: currentInput,
-              e,
-              value: finalValue,
-            })
+          const buildData = window.__buildData({
+            action: assertionModes.INPUT,
+            el: currentInput,
+            e,
+            value: finalValue,
+            elementIndex: -1,
+          });
+          const { elIndex, refinedAttributes } = window.__searchElIndex(
+            e.target,
+            "input",
+            buildData.attributes
           );
+          buildData.elementIndex = elIndex;
+          buildData.attributes = { ...refinedAttributes };
+          window.__recordAction(buildData);
         }
         currentInput = null;
         initialValue = null;
@@ -43,14 +50,21 @@
       if (!shouldUpdateInput) window.__maybeRecordTabSwitch?.("recorder-click");
 
       if (el.tagName && el.tagName.toLowerCase() === "select") return;
-      window.__recordAction(
-        window.__buildData({
-          action: "click",
-          el,
-          e,
-          text: el.innerText?.trim() || null,
-        })
+      const buildData = window.__buildData({
+        action: assertionModes.CLICK,
+        el,
+        e,
+        text: el.innerText?.trim() || null,
+        elementIndex: -1,
+      });
+      const { elIndex, refinedAttributes } = window.__searchElIndex(
+        e.target,
+        el.tagName.toLowerCase(),
+        buildData.attributes
       );
+      buildData.elementIndex = elIndex;
+      buildData.attributes = { ...refinedAttributes };
+      window.__recordAction(buildData);
     });
 
     document.addEventListener("focusin", (e) => {
@@ -74,15 +88,22 @@
         const finalValue = el.value;
 
         if (finalValue !== initialValue) {
-          window.__recordAction(
-            window.__buildData({
-              action: "input",
-              el,
-              e,
-              value: finalValue,
-              keyPressed: "Enter",
-            })
+          const buildData = window.__buildData({
+            action: assertionModes.INPUT,
+            el,
+            e,
+            value: finalValue,
+            keyPressed: "Enter",
+            elementIndex: -1,
+          });
+          const { elIndex, refinedAttributes } = window.__searchElIndex(
+            e.target,
+            "input",
+            buildData.attributes
           );
+          buildData.elementIndex = elIndex;
+          buildData.attributes = { ...refinedAttributes };
+          window.__recordAction(buildData);
         }
 
         currentInput.removeEventListener("keydown", handleKeydown);
@@ -97,9 +118,21 @@
       if (el === currentInput) {
         const finalValue = el.value;
         if (finalValue !== initialValue) {
-          window.__recordAction(
-            window.__buildData({ action: "input", el, e, value: finalValue })
+          const buildData = window.__buildData({
+            action: assertionModes.INPUT,
+            el,
+            e,
+            value: finalValue,
+            elementIndex: -1,
+          });
+          const { elIndex, refinedAttributes } = window.__searchElIndex(
+            e.target,
+            "input",
+            buildData.attributes
           );
+          buildData.elementIndex = elIndex;
+          buildData.attributes = { ...refinedAttributes };
+          window.__recordAction(buildData);
         }
         currentInput = null;
         initialValue = null;
@@ -130,7 +163,7 @@
       window.__maybeRecordTabSwitch?.("recorder-change");
       window.__recordAction(
         window.__buildData({
-          action: "select",
+          action: assertionModes.SELECT,
           el,
           e,
           value,

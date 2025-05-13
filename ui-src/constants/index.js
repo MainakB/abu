@@ -1,4 +1,8 @@
 export const ASSERTIONMODES = {
+  SELECT: "SELECT",
+  CLICK: "CLICK",
+  INPUT: "INPUT",
+
   ASSERTTEXTEQUALS: "ASSERTTEXTEQUALS",
   ASSERTTEXTNOTEQUALS: "ASSERTTEXTNOTEQUALS",
   ASSERTVALUEEQUALS: "ASSERTVALUEEQUALS",
@@ -160,9 +164,19 @@ export const ASSERTIONMODES = {
   GETPDFTEXT: "GETPDFTEXT",
   GETPDFPAGECOUNT: "GETPDFPAGECOUNT",
   GETPDFPAGEORIENTATION: "GETPDFPAGEORIENTATION",
+  HTTP: "HTTP",
 };
 
 export const FUNCTIONMAPPER = {
+  NETPAYLOAD: "toHaveNetPayload",
+  NETREQUEST: "toHaveValue",
+
+  CLICK: { key: ASSERTIONMODES.CLICK, name: "click" },
+  INPUT: { key: ASSERTIONMODES.INPUT, name: "input" },
+  SELECT: {
+    key: ASSERTIONMODES.SELECT,
+    name: "dropdown",
+  },
   ASSERTCOOKIEVALUEEQUALS: {
     key: ASSERTIONMODES.ASSERTCOOKIEVALUEEQUALS,
     name: "assertCookieValueEquals",
@@ -196,8 +210,6 @@ export const FUNCTIONMAPPER = {
     key: ASSERTIONMODES.ASSERTCURRENTURLNOTCONTAINS,
     name: "assertCurentUrlNotContains",
   },
-  CLICK: { key: "click", name: "click" },
-  INPUT: { key: "input", name: "input" },
 
   ASSERTTEXTEQUALS: {
     key: ASSERTIONMODES.ASSERTTEXTEQUALS,
@@ -318,8 +330,6 @@ export const FUNCTIONMAPPER = {
     name: "assertValueInDropDownList",
   },
 
-  NETPAYLOAD: "toHaveNetPayload",
-  NETREQUEST: "toHaveValue",
   ASSERTVISIBILITY: {
     key: ASSERTIONMODES.ASSERTVISIBILITY,
     name: "assertElementVisible",

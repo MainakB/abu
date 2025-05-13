@@ -129,10 +129,11 @@ firstPage.on("framenavigated", async (frame) => {
   if (frame === firstPage.mainFrame() && !firstUrlCaptured) {
     const url = frame.url();
     if (!url.includes("about:blank") && !firstUrlCaptured) {
+      firstUrlCaptured = true;
       await firstPage.waitForLoadState("load");
       await updateInitialRecorderState(firstPage, globalRecorderMode, true);
       const title = await firstPage.title();
-      firstUrlCaptured = true;
+
       console.log("🌐 First page navigation recorded:", url);
       const tabId = uuidv4();
       await Promise.all([

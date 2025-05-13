@@ -1,3 +1,4 @@
+import converter from "number-to-words";
 import { FUNCTIONMAPPER } from "../ui-src/constants/index.js";
 
 const getLocObject = (keyName, value) => {
@@ -47,6 +48,10 @@ const getExportTypes = (key) => {
 
   if (key === "xpath") {
     return wrapEnum("Types.LocatorTypes.XPATH");
+  }
+
+  if (key === "className") {
+    return wrapEnum("Types.LocatorTypes.CLASSNAME");
   }
 
   if (key === "css") {
@@ -135,7 +140,7 @@ const constructLocators = (arg, locatorIndex) => {
       locator.push(
         getLocObject(
           getExportTypes("xpath"),
-          `//${tagname}[@${key}=${argSelectors[key]}]`
+          `//${tagname}[@${key}="${argSelectors[key]}"]`
         )
       );
     }
@@ -231,9 +236,47 @@ export const ACTION_HANDLERS = {
 
   [FUNCTIONMAPPER.INPUT.key]: (arg, idx) => {
     const loc = constructLocators(arg, idx);
+    const doEnterAfterInput =
+      arg.keyPressed && arg.keyPressed === "Enter" ? ", eai: true" : "";
+
+    const inputLabel =
+      arg.attributes?.placeholder ||
+      arg.attributes?.associatedLabel ||
+      arg.attributes?.title ||
+      arg.attributes?.["aria-describedby"] ||
+      arg.attributes?.["aria-label"] ||
+      arg.attributes?.name ||
+      null;
+    const inputLabelToUse = inputLabel ? `"${inputLabel}"` : null;
+
+    // let elIndex = -1;
+    let ordinalPrefix = "";
+    if (arg.elementIndex !== undefined && arg.elementIndex >= 0) {
+      let temp = arg.elementIndex + 1;
+      let elIndex = converter.toOrdinal(temp);
+      ordinalPrefix = `${elIndex} `;
+    }
+
     return [
       {
-        step: `And ${FUNCTIONMAPPER.INPUT.name}({po:"${loc.locKeyName}", txt:"${arg.value}"})`,
+        step: `And ${FUNCTIONMAPPER.INPUT.name}({po:"${loc.locKeyName}", txt:"${arg.value}"${doEnterAfterInput}})`,
+        aiStep:
+          arg.value && arg.keyPressed && arg.keyPressed === "Enter"
+            ? `And type "${arg.value}" to the ${ordinalPrefix}${inputLabelToUse} input field and hit enter`
+            : arg.value
+            ? `And type "${arg.value}" to the ${ordinalPrefix}${inputLabelToUse} input field`
+            : null,
+        locator: loc.result,
+      },
+      loc.newIdx,
+    ];
+  },
+
+  [FUNCTIONMAPPER.SELECT.key]: (arg, idx) => {
+    const loc = constructLocators(arg, idx);
+    return [
+      {
+        step: `And ${FUNCTIONMAPPER.SELECT.name}({po:"${loc.locKeyName}", txt:"${arg.value}"})`,
         locator: loc.result,
       },
       loc.newIdx,

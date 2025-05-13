@@ -10,11 +10,39 @@
     } catch {}
   });
 
-  const getAssociatedLabel = (el) => {
-    if (!el.id) return null;
-    const labelEl = document.querySelector(`label[for="${el.id}"]`);
-    return labelEl?.innerText?.trim() || null;
-  };
+  // const getAssociatedLabel = (el) => {
+  //   if (!el.id) return null;
+  //   const labelEl = document.querySelector(`label[for="${el.id}"]`);
+  //   return labelEl?.innerText?.trim() || null;
+  // };
+
+  function getAssociatedLabel(el) {
+    if (!el) return null;
+
+    // 1. Look for <label for="...">
+    if (el.id) {
+      const label = document.querySelector(`label[for="${CSS.escape(el.id)}"]`);
+      if (label?.innerText?.trim()) return label.innerText.trim();
+    }
+
+    // 2. Check if element is nested inside a <label>
+    let parent = el.closest("label");
+    if (parent?.innerText?.trim()) {
+      return parent.innerText.trim();
+    }
+
+    // 3. Look for aria-labelledby reference
+    const ariaLabelledBy = el.getAttribute("aria-labelledby");
+    if (ariaLabelledBy) {
+      const ids = ariaLabelledBy.split(/\s+/);
+      const labelTexts = ids
+        .map((id) => document.getElementById(id)?.innerText?.trim())
+        .filter(Boolean);
+      if (labelTexts.length) return labelTexts.join(" ");
+    }
+
+    return null;
+  }
 
   const getCheckboxStatus = (el) => {
     if (!el) return null;
@@ -79,6 +107,7 @@
     dbPassword,
     dbPortNum,
     dbQuery,
+    elementIndex,
   }) => {
     let selectors = null;
     let attributes = null;
@@ -109,6 +138,13 @@
       ...buildOptionalField("dbPassword", dbPassword),
       ...buildOptionalField("dbPortNum", dbPortNum),
       ...buildOptionalField("dbQuery", dbQuery),
+
+      ...buildOptionalField(
+        "elementIndex",
+        elementIndex !== undefined && elementIndex !== null
+          ? elementIndex
+          : null
+      ),
 
       ...buildOptionalField(
         "selectOptionIndex",
@@ -150,7 +186,7 @@
       const value = iframesAttr[attr];
       if (value) {
         const attrName = attr === "className" ? "class" : attr;
-        selectors.xpath.push(`.//${tagName}[@${attrName}=${value}]`);
+        selectors.xpath.push(`.//${tagName}[@${attrName}='${value}']`);
       }
     }
 
@@ -305,4 +341,300 @@
 
     observer.observe(target, { childList: true, subtree: true });
   };
+
+  function isVisible(el) {
+    if (!el) return false;
+
+    const style = getComputedStyle(el);
+
+    return (
+      style &&
+      style.display !== "none" &&
+      style.visibility !== "hidden" &&
+      style.opacity !== "0" &&
+      el.offsetWidth > 0 &&
+      el.offsetHeight > 0 &&
+      el.getClientRects().length > 0
+    );
+  }
+
+  function isAttributeUnique(attrName, attrValue, tagName = "*") {
+    if (!attrValue) return null;
+
+    const selector = `${tagName}[${CSS.escape(attrName)}="${attrValue}"]`;
+    const matches = Array.from(document.querySelectorAll(selector)).filter(
+      isVisible
+    );
+
+    return matches.length === 1 ? matches[0] : null;
+  }
+
+  function getVisibleIndex(target, tagType = "input") {
+    const visibleElements = Array.from(
+      document.querySelectorAll(tagType)
+    ).filter(isVisible);
+    return visibleElements.indexOf(target);
+  }
+
+  function isHumanReadable(value) {
+    if (!value || typeof value !== "string") return false;
+
+    const trimmed = value.trim();
+
+    const classPattern = /^[-_a-z0-9]+$/;
+    const wordCount = trimmed.split(/\s+/).length;
+    const uuidPattern =
+      /^[a-f0-9]{8}-?[a-f0-9]{4,}-?[a-f0-9]{4,}-?[a-f0-9]{4,}-?[a-f0-9]{12}$/i;
+
+    return (
+      !classPattern.test(trimmed) &&
+      !uuidPattern.test(trimmed) &&
+      (wordCount > 1 || /^[A-Za-z]+$/.test(trimmed))
+    );
+  }
+
+  function getAllUniqueHumanReadableAttributes(attributes, tagName) {
+    const refined = {};
+
+    const priorityAttrs = [
+      "aria-label",
+      "placeholder",
+      "title",
+      "aria-describedby",
+      "name",
+    ];
+
+    for (const attr of priorityAttrs) {
+      const value = attributes[attr];
+      if (
+        value &&
+        isAttributeUnique(attr, value, tagName) &&
+        isHumanReadable(value)
+      ) {
+        refined[attr] = value;
+      }
+    }
+
+    return refined;
+  }
+
+  function getAssociatedLabelMatch(attributes, tagName) {
+    if (!attributes.associatedLabel?.trim()) return null;
+
+    const targetText = attributes.associatedLabel.trim().toLowerCase();
+    const matches = Array.from(document.querySelectorAll(tagName)).filter(
+      (el) => isVisible(el) && el.innerText?.trim().toLowerCase() === targetText
+    );
+
+    if (matches.length === 1 && isHumanReadable(attributes.associatedLabel)) {
+      return { associatedLabel: attributes.associatedLabel };
+    }
+
+    return null;
+  }
+
+  window.__searchElIndex = (target, tagType, attributes) => {
+    try {
+      if (!target || !tagType || !attributes)
+        return { index: -1, refinedAttributes: {} };
+
+      const refinedAttributes = getAllUniqueHumanReadableAttributes(
+        attributes,
+        tagType
+      );
+      const labelMatch = getAssociatedLabelMatch(attributes, tagType);
+
+      if (Object.keys(refinedAttributes).length || labelMatch) {
+        return {
+          elIndex: -1,
+          refinedAttributes: { ...refinedAttributes, ...labelMatch },
+        };
+      }
+
+      const index = getVisibleIndex(target, tagType);
+      return {
+        elIndex: index,
+        refinedAttributes: attributes,
+      };
+    } catch (err) {
+      console.error("__searchElIndex failed:", err);
+      return {
+        index: -1,
+        refinedAttributes: attributes,
+      };
+    }
+  };
+
+  // function isVisible(el) {
+  //   if (!el) return false;
+
+  //   const style = getComputedStyle(el);
+
+  //   return (
+  //     style &&
+  //     style.display !== "none" &&
+  //     style.visibility !== "hidden" &&
+  //     style.opacity !== "0" &&
+  //     el.offsetWidth > 0 &&
+  //     el.offsetHeight > 0 &&
+  //     el.getClientRects().length > 0
+  //   );
+  // }
+
+  // function isAttributeUnique(attrName, attrValue, tagName = "*") {
+  //   if (!attrValue) return null;
+
+  //   const selector = `${tagName}[${CSS.escape(attrName)}="${attrValue}"]`;
+  //   const matches = Array.from(document.querySelectorAll(selector)).filter(
+  //     isVisible
+  //   );
+
+  //   return matches.length === 1 ? matches[0] : null;
+  // }
+
+  // function getFirstUniqueAttribute(attributes, tagName) {
+  //   const priorityAttrs = [
+  //     "aria-label",
+  //     "placeholder",
+  //     "title",
+  //     "aria-describedby",
+  //     "name",
+  //   ];
+
+  //   for (const attr of priorityAttrs) {
+  //     if (
+  //       attributes[attr] &&
+  //       isAttributeUnique(attr, attributes[attr], tagName)
+  //     ) {
+  //       return attr;
+  //     }
+  //   }
+
+  //   return null;
+  // }
+
+  // function getVisibleIndex(target, tagType = "input") {
+  //   const visibleElements = Array.from(
+  //     document.querySelectorAll(tagType)
+  //   ).filter(isVisible);
+  //   return visibleElements.indexOf(target);
+  // }
+
+  // function refineAttributes(attributes, uniqueAttrName, isByLabel = false) {
+  //   const refined = {};
+  //   const key = uniqueAttrName || (isByLabel ? "associatedLabel" : null);
+
+  //   if (key && isHumanReadable(attributes[key])) {
+  //     refined[key] = attributes[key];
+  //   }
+
+  //   return refined;
+  // }
+
+  // function isHumanReadable(value) {
+  //   if (!value || typeof value !== "string") return false;
+
+  //   const trimmed = value.trim();
+
+  //   // Reject if mostly kebab-case, snake_case, or camelCase-like
+  //   const classPattern = /^[-_a-z0-9]+$/i;
+  //   const wordCount = trimmed.split(/\s+/).length;
+  //   const uuidPattern =
+  //     /^[a-f0-9]{8}-?[a-f0-9]{4,}-?[a-f0-9]{4,}-?[a-f0-9]{4,}-?[a-f0-9]{12}$/i;
+
+  //   // return !classPattern.test(trimmed) || wordCount > 1;
+  //   return (
+  //     !classPattern.test(trimmed) &&
+  //     !uuidPattern.test(trimmed) &&
+  //     (wordCount > 1 || /^[A-Za-z]+$/.test(trimmed))
+  //   );
+  // }
+
+  // window.__searchElIndex = (target, tagType, attributes) => {
+  //   if (!target || !tagType || !attributes)
+  //     return { index: -1, refinedAttributes: {} };
+
+  //   const uniqueAttr = getFirstUniqueAttribute(attributes, tagType);
+
+  //   let isMatchByAssociatedLabel = false;
+  //   if (attributes.associatedLabel?.trim()) {
+  //     const targetText = attributes.associatedLabel.trim().toLowerCase();
+  //     const matches = Array.from(document.querySelectorAll(tagType)).filter(
+  //       (el) =>
+  //         isVisible(el) && el.innerText?.trim().toLowerCase() === targetText
+  //     );
+  //     isMatchByAssociatedLabel = matches.length === 1;
+  //   }
+
+  //   if (
+  //     (uniqueAttr && isHumanReadable(attributes[uniqueAttr])) ||
+  //     (isMatchByAssociatedLabel && isHumanReadable(attributes.associatedLabel))
+  //   ) {
+  //     return {
+  //       elIndex: -1,
+  //       refinedAttributes: refineAttributes(
+  //         attributes,
+  //         uniqueAttr,
+  //         isMatchByAssociatedLabel
+  //       ),
+  //     };
+  //   }
+
+  //   const index = getVisibleIndex(target, tagType);
+  //   return {
+  //     elIndex: index,
+  //     refinedAttributes: attributes,
+  //   };
+  // };
+  // window.__searchElIndex = (target, tagType, attributes) => {
+  //   console.log("selectors: ", selectors);
+  //   if (
+  //     attributes &&
+  //     (attributes?.placeholder ||
+  //       attributes?.associatedLabel ||
+  //       attributes?.title ||
+  //       attributes?.["aria-describedby"] ||
+  //       attributes?.["aria-label"] ||
+  //       attributes?.name)
+  //   ) {
+  //     const uniqueAttr =
+  //       (attributes?.["aria-label"] &&
+  //         isAttributeUnique("aria-label", attributes["aria-label"], tagType)) ||
+  //       (attributes?.placeholder &&
+  //         isAttributeUnique("placeholder", attributes.placeholder, tagType)) ||
+  //       (attributes?.title &&
+  //         isAttributeUnique("title", attributes.title, tagType)) ||
+  //       (attributes?.["aria-describedby"] &&
+  //         isAttributeUnique(
+  //           "aria-describedby",
+  //           attributes["aria-describedby"],
+  //           tagType
+  //         )) ||
+  //       (attributes?.name &&
+  //         isAttributeUnique("name", attributes.name, tagType)) ||
+  //       null;
+
+  //     let isMatchByAssociatedLabel = false;
+  //     if (
+  //       attributes?.associatedLabel &&
+  //       attributes?.associatedLabel.trim() !== ""
+  //     ) {
+  //       const targetText = attributes?.associatedLabel.trim().toLowerCase();
+  //       const matches = Array.from(document.querySelectorAll(tagType)).filter(
+  //         (el) =>
+  //           isVisible(el) && el.innerText?.trim().toLowerCase() === targetText
+  //       );
+  //       isMatchByAssociatedLabel = matches.length === 1;
+  //     }
+
+  //     if (uniqueAttr || isMatchByAssociatedLabel) return -1;
+  //   }
+
+  //   const visibleInputs = Array.from(document.querySelectorAll(tagType)).filter(
+  //     isVisible
+  //   );
+
+  //   const index = visibleInputs.indexOf(target);
+  //   return index;
+  // };
 })();

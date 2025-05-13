@@ -15,22 +15,20 @@
     });
 
     // Preferred stable selectors
-    selectors.id = el.id ? `#${el.id}` : null;
-    selectors.name = el.name ? `[name="${el.name}"]` : null;
+    selectors.id = el.id ? `${el.id}` : null;
+    selectors.name = el.name ? `${el.name}` : null;
     selectors["data-testid"] = el.dataset.testid
-      ? `[data-testid="${el.dataset.testid}"]`
+      ? `${el.dataset.testid}`
       : null;
     selectors["aria-label"] = el.getAttribute("aria-label")
-      ? `[aria-label="${el.getAttribute("aria-label")}"]`
+      ? `${el.getAttribute("aria-label")}`
       : null;
     selectors.role = el.getAttribute("role")
-      ? `[role="${el.getAttribute("role")}"]`
+      ? `${el.getAttribute("role")}`
       : null;
     selectors.className = getUniqueClass(el);
     selectors.href =
-      el.tagName.toLowerCase() === "a"
-        ? `[href="${el.getAttribute("href")}"]`
-        : null;
+      el.tagName.toLowerCase() === "a" ? `${el.getAttribute("href")}` : null;
     selectors.css = getCssSelector(el);
     let xpathText = generateTextBasedXpath(el);
     selectors.xpath = [generateXPath(el), ...(xpathText ? [xpathText] : [])]; // Last resort
@@ -48,7 +46,7 @@
     const classes = el.className
       .split(" ")
       .filter((c) => c && !c.includes(" "));
-    return classes.length === 1 ? `.${classes[0]}` : null;
+    return classes.length === 1 ? `${classes[0]}` : null;
   };
 
   const getCssSelector = (el) => {
