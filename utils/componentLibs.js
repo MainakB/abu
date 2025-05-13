@@ -60,14 +60,14 @@ const ASSERTION_NAME_LOOKUP = {
       negative: ASSERTIONMODES.ASSERTTEXTINPAGESOURCENOTCONTAINS,
     },
   },
-  [ASSERTIONMODES.ASSERTCOOKIEVALUE]: {
+  [ASSERTIONMODES.ASSERTCOOKIEVALUEEQUALS]: {
     exact: {
-      positive: ASSERTIONNAMES.ASSERTCOOKIEVALUEEQUALS,
-      negative: ASSERTIONNAMES.ASSERTCOOKIEVALUENOTEQUALS,
+      positive: ASSERTIONMODES.ASSERTCOOKIEVALUEEQUALS,
+      negative: ASSERTIONMODES.ASSERTCOOKIEVALUENOTEQUALS,
     },
     contains: {
-      positive: ASSERTIONNAMES.ASSERTCOOKIEVALUECONTAINS,
-      negative: ASSERTIONNAMES.ASSERTCOOKIEVALUENOTCONTAINS,
+      positive: ASSERTIONMODES.ASSERTCOOKIEVALUECONTAINS,
+      negative: ASSERTIONMODES.ASSERTCOOKIEVALUENOTCONTAINS,
     },
   },
 
@@ -277,7 +277,38 @@ const ASSERTION_NAME_LOOKUP = {
       negative: ASSERTIONMODES.MATCHISDISPLAYEDNOTEQUALS,
     },
   },
+  [ASSERTIONMODES.DROPDOWNCOUNTIS]: {
+    exact: {
+      positive: ASSERTIONMODES.DROPDOWNCOUNTIS,
+      negative: ASSERTIONMODES.DROPDOWNCOUNTISNOT,
+    },
+  },
+  [ASSERTIONMODES.DROPDOWNSELECTED]: {
+    exact: {
+      positive: ASSERTIONMODES.DROPDOWNSELECTED,
+      negative: ASSERTIONMODES.DROPDOWNNOTSELECTED,
+    },
+  },
+  [ASSERTIONMODES.DROPDOWNCONTAINS]: {
+    exact: {
+      positive: ASSERTIONMODES.DROPDOWNCONTAINS,
+    },
+  },
+  [ASSERTIONMODES.DROPDOWNVALUESARE]: {
+    exact: {
+      positive: ASSERTIONMODES.DROPDOWNVALUESARE,
+    },
+  },
+  [ASSERTIONMODES.DROPDOWNDUPLICATECOUNT]: {
+    exact: {
+      positive: ASSERTIONMODES.DROPDOWNDUPLICATECOUNT,
+    },
+  },
 };
+
+// type === ASSERTIONMODES.DROPDOWNVALUESARE ||
+// type === ASSERTIONMODES.DROPDOWNDUPLICATECOUNT ||
+// type === ASSERTIONMODES.DROPDOWNDUPLICATECOUNT
 
 export const floatingDeleteCookieDockConfirm = (
   cookieList,
@@ -831,11 +862,9 @@ export const floatingAssertCurrentUrlConfirm = ({
   mode,
   closeDock,
 }) => {
-  console.log(mode, exactMatch, isNegative);
   const assertionMapping = ASSERTION_NAME_LOOKUP[mode];
   const category = exactMatch ? "exact" : "contains";
   const polarity = isNegative ? "negative" : "positive";
-  console.log("category and polarity: ", [category, polarity]);
   const assertionName = assertionMapping[category][polarity];
 
   window.__recordAction(
@@ -846,5 +875,92 @@ export const floatingAssertCurrentUrlConfirm = ({
       expected,
     })
   );
+  closeDock();
+};
+
+export const getCookies = async () => {
+  const cookies = await window.__getCookies();
+  return cookies;
+};
+
+export const recordCookiesAssert = ({
+  selectedAssertions,
+  isSoftAssert,
+  mode,
+  closeDock,
+}) => {
+  const assertionMapping = ASSERTION_NAME_LOOKUP[mode];
+
+  for (let i = 0; i < selectedAssertions.length; i++) {
+    const cookieObj = selectedAssertions[i];
+    const category = cookieObj.isSubstringMatch ? "contains" : "exact";
+    const polarity = cookieObj.isNegative ? "negative" : "positive";
+    const assertionName = assertionMapping[category][polarity];
+
+    window.__recordAction(
+      window.__buildData({
+        action: "assert",
+        isSoftAssert,
+        assertion: assertionName,
+        cookieName: cookieObj.cookieName,
+        expected: cookieObj.value,
+      })
+    );
+  }
+
+  closeDock();
+};
+
+export const recordDropdownAssert = ({
+  expected,
+  isSoftAssert,
+  isNegative,
+  locatorName,
+  mode,
+  closeDock,
+  el,
+  e,
+}) => {
+  const assertionMapping = ASSERTION_NAME_LOOKUP[mode];
+  const category = "exact";
+  const polarity = isNegative ? "negative" : "positive";
+  const assertionName = assertionMapping[category][polarity];
+
+  window.__recordAction(
+    window.__buildData({
+      action: "assert",
+      locatorName,
+      isSoftAssert,
+      assertion: assertionName,
+      expected,
+      el,
+      e,
+    })
+  );
+
+  closeDock();
+};
+
+export const recordDropdownOrderAssert = ({
+  checkBoxState,
+  isSoftAssert,
+  locatorName,
+  closeDock,
+  el,
+  e,
+}) => {
+  // console.log("category and polarity: ", [category, polarity]);
+  window.__recordAction(
+    window.__buildData({
+      action: "assert",
+      locatorName,
+      isSoftAssert,
+      assertion: ASSERTIONMODES.DROPDOWNINALPHABETICORDER,
+      expected: checkBoxState.isChecked ? "asc" : "desc",
+      el,
+      e,
+    })
+  );
+
   closeDock();
 };

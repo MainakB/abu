@@ -1,13 +1,12 @@
 import React, { useState, useEffect } from "react";
 import ConfirmCancelFooter from "../confirm-cancel-footer/ConfirmCancelFooter.jsx";
 import { useModeSocket } from "../../../hooks/useModeSocket.js";
-
-export default function AssertCookieValueDock({
+import {
   getCookies,
-  mode,
-  onConfirm,
-  onCancel,
-}) {
+  recordCookiesAssert,
+} from "../../../../utils/componentLibs.js";
+
+export default function AssertCookieValueDock({ mode, onCancel }) {
   // Initialize state for each attribute
   const [cookiesStates, setCookiesStates] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -89,8 +88,15 @@ export default function AssertCookieValueDock({
         isNegative: c.isNegative,
         isSubstringMatch: c.isSubstringMatch,
       }));
-    onConfirm(selectedAssertions, softAssert);
-    setSoftAssert(false);
+      
+    recordCookiesAssert({
+      selectedAssertions,
+      isSoftAssert: softAssert,
+      mode,
+      closeDock: handleCancel,
+    });
+    // onConfirm(selectedAssertions, softAssert);
+    // setSoftAssert(false);
   };
 
   return (

@@ -466,7 +466,18 @@ export const ACTION_HANDLERS = {
     const soft = arg.isSoftAssert ? ", isSoftAssert: true" : "";
     return [
       {
-        step: `And ${FUNCTIONMAPPER.DROPDOWNSELECTED.name}({po:"${loc.locKeyName}, et: "${arg.expected}"${soft}})`,
+        step: `And ${FUNCTIONMAPPER.DROPDOWNSELECTED.name}({po:"${loc.locKeyName}", et: "${arg.expected}"${soft}})`,
+        locator: loc.result,
+      },
+      loc.newIdx,
+    ];
+  },
+  [FUNCTIONMAPPER.DROPDOWNNOTSELECTED.key]: (arg, idx) => {
+    const loc = constructLocators(arg, idx);
+    const soft = arg.isSoftAssert ? ", isSoftAssert: true" : "";
+    return [
+      {
+        step: `And ${FUNCTIONMAPPER.DROPDOWNNOTSELECTED.name}({po:"${loc.locKeyName}", et: "${arg.expected}"${soft}})`,
         locator: loc.result,
       },
       loc.newIdx,
@@ -478,7 +489,40 @@ export const ACTION_HANDLERS = {
     const soft = arg.isSoftAssert ? ", isSoftAssert: true" : "";
     return [
       {
-        step: `And ${FUNCTIONMAPPER.DROPDOWNCOUNTIS.name}({po:"${loc.locKeyName}, ect: "${arg.expected}"${soft}})`,
+        step: `And ${FUNCTIONMAPPER.DROPDOWNCOUNTIS.name}({po:"${loc.locKeyName}", ect: ${arg.expected}${soft}})`,
+        locator: loc.result,
+      },
+      loc.newIdx,
+    ];
+  },
+  [FUNCTIONMAPPER.DROPDOWNCOUNTISNOT.key]: (arg, idx) => {
+    const loc = constructLocators(arg, idx);
+    const soft = arg.isSoftAssert ? ", isSoftAssert: true" : "";
+    return [
+      {
+        step: `And ${FUNCTIONMAPPER.DROPDOWNCOUNTISNOT.name}({po:"${loc.locKeyName}", ect: ${arg.expected}${soft}})`,
+        locator: loc.result,
+      },
+      loc.newIdx,
+    ];
+  },
+  [FUNCTIONMAPPER.DROPDOWNVALUESARE.key]: (arg, idx) => {
+    const loc = constructLocators(arg, idx);
+    const soft = arg.isSoftAssert ? ", isSoftAssert: true" : "";
+    return [
+      {
+        step: `And ${FUNCTIONMAPPER.DROPDOWNVALUESARE.name}({po:"${loc.locKeyName}", et: "${arg.expected}"${soft}})`,
+        locator: loc.result,
+      },
+      loc.newIdx,
+    ];
+  },
+  [FUNCTIONMAPPER.DROPDOWNDUPLICATECOUNT.key]: (arg, idx) => {
+    const loc = constructLocators(arg, idx);
+    const soft = arg.isSoftAssert ? ", isSoftAssert: true" : "";
+    return [
+      {
+        step: `And ${FUNCTIONMAPPER.DROPDOWNDUPLICATECOUNT.name}({po:"${loc.locKeyName}", ect: ${arg.expected}${soft}})`,
         locator: loc.result,
       },
       loc.newIdx,
@@ -490,7 +534,7 @@ export const ACTION_HANDLERS = {
     const soft = arg.isSoftAssert ? ", isSoftAssert: true" : "";
     return [
       {
-        step: `And ${FUNCTIONMAPPER.DROPDOWNINALPHABETICORDER.name}({po:"${loc.locKeyName}, sortOrder: "${arg.expected}"${soft}})`,
+        step: `And ${FUNCTIONMAPPER.DROPDOWNINALPHABETICORDER.name}({po:"${loc.locKeyName}", sortOrder: "${arg.expected}"${soft}})`,
         locator: loc.result,
       },
       loc.newIdx,
@@ -502,7 +546,7 @@ export const ACTION_HANDLERS = {
     const soft = arg.isSoftAssert ? ", isSoftAssert: true" : "";
     return [
       {
-        step: `And ${FUNCTIONMAPPER.DROPDOWNCONTAINS.name}({po:"${loc.locKeyName}, txt: "${arg.expected}"${soft}})`,
+        step: `And ${FUNCTIONMAPPER.DROPDOWNCONTAINS.name}({po:"${loc.locKeyName}", txt: "${arg.expected}"${soft}})`,
         locator: loc.result,
       },
       loc.newIdx,
@@ -1333,6 +1377,42 @@ export const ACTION_HANDLERS = {
         locator: loc.result,
       },
       loc.newIdx,
+    ];
+  },
+  [FUNCTIONMAPPER.ASSERTCOOKIEVALUEEQUALS.key]: (arg, idx) => {
+    const soft = arg.isSoftAssert ? ", isSoftAssert: true" : "";
+    return [
+      {
+        step: `And ${FUNCTIONMAPPER.ASSERTCOOKIEVALUEEQUALS.name}({nme:"${arg.cookieName}", et:"${arg.expected}"${soft}})`,
+      },
+      idx,
+    ];
+  },
+  [FUNCTIONMAPPER.ASSERTCOOKIEVALUENOTEQUALS.key]: (arg, idx) => {
+    const soft = arg.isSoftAssert ? ", isSoftAssert: true" : "";
+    return [
+      {
+        step: `And ${FUNCTIONMAPPER.ASSERTCOOKIEVALUENOTEQUALS.name}({nme:"${arg.cookieName}", et:"${arg.expected}"${soft}})`,
+      },
+      idx,
+    ];
+  },
+  [FUNCTIONMAPPER.ASSERTCOOKIEVALUECONTAINS.key]: (arg, idx) => {
+    const soft = arg.isSoftAssert ? ", isSoftAssert: true" : "";
+    return [
+      {
+        step: `And ${FUNCTIONMAPPER.ASSERTCOOKIEVALUECONTAINS.name}({nme:"${arg.cookieName}", et:"${arg.expected}"${soft}})`,
+      },
+      idx,
+    ];
+  },
+  [FUNCTIONMAPPER.ASSERTCOOKIEVALUENOTCONTAINS.key]: (arg, idx) => {
+    const soft = arg.isSoftAssert ? ", isSoftAssert: true" : "";
+    return [
+      {
+        step: `And ${FUNCTIONMAPPER.ASSERTCOOKIEVALUENOTCONTAINS.name}({nme:"${arg.cookieName}", et:"${arg.expected}"${soft}})`,
+      },
+      idx,
     ];
   },
 };

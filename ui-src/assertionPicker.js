@@ -96,7 +96,7 @@
           mode === assertionModes.ADDREUSESTEP ||
           mode === assertionModes.PAGERELOAD ||
           mode === assertionModes.ASSERTCURRENTURLEQUALS ||
-          mode === assertionModes.ASSERTCOOKIEVALUE ||
+          mode === assertionModes.ASSERTCOOKIEVALUEEQUALS ||
           mode === assertionModes.ASSERTTEXTINPAGESOURCEEQUALS ||
           mode === assertionModes.ASSERTTEXTINPDF ||
           mode === assertionModes.ASSERTPDFCOMPARISON ||

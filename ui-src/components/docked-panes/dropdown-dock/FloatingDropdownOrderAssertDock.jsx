@@ -1,10 +1,13 @@
 import React, { useState, useEffect, useMemo } from "react";
 import ConfirmCancelFooter from "../confirm-cancel-footer/ConfirmCancelFooter.jsx";
 import { useModeSocket } from "../../../hooks/useModeSocket.js";
+import { recordDropdownOrderAssert } from "../../../../utils/componentLibs.js";
 
 export default function FloatingDropdownOrderAssertDock({
   el,
-  onConfirm,
+  e,
+  mode,
+  // onConfirm,
   onCancel,
 }) {
   // const [isChecked, setIsChecked] = useState(el.checked);
@@ -20,21 +23,29 @@ export default function FloatingDropdownOrderAssertDock({
     }
   }, [el]);
 
-  const handleConfirm = () => {
-    onConfirm(
-      {
-        isChecked,
-      },
-      softAssert,
-      el,
-      locatorName
-    );
-    setSoftAssert(false);
-  };
-
   const handleCancel = () => {
     setSoftAssert(false);
     onCancel();
+  };
+
+  const handleConfirm = () => {
+    recordDropdownOrderAssert({
+      checkBoxState: {
+        isChecked,
+      },
+      isSoftAssert: softAssert,
+      locatorName,
+      closeDock: handleCancel,
+      el,
+      e,
+    });
+    // onConfirm(
+    //   ,
+    //   softAssert,
+    //   el,
+    //   locatorName
+    // );
+    // setSoftAssert(false);
   };
 
   return (

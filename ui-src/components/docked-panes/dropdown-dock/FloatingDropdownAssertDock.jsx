@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { ASSERTIONMODES, ASSERTIONNAMES } from "../../../constants/index.js";
 import ConfirmCancelFooter from "../confirm-cancel-footer/ConfirmCancelFooter.jsx";
 import { useModeSocket } from "../../../hooks/useModeSocket.js";
+import { recordDropdownAssert } from "../../../../utils/componentLibs.js";
 
 function getDropdownCount(el) {
   try {
@@ -76,10 +77,6 @@ function getHeader(modeValue) {
     return "Assert Dropdown Count";
   }
 
-  // if (modeValue === ASSERTIONMODES.DROPDOWNINALPHABETICORDER) {
-  //   return "Assert Dropdown Order";
-  // }
-
   if (modeValue === ASSERTIONMODES.DROPDOWNDUPLICATECOUNT) {
     return "Assert Dropdown Duplicates Count";
   }
@@ -91,62 +88,16 @@ function getHeader(modeValue) {
   if (modeValue === ASSERTIONMODES.DROPDOWNVALUESARE) {
     return "Assert Dropdown Values";
   }
-
-  // ASSERTIONMODES.DROPDOWNCOUNTISNOT || ASSERTIONMODES.DROPDOWNNOTSELECTED
 }
 
-function getAssertionName(modeValue) {
-  if (modeValue === ASSERTIONMODES.DROPDOWNCONTAINS) {
-    return ASSERTIONNAMES.DROPDOWNCONTAINS;
-  }
-
-  if (modeValue === ASSERTIONMODES.DROPDOWNCOUNT) {
-    return ASSERTIONNAMES.DROPDOWNCOUNT;
-  }
-
-  // if (modeValue === ASSERTIONMODES.DROPDOWNINALPHABETICORDER) {
-  //   return ASSERTIONNAMES.DROPDOWNINALPHABETICORDER;
-  // }
-
-  if (modeValue === ASSERTIONMODES.DROPDOWNDUPLICATECOUNT) {
-    return ASSERTIONNAMES.DROPDOWNDUPLICATECOUNT;
-  }
-
-  if (modeValue === ASSERTIONMODES.DROPDOWNSELECTED) {
-    return ASSERTIONNAMES.DROPDOWNSELECTED;
-  }
-
-  if (modeValue === ASSERTIONMODES.DROPDOWNVALUESARE) {
-    return ASSERTIONNAMES.DROPDOWNVALUESARE;
-  }
-
-  // ASSERTIONMODES.DROPDOWNCOUNTISNOT || ASSERTIONMODES.DROPDOWNNOTSELECTED
-}
-
-export default function FloatingDropdownAssertDock({
-  el,
-  mode,
-  onConfirm,
-  onCancel,
-}) {
+export default function FloatingDropdownAssertDock({ el, mode, onCancel, e }) {
   const [header, setHeader] = useState(() => getHeader(mode));
-  const [assertName, setAssertName] = useState(() => getAssertionName(mode));
   const [expected, setExpected] = useState(() => {
-    if (
-      mode === ASSERTIONMODES.DROPDOWNCOUNTIS ||
-      mode === ASSERTIONMODES.DROPDOWNCOUNTISNOT
-    )
-      return getDropdownCount(el);
+    if (mode === ASSERTIONMODES.DROPDOWNCOUNTIS) return getDropdownCount(el);
     if (mode === ASSERTIONMODES.DROPDOWNCONTAINS) return "";
-    if (
-      // mode === ASSERTIONMODES.DROPDOWNINALPHABETICORDER ||
-      mode === ASSERTIONMODES.DROPDOWNVALUESARE
-    )
+    if (mode === ASSERTIONMODES.DROPDOWNVALUESARE)
       return getDropdownOrder(el, false);
-    if (
-      mode === ASSERTIONMODES.DROPDOWNSELECTED ||
-      mode === ASSERTIONMODES.DROPDOWNNOTSELECTED
-    )
+    if (mode === ASSERTIONMODES.DROPDOWNSELECTED)
       return getDropdownSelected(el);
     if (mode === ASSERTIONMODES.DROPDOWNDUPLICATECOUNT) return 0;
     return "";
@@ -159,8 +110,16 @@ export default function FloatingDropdownAssertDock({
   useModeSocket(onCancel);
 
   const handleConfirm = () => {
-    onConfirm(expected, softAssert, isNegative, assertName, mode, locatorName);
-    setSoftAssert(false);
+    recordDropdownAssert({
+      expected,
+      isSoftAssert: softAssert,
+      isNegative,
+      locatorName,
+      mode,
+      closeDock: handleCancel,
+      el,
+      e,
+    });
   };
 
   const handleCancel = () => {

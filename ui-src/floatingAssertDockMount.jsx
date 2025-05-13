@@ -68,19 +68,6 @@ window.showFloatingAssert = (mode, el, e, type) => {
     textValue = el.innerText?.trim() || "";
   }
 
-  const ASSERTION_NAME_LOOKUP = {
-    [ASSERTIONMODES.ASSERTCOOKIEVALUE]: {
-      exact: {
-        positive: ASSERTIONNAMES.ASSERTCOOKIEVALUEEQUALS,
-        negative: ASSERTIONNAMES.ASSERTCOOKIEVALUENOTEQUALS,
-      },
-      contains: {
-        positive: ASSERTIONNAMES.ASSERTCOOKIEVALUECONTAINS,
-        negative: ASSERTIONNAMES.ASSERTCOOKIEVALUENOTCONTAINS,
-      },
-    },
-  };
-
   const closeDock = async () => {
     if (floatingAssertRoot) {
       floatingAssertRoot.unmount();
@@ -92,36 +79,6 @@ window.showFloatingAssert = (mode, el, e, type) => {
       await window.__recorderStore.setMode("record", false);
     }
     // await window.__recorderStore.setMode("record", false);
-  };
-
-  const getCookies = async () => {
-    const cookies = await window.__getCookies();
-    return cookies;
-  };
-
-  const recordCookiesAssert = async (selectedAssertions, isSoftAssert) => {
-    const assertionMapping = ASSERTION_NAME_LOOKUP[mode];
-
-    for (let i = 0; i < selectedAssertions.length; i++) {
-      const cookieObj = selectedAssertions[i];
-      const category = cookieObj.isSubstringMatch ? "contains" : "exact";
-      const polarity = cookieObj.isNegative ? "negative" : "positive";
-      const assertionName = assertionMapping[category][polarity];
-
-      window.__recordAction(
-        window.__buildData({
-          action: "assert",
-          isSoftAssert,
-          assertion: assertionName,
-          cookieName: cookieObj.name,
-          expected: cookieObj.value,
-          el,
-          e,
-        })
-      );
-    }
-
-    await closeDock();
   };
 
   const recordCheckboxRadioAssert = async (
@@ -155,60 +112,6 @@ window.showFloatingAssert = (mode, el, e, type) => {
         assertion: assertName,
         expected: checkBoxState.isChecked,
         el: elToUse,
-        e,
-      })
-    );
-
-    await closeDock();
-  };
-
-  const recordDropdownOrderAssert = async (
-    checkBoxState,
-    isSoftAssert,
-    elToUse,
-    locatorName
-  ) => {
-    window.__recordAction(
-      window.__buildData({
-        action: "assert",
-        locatorName,
-        isSoftAssert,
-        assertion: ASSERTIONNAMES.DROPDOWNINALPHABETICORDER,
-        expected: checkBoxState.isChecked ? "asc" : "desc",
-        el,
-        e,
-      })
-    );
-
-    await closeDock();
-  };
-
-  const recordDropdownAssert = async (
-    expected,
-    isSoftAssert,
-    isNegative,
-    assertName,
-    modeVal,
-    locatorName
-  ) => {
-    if (
-      isNegative &&
-      (modeVal === ASSERTIONMODES.DROPDOWNCOUNTIS ||
-        modeVal === ASSERTIONMODES.DROPDOWNSELECTED)
-    ) {
-      assertName =
-        modeVal === ASSERTIONMODES.DROPDOWNCOUNTIS
-          ? ASSERTIONNAMES.DROPDOWNCOUNTISNOT
-          : ASSERTIONNAMES.DROPDOWNNOTSELECTED;
-    }
-    window.__recordAction(
-      window.__buildData({
-        action: "assert",
-        locatorName,
-        isSoftAssert,
-        assertion: assertName,
-        expected,
-        el,
         e,
       })
     );
@@ -255,14 +158,9 @@ window.showFloatingAssert = (mode, el, e, type) => {
           textValue={textValue}
         />
       );
-    } else if (type === ASSERTIONMODES.ASSERTCOOKIEVALUE) {
+    } else if (type === ASSERTIONMODES.ASSERTCOOKIEVALUEEQUALS) {
       floatingAssertRoot.render(
-        <AssertCookieValueDock
-          getCookies={getCookies}
-          mode={mode}
-          onCancel={closeDock}
-          onConfirm={recordCookiesAssert}
-        />
+        <AssertCookieValueDock mode={mode} onCancel={closeDock} />
       );
     } else if (
       type === ASSERTIONMODES.CHECKBOXSTATE ||
@@ -316,8 +214,8 @@ window.showFloatingAssert = (mode, el, e, type) => {
           <FloatingDropdownAssertDock
             mode={mode}
             el={el}
+            e={e}
             onCancel={closeDock}
-            onConfirm={recordDropdownAssert}
           />
         );
       } else {
@@ -334,8 +232,9 @@ window.showFloatingAssert = (mode, el, e, type) => {
         floatingAssertRoot.render(
           <FloatingDropdownOrderAssertDock
             el={el}
+            e={e}
+            mode={mode}
             onCancel={closeDock}
-            onConfirm={recordDropdownOrderAssert}
           />
         );
       } else {
