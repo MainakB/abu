@@ -90,6 +90,7 @@
           return;
 
         if (
+          mode === assertionModes.HTTP ||
           mode === assertionModes.ADDCOOKIES ||
           mode === assertionModes.DELETECOOKIES ||
           mode === assertionModes.TAKESCREENSHOT ||

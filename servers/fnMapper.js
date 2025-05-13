@@ -1503,4 +1503,61 @@ export const ACTION_HANDLERS = {
       idx,
     ];
   },
+
+  [FUNCTIONMAPPER.HTTPHOST.key]: (arg, idx) => {
+    return [
+      {
+        step: `Given ${FUNCTIONMAPPER.HTTPHOST.name} "${arg.httpUrl}"`,
+      },
+      idx,
+    ];
+  },
+  [FUNCTIONMAPPER.HTTPPATH.key]: (arg, idx) => {
+    return [
+      {
+        step: `And ${FUNCTIONMAPPER.HTTPPATH.name} "${arg.httpPath}"`,
+      },
+      idx,
+    ];
+  },
+  [FUNCTIONMAPPER.HTTPHEADER.key]: (arg, idx) => {
+    return [
+      {
+        step: `And ${FUNCTIONMAPPER.HTTPHEADER.name} ${arg.httpHeaderKey}="${arg.httpHeaderValue}"`,
+      },
+      idx,
+    ];
+  },
+  [FUNCTIONMAPPER.HTTPHEADERS.key]: (arg, idx) => {
+    return [
+      {
+        step: `And ${FUNCTIONMAPPER.HTTPHEADERS.name} ${arg.httpHeaders}`,
+      },
+      idx,
+    ];
+  },
+  [FUNCTIONMAPPER.HTTPPAYLOAD.key]: (arg, idx) => {
+    return [
+      {
+        step: `And ${FUNCTIONMAPPER.HTTPPAYLOAD.name} ${arg.httpPayload}`,
+      },
+      idx,
+    ];
+  },
+  [FUNCTIONMAPPER.HTTPMETHOD.key]: (arg, idx) => {
+    return [
+      {
+        step: `And ${FUNCTIONMAPPER.HTTPMETHOD.name} ${arg.httpMethod}`,
+      },
+      idx,
+    ];
+  },
+  [FUNCTIONMAPPER.HTTPSTATUS.key]: (arg, idx) => {
+    return [
+      {
+        step: `Then ${FUNCTIONMAPPER.HTTPSTATUS.name} ${arg.httpStatus}`,
+      },
+      idx,
+    ];
+  },
 };

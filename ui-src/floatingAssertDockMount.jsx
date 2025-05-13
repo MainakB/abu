@@ -23,6 +23,7 @@ import FloatingDrodownSelectedAssignDock from "./components/docked-panes/element
 import FloatingDBDataAssignDock from "./components/docked-panes/db-assignments/FloatingDBDataAssignDock.jsx";
 import TabbedAssertionDock from "./components/docked-panes/tabbed-assign-match/TabbedAssertionDock.jsx";
 import FloatingElementTextMatchDock from "./components/docked-panes/element-based-match/FloatingElementTextMatchDock.jsx";
+import FloatingApiRequestDock from "./components/docked-panes/api-request-dock/FloatingApiRequestDock.jsx";
 import { ASSERTIONMODES } from "./constants/index.js";
 
 let floatingAssertRoot = null;
@@ -150,6 +151,10 @@ window.showFloatingAssert = (mode, el, e, type) => {
           onCancel={closeDock}
           textValue={textValue}
         />
+      );
+    } else if (type === ASSERTIONMODES.HTTP) {
+      floatingAssertRoot.render(
+        <FloatingApiRequestDock onCancel={closeDock} />
       );
     } else if (type === ASSERTIONMODES.ADDCOOKIES) {
       floatingAssertRoot.render(

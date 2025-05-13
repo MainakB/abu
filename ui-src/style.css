@@ -833,6 +833,44 @@ button.disabled:focus {
   align-self: flex-start !important;
 }
 
+.hdr-remove-button {
+  border: none !important;
+  background: none !important;
+  cursor: pointer !important;
+  font-size: 18px !important;
+  padding: 5px !important;
+  align-self: flex-start !important;
+}
+
+.http-field-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.hdr-verb-select {
+  margin-left: 0px !important;
+  border: 1px solid #ccc !important;
+  border-radius: 4px !important;
+  padding: 6px 8px !important;
+  background: var(--recorder-input-bg, white) !important;
+  color: var(--recorder-text-color, #333) !important;
+  font-size: 14px !important;
+  appearance: auto !important;
+  /* restore default styling */
+}
+
+.http-hdr-row {
+  display: flex;
+  gap: 10px;
+}
+
+.http-field-container {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
 /* Fix domain/path inputs */
 .cookie-additional-fields {
   display: flex !important;

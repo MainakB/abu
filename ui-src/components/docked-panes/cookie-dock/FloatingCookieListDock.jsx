@@ -103,7 +103,14 @@ export default function FloatingCookieListDock({ onConfirm, onCancel }) {
                       onBlur={() => markTouched(index, "name")}
                     />
                     {touched[index]?.name && !cookie.name.trim() && (
-                      <div className="cookie-error">Name required</div>
+                      <div
+                        className="cookie-error"
+                        style={{
+                          color: "var(--recorder-error-color) !important",
+                        }}
+                      >
+                        * Name required
+                      </div>
                     )}
                   </label>
 
@@ -117,7 +124,14 @@ export default function FloatingCookieListDock({ onConfirm, onCancel }) {
                       onBlur={() => markTouched(index, "value")}
                     />
                     {touched[index]?.value && !cookie.value.trim() && (
-                      <div className="cookie-error">Value required</div>
+                      <div
+                        className="cookie-error"
+                        style={{
+                          color: "var(--recorder-error-color) !important",
+                        }}
+                      >
+                        * Value required
+                      </div>
                     )}
                   </label>
 

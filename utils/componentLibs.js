@@ -322,6 +322,40 @@ const ASSERTION_NAME_LOOKUP = {
   },
 };
 
+export const getElementAttributes = async (el) => {
+  if (!el || typeof el.getAttributeNames !== "function") {
+    console.warn("Invalid element passed to getElementAttributes");
+    return {};
+  }
+
+  const attrList = el.getAttributeNames();
+  const attributes = {};
+
+  for (const attr of attrList) {
+    const value = el.getAttribute(attr);
+
+    // Normalize boolean-style attributes (e.g., `disabled`, `checked`)
+    attributes[attr] = value === "" ? true : value;
+  }
+
+  // Include data-* attributes in camelCase via el.dataset
+  const dataAttrs = { ...el.dataset };
+
+  return {
+    ...attributes,
+    ...dataAttrs,
+  };
+};
+
+export const isValidUrl = (value) => {
+  try {
+    const url = new URL(value);
+    return url.protocol === "http:" || url.protocol === "https:";
+  } catch (e) {
+    return false;
+  }
+};
+
 export const floatingDeleteCookieDockConfirm = (
   cookieList,
   closeDock,
@@ -347,31 +381,6 @@ export const floatingDeleteCookieDockConfirm = (
   windowDeleteCookies(cookieList);
   closeDock();
   // await Promise.all([windowDeleteCookies(cookieList), closeDock()]);
-};
-
-export const getElementAttributes = async (el) => {
-  if (!el || typeof el.getAttributeNames !== "function") {
-    console.warn("Invalid element passed to getElementAttributes");
-    return {};
-  }
-
-  const attrList = el.getAttributeNames();
-  const attributes = {};
-
-  for (const attr of attrList) {
-    const value = el.getAttribute(attr);
-
-    // Normalize boolean-style attributes (e.g., `disabled`, `checked`)
-    attributes[attr] = value === "" ? true : value;
-  }
-
-  // Include data-* attributes in camelCase via el.dataset
-  const dataAttrs = { ...el.dataset };
-
-  return {
-    ...attributes,
-    ...dataAttrs,
-  };
 };
 
 export const recordAddReuseStep = (fileName, params, onCancel) => {
@@ -999,6 +1008,86 @@ export const recordDropdownOrderAssert = ({
       expected: checkBoxState.isChecked ? "asc" : "desc",
       el,
       e,
+    })
+  );
+
+  closeDock();
+};
+
+export const recordHttpRequest = ({
+  host,
+  path,
+  method,
+  headers,
+  body,
+  closeDock,
+  status,
+}) => {
+  console.log({
+    host,
+    path,
+    method,
+    headers,
+    body,
+    closeDock,
+    status,
+  });
+  window.__recordAction(
+    window.__buildData({
+      action: "assert",
+      assertion: ASSERTIONMODES.HTTPHOST,
+      httpUrl: host.trim(),
+    })
+  );
+
+  if (path.trim()) {
+    window.__recordAction(
+      window.__buildData({
+        action: "assert",
+        assertion: ASSERTIONMODES.HTTPPATH,
+        httpPath: path.trim(),
+      })
+    );
+  }
+
+  if (headers && Array.isArray(headers) && headers.length) {
+    const headersObject = headers.reduce((acc, { key, value }) => {
+      if (key && value) acc[key] = value;
+      return acc;
+    }, {});
+
+    window.__recordAction(
+      window.__buildData({
+        action: "assert",
+        assertion: ASSERTIONMODES.HTTPHEADERS,
+        httpHeaders: JSON.stringify(headersObject),
+      })
+    );
+  }
+
+  if (body.trim()) {
+    window.__recordAction(
+      window.__buildData({
+        action: "assert",
+        assertion: ASSERTIONMODES.HTTPPAYLOAD,
+        httpPayload: body.trim(),
+      })
+    );
+  }
+
+  window.__recordAction(
+    window.__buildData({
+      action: "assert",
+      assertion: ASSERTIONMODES.HTTPMETHOD,
+      httpMethod: method.toUpperCase().trim(),
+    })
+  );
+
+  window.__recordAction(
+    window.__buildData({
+      action: "assert",
+      assertion: ASSERTIONMODES.HTTPSTATUS,
+      httpStatus: Number(status),
     })
   );
 

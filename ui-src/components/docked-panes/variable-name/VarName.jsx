@@ -95,7 +95,14 @@ export default function VarName({
         onChange={handleVarNameChange}
         placeholder="Enter variable name.."
       />
-      {varNameError && <div className="invalid-tag-error">{varNameError}</div>}
+      {varNameError && (
+        <div
+          className="invalid-tag-error"
+          style={{ color: "var(--recorder-error-color) !important" }}
+        >
+          {varNameError}
+        </div>
+      )}
     </div>
   );
 }

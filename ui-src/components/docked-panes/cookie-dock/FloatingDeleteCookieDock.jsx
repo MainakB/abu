@@ -122,7 +122,12 @@ export default function FloatingDeleteCookieDock({ onCancel }) {
                       touched[index] &&
                       !name.trim() &&
                       names.length > 0 && (
-                        <div className="delete-cookie-error">
+                        <div
+                          className="delete-cookie-error"
+                          style={{
+                            color: "var(--recorder-error-color) !important",
+                          }}
+                        >
                           * Name required
                         </div>
                       )}

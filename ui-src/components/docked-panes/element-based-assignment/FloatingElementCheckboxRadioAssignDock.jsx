@@ -66,7 +66,10 @@ export default function FloatingElementCheckboxRadioAssignDock({
       <div className="pdf-text-container">
         {isInvalidTag ? (
           <div className="locator-name-container">
-            <span className="invalid-tag-error">
+            <span
+              className="invalid-tag-error"
+              style={{ color: "var(--recorder-error-color) !important" }}
+            >
               * Element is not an input tag. Use get value or attribute instead.
             </span>
           </div>

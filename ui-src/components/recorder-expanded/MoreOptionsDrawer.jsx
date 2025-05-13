@@ -80,6 +80,7 @@ export default function MoreOptionsDrawer({
           </div>
           {expanded.actions && (
             <ul className="drawer-list">
+              {getNonElementDockView(ASSERTIONMODES.HTTP, "📡", "API Request")}
               {getNonElementDockView(
                 ASSERTIONMODES.ADDREUSESTEP,
                 "♻️",

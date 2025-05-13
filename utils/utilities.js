@@ -108,6 +108,13 @@
     dbPortNum,
     dbQuery,
     elementIndex,
+    httpStatus,
+    httpMethod,
+    httpPayload,
+    httpHeaders,
+    httpHeader,
+    httpPath,
+    httpUrl,
   }) => {
     let selectors = null;
     let attributes = null;
@@ -138,6 +145,14 @@
       ...buildOptionalField("dbPassword", dbPassword),
       ...buildOptionalField("dbPortNum", dbPortNum),
       ...buildOptionalField("dbQuery", dbQuery),
+
+      ...buildOptionalField("httpStatus", httpStatus),
+      ...buildOptionalField("httpMethod", httpMethod),
+      ...buildOptionalField("httpPayload", httpPayload),
+      ...buildOptionalField("httpHeaders", httpHeaders),
+      ...buildOptionalField("httpHeader", httpHeader),
+      ...buildOptionalField("httpPath", httpPath),
+      ...buildOptionalField("httpUrl", httpUrl),
 
       ...buildOptionalField(
         "elementIndex",
