@@ -8,8 +8,8 @@ export default function GenericAssertionsList({
 }) {
   const genericAssertionItems = [
     [ASSERTIONMODES.ASSERTCOOKIEVALUE, "Assert Cookie Value"],
-    [ASSERTIONMODES.ASSERTCURRENTURL, "Assert Current Url"],
-    [ASSERTIONMODES.ASSERTTEXTINPAGESOURCE, "Assert Text In Page Source"],
+    [ASSERTIONMODES.ASSERTCURRENTURLEQUALS, "Assert Current Url"],
+    [ASSERTIONMODES.ASSERTTEXTINPAGESOURCEEQUALS, "Assert Text In Page Source"],
   ];
 
   return (

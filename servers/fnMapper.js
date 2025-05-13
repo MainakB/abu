@@ -240,15 +240,130 @@ export const ACTION_HANDLERS = {
     ];
   },
 
-  [FUNCTIONMAPPER.TEXT.key]: (arg, idx) => {
+  [FUNCTIONMAPPER.ASSERTTEXTEQUALS.key]: (arg, idx) => {
     const loc = constructLocators(arg, idx);
     const soft = arg.isSoftAssert ? ", isSoftAssert: true" : "";
     return [
       {
-        step: `And ${FUNCTIONMAPPER.TEXT.name}({po:"${loc.locKeyName}", et:"${arg.expected}"${soft}})`,
+        step: `And ${FUNCTIONMAPPER.ASSERTTEXTEQUALS.name}({po:"${loc.locKeyName}", et:"${arg.expected}"${soft}})`,
         locator: loc.result,
       },
       loc.newIdx,
+    ];
+  },
+  [FUNCTIONMAPPER.ASSERTTEXTNOTEQUALS.key]: (arg, idx) => {
+    const loc = constructLocators(arg, idx);
+    const soft = arg.isSoftAssert ? ", isSoftAssert: true" : "";
+    return [
+      {
+        step: `And ${FUNCTIONMAPPER.ASSERTTEXTNOTEQUALS.name}({po:"${loc.locKeyName}", et:"${arg.expected}"${soft}})`,
+        locator: loc.result,
+      },
+      loc.newIdx,
+    ];
+  },
+  [FUNCTIONMAPPER.ASSERTTEXTCONTAINS.key]: (arg, idx) => {
+    const loc = constructLocators(arg, idx);
+    const soft = arg.isSoftAssert ? ", isSoftAssert: true" : "";
+    return [
+      {
+        step: `And ${FUNCTIONMAPPER.ASSERTTEXTCONTAINS.name}({po:"${loc.locKeyName}", et:"${arg.expected}"${soft}})`,
+        locator: loc.result,
+      },
+      loc.newIdx,
+    ];
+  },
+  [FUNCTIONMAPPER.ASSERTTEXTNOTCONTAINS.key]: (arg, idx) => {
+    const loc = constructLocators(arg, idx);
+    const soft = arg.isSoftAssert ? ", isSoftAssert: true" : "";
+    return [
+      {
+        step: `And ${FUNCTIONMAPPER.ASSERTTEXTNOTCONTAINS.name}({po:"${loc.locKeyName}", et:"${arg.expected}"${soft}})`,
+        locator: loc.result,
+      },
+      loc.newIdx,
+    ];
+  },
+
+  [FUNCTIONMAPPER.ASSERTVALUEEQUALS.key]: (arg, idx) => {
+    const loc = constructLocators(arg, idx);
+    const soft = arg.isSoftAssert ? ", isSoftAssert: true" : "";
+    return [
+      {
+        step: `And ${FUNCTIONMAPPER.ASSERTVALUEEQUALS.name}({po:"${loc.locKeyName}", atr:"value", ea:"${arg.expected}"${soft}})`,
+        locator: loc.result,
+      },
+      loc.newIdx,
+    ];
+  },
+  [FUNCTIONMAPPER.ASSERTVALUENOTEQUALS.key]: (arg, idx) => {
+    const loc = constructLocators(arg, idx);
+    const soft = arg.isSoftAssert ? ", isSoftAssert: true" : "";
+    return [
+      {
+        step: `And ${FUNCTIONMAPPER.ASSERTVALUENOTEQUALS.name}({po:"${loc.locKeyName}", atr:"value", ea:"${arg.expected}"${soft}})`,
+        locator: loc.result,
+      },
+      loc.newIdx,
+    ];
+  },
+  [FUNCTIONMAPPER.ASSERTVALUECONTAINS.key]: (arg, idx) => {
+    const loc = constructLocators(arg, idx);
+    const soft = arg.isSoftAssert ? ", isSoftAssert: true" : "";
+    return [
+      {
+        step: `And ${FUNCTIONMAPPER.ASSERTVALUECONTAINS.name}({po:"${loc.locKeyName}", atr:"value", ea:"${arg.expected}"${soft}})`,
+        locator: loc.result,
+      },
+      loc.newIdx,
+    ];
+  },
+  [FUNCTIONMAPPER.ASSERTVALUENOTCONTAINS.key]: (arg, idx) => {
+    const loc = constructLocators(arg, idx);
+    const soft = arg.isSoftAssert ? ", isSoftAssert: true" : "";
+    return [
+      {
+        step: `And ${FUNCTIONMAPPER.ASSERTVALUENOTCONTAINS.name}({po:"${loc.locKeyName}", atr:"value", ea:"${arg.expected}"${soft}})`,
+        locator: loc.result,
+      },
+      loc.newIdx,
+    ];
+  },
+
+  [FUNCTIONMAPPER.ASSERTTEXTINPAGESOURCEEQUALS.key]: (arg, idx) => {
+    const soft = arg.isSoftAssert ? ", isSoftAssert: true" : "";
+    return [
+      {
+        step: `And ${FUNCTIONMAPPER.ASSERTTEXTINPAGESOURCEEQUALS.name}({et:"${arg.expected}"${soft}})`,
+      },
+      idx,
+    ];
+  },
+  [FUNCTIONMAPPER.ASSERTTEXTINPAGESOURCENOTEQUALS.key]: (arg, idx) => {
+    const soft = arg.isSoftAssert ? ", isSoftAssert: true" : "";
+    return [
+      {
+        step: `And ${FUNCTIONMAPPER.ASSERTTEXTINPAGESOURCENOTEQUALS.name}({et:"${arg.expected}"${soft}})`,
+      },
+      idx,
+    ];
+  },
+  [FUNCTIONMAPPER.ASSERTTEXTINPAGESOURCECONTAINS.key]: (arg, idx) => {
+    const soft = arg.isSoftAssert ? ", isSoftAssert: true" : "";
+    return [
+      {
+        step: `And ${FUNCTIONMAPPER.ASSERTTEXTINPAGESOURCECONTAINS.name}({et:"${arg.expected}"${soft}})`,
+      },
+      idx,
+    ];
+  },
+  [FUNCTIONMAPPER.ASSERTTEXTINPAGESOURCENOTCONTAINS.key]: (arg, idx) => {
+    const soft = arg.isSoftAssert ? ", isSoftAssert: true" : "";
+    return [
+      {
+        step: `And ${FUNCTIONMAPPER.ASSERTTEXTINPAGESOURCENOTCONTAINS.name}({et:"${arg.expected}"${soft}})`,
+      },
+      idx,
     ];
   },
 
@@ -573,11 +688,11 @@ export const ACTION_HANDLERS = {
       loc.newIdx,
     ];
   },
-  [FUNCTIONMAPPER.VALUE.key]: (arg, idx) => {
+  [FUNCTIONMAPPER.GETVALUE.key]: (arg, idx) => {
     const loc = constructLocators(arg, idx);
     return [
       {
-        step: `* def ${arg.varName} = ${FUNCTIONMAPPER.VALUE.name}({po:"${loc.locKeyName}", atr:"value"})`,
+        step: `* def ${arg.varName} = ${FUNCTIONMAPPER.GETVALUE.name}({po:"${loc.locKeyName}", atr:"value"})`,
         locator: loc.result,
       },
       loc.newIdx,

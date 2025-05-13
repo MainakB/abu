@@ -1,24 +1,24 @@
 import { ASSERTIONMODES, ASSERTIONNAMES } from "../ui-src/constants/index.js";
 
 const ASSERTION_NAME_LOOKUP = {
-  [ASSERTIONMODES.TEXT]: {
+  [ASSERTIONMODES.ASSERTTEXTEQUALS]: {
     exact: {
-      positive: ASSERTIONNAMES.TEXT,
-      negative: ASSERTIONNAMES.TEXTNOTEQUALS,
+      positive: ASSERTIONMODES.ASSERTTEXTEQUALS,
+      negative: ASSERTIONMODES.ASSERTTEXTNOTEQUALS,
     },
     contains: {
-      positive: ASSERTIONNAMES.TEXTCONTAINS,
-      negative: ASSERTIONNAMES.TEXTNOTCONTAINS,
+      positive: ASSERTIONMODES.ASSERTTEXTCONTAINS,
+      negative: ASSERTIONMODES.ASSERTTEXTNOTCONTAINS,
     },
   },
-  [ASSERTIONMODES.VALUE]: {
+  [ASSERTIONMODES.ASSERTVALUEEQUALS]: {
     exact: {
-      positive: ASSERTIONNAMES.VALUE,
-      negative: ASSERTIONNAMES.VALUENOTEQUALS,
+      positive: ASSERTIONMODES.ASSERTVALUEEQUALS,
+      negative: ASSERTIONMODES.ASSERTVALUENOTEQUALS,
     },
     contains: {
-      positive: ASSERTIONNAMES.VALUENOTCONTAINS,
-      negative: ASSERTIONNAMES.VALUECONTAINS,
+      positive: ASSERTIONMODES.ASSERTVALUECONTAINS,
+      negative: ASSERTIONMODES.ASSERTVALUENOTCONTAINS,
     },
   },
   [ASSERTIONMODES.ASSERTPRESENCE]: {
@@ -40,24 +40,24 @@ const ASSERTION_NAME_LOOKUP = {
     },
   },
 
-  [ASSERTIONMODES.ASSERTCURRENTURL]: {
+  [ASSERTIONMODES.ASSERTCURRENTURLEQUALS]: {
     exact: {
-      positive: ASSERTIONNAMES.ASSERTCURRENTURLEQUALS,
-      negative: ASSERTIONNAMES.ASSERTCURRENTURLNOTEQUALS,
+      positive: ASSERTIONMODES.ASSERTCURRENTURLEQUALS,
+      negative: ASSERTIONMODES.ASSERTCURRENTURLNOTEQUALS,
     },
     contains: {
-      positive: ASSERTIONNAMES.ASSERTCURRENTURLCONTAINS,
-      negative: ASSERTIONNAMES.ASSERTCURRENTURLNOTCONTAINS,
+      positive: ASSERTIONMODES.ASSERTCURRENTURLCONTAINS,
+      negative: ASSERTIONMODES.ASSERTCURRENTURLNOTCONTAINS,
     },
   },
-  [ASSERTIONMODES.ASSERTTEXTINPAGESOURCE]: {
+  [ASSERTIONMODES.ASSERTTEXTINPAGESOURCEEQUALS]: {
     exact: {
-      positive: ASSERTIONNAMES.ASSERTTEXTINPAGESOURCE,
-      negative: ASSERTIONNAMES.ASSERTTEXTINPAGESOURCENOTEQUALS,
+      positive: ASSERTIONMODES.ASSERTTEXTINPAGESOURCEEQUALS,
+      negative: ASSERTIONMODES.ASSERTTEXTINPAGESOURCENOTEQUALS,
     },
     contains: {
-      positive: ASSERTIONNAMES.ASSERTTEXTINPAGESOURCECONTAINS,
-      negative: ASSERTIONNAMES.ASSERTTEXTINPAGESOURCENOTCONTAINS,
+      positive: ASSERTIONMODES.ASSERTTEXTINPAGESOURCECONTAINS,
+      negative: ASSERTIONMODES.ASSERTTEXTINPAGESOURCENOTCONTAINS,
     },
   },
   [ASSERTIONMODES.ASSERTCOOKIEVALUE]: {
@@ -788,4 +788,63 @@ export const recordAttributesAssert = async ({
   }
 
   await closeDock();
+};
+
+export const floatingAssertDockAssertTxtOnConfirm = ({
+  expected,
+  isSoftAssert,
+  locatorName,
+  exact,
+  isNegative,
+  el,
+  e,
+  textValue,
+  mode,
+  closeDock,
+}) => {
+  const assertionMapping = ASSERTION_NAME_LOOKUP[mode];
+  const category = exact ? "exact" : "contains";
+  const polarity = isNegative ? "negative" : "positive";
+  const assertName = assertionMapping[category][polarity];
+
+  window.__recordAction(
+    window.__buildData({
+      action: "assert",
+      isSoftAssert,
+      locatorName,
+      assertion: assertName,
+      // getModeSelected(mode),
+      expected,
+      el,
+      e,
+      text: textValue,
+    })
+  );
+  closeDock();
+};
+
+export const floatingAssertCurrentUrlConfirm = ({
+  expected,
+  isSoftAssert,
+  isNegative,
+  exactMatch,
+  mode,
+  closeDock,
+}) => {
+  console.log(mode, exactMatch, isNegative);
+  const assertionMapping = ASSERTION_NAME_LOOKUP[mode];
+  const category = exactMatch ? "exact" : "contains";
+  const polarity = isNegative ? "negative" : "positive";
+  console.log("category and polarity: ", [category, polarity]);
+  const assertionName = assertionMapping[category][polarity];
+
+  window.__recordAction(
+    window.__buildData({
+      action: "assert",
+      isSoftAssert,
+      assertion: assertionName,
+      expected,
+    })
+  );
+  closeDock();
 };

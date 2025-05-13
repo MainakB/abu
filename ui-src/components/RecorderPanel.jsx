@@ -298,16 +298,26 @@ export default function RecorderPanel() {
         </button>
         <button
           title="Assert text"
-          className={getClassNameForAssert(mode, ASSERTIONMODES.TEXT)}
-          onClick={async () => await toggleMode(ASSERTIONMODES.TEXT)}
+          className={getClassNameForAssert(
+            mode,
+            ASSERTIONMODES.ASSERTTEXTEQUALS
+          )}
+          onClick={async () =>
+            await toggleMode(ASSERTIONMODES.ASSERTTEXTEQUALS)
+          }
           disabled={window.__isPaused()}
         >
           {tickMap.text ? "✅" : "🆎"}
         </button>
         <button
           title="Assert value"
-          className={getClassNameForAssert(mode, "value")}
-          onClick={async () => await toggleMode("value")}
+          className={getClassNameForAssert(
+            mode,
+            ASSERTIONMODES.ASSERTVALUEEQUALS
+          )}
+          onClick={async () =>
+            await toggleMode(ASSERTIONMODES.ASSERTVALUEEQUALS)
+          }
           disabled={window.__isPaused()}
         >
           {tickMap.value ? "✅" : "📝"}

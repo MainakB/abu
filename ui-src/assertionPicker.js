@@ -95,9 +95,9 @@
           mode === assertionModes.TAKESCREENSHOT ||
           mode === assertionModes.ADDREUSESTEP ||
           mode === assertionModes.PAGERELOAD ||
-          mode === assertionModes.ASSERTCURRENTURL ||
+          mode === assertionModes.ASSERTCURRENTURLEQUALS ||
           mode === assertionModes.ASSERTCOOKIEVALUE ||
-          mode === assertionModes.ASSERTTEXTINPAGESOURCE ||
+          mode === assertionModes.ASSERTTEXTINPAGESOURCEEQUALS ||
           mode === assertionModes.ASSERTTEXTINPDF ||
           mode === assertionModes.ASSERTPDFCOMPARISON ||
           mode === assertionModes.ASSERTTEXTIMAGESINPDF ||

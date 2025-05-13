@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { ASSERTIONMODES } from "../../../constants/index.js";
 import ConfirmCancelFooter from "../confirm-cancel-footer/ConfirmCancelFooter.jsx";
 import { useModeSocket } from "../../../hooks/useModeSocket.js";
+import { floatingAssertDockAssertTxtOnConfirm } from "../../../../utils/componentLibs.js";
 
 function getOwnText(el) {
   try {
@@ -20,11 +21,17 @@ function getOwnText(el) {
   }
 }
 
-export default function FloatingAssertDock({ el, mode, onConfirm, onCancel }) {
+export default function FloatingAssertDock({
+  el,
+  e,
+  mode,
+  onCancel,
+  textValue,
+}) {
   useModeSocket(onCancel);
   const [expected, setExpected] = useState(() => {
-    if (mode === ASSERTIONMODES.TEXT) return getOwnText(el);
-    if (mode === ASSERTIONMODES.VALUE)
+    if (mode === ASSERTIONMODES.ASSERTTEXTEQUALS) return getOwnText(el);
+    if (mode === ASSERTIONMODES.ASSERTVALUEEQUALS)
       return el?.value || el?.getAttribute("value") || "";
     return "";
   });
@@ -40,8 +47,20 @@ export default function FloatingAssertDock({ el, mode, onConfirm, onCancel }) {
   };
 
   const handleConfirm = () => {
-    onConfirm(expected, softAssert, locatorName, exactMatch, isNegative);
-    setSoftAssert(false);
+    floatingAssertDockAssertTxtOnConfirm({
+      expected,
+      isSoftAssert: softAssert,
+      locatorName,
+      exact: exactMatch,
+      isNegative,
+      el,
+      e,
+      textValue,
+      mode,
+      closeDock: handleCancel,
+    });
+    // onConfirm(expected, softAssert, locatorName, exactMatch, isNegative);
+    // setSoftAssert(false);
   };
 
   return (

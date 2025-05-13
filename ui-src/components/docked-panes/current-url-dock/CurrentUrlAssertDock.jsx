@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { ASSERTIONMODES } from "../../../constants/index.js";
 import ConfirmCancelFooter from "../confirm-cancel-footer/ConfirmCancelFooter.jsx";
 import { useModeSocket } from "../../../hooks/useModeSocket.js";
+import { floatingAssertCurrentUrlConfirm } from "../../../../utils/componentLibs.js";
 
 async function getCurrentUrl() {
   try {
@@ -12,12 +13,7 @@ async function getCurrentUrl() {
   }
 }
 
-export default function CurrentUrlAssertDock({
-  el,
-  mode,
-  onConfirm,
-  onCancel,
-}) {
+export default function CurrentUrlAssertDock({ mode, onCancel }) {
   const [expected, setExpected] = useState("");
   const [isNegative, setIsNegative] = useState(false);
   const [softAssert, setSoftAssert] = useState(false);
@@ -44,8 +40,17 @@ export default function CurrentUrlAssertDock({
   };
 
   const handleConfirm = () => {
-    onConfirm(expected, softAssert, isNegative, exactMatch);
-    closeDockReset();
+    floatingAssertCurrentUrlConfirm({
+      expected,
+      isSoftAssert: softAssert,
+      isNegative,
+      exactMatch,
+      mode,
+      closeDock: handleCancel,
+    });
+
+    // onConfirm(expected, softAssert, isNegative, exactMatch);
+    // closeDockReset();
   };
 
   return (

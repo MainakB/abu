@@ -69,46 +69,6 @@ window.showFloatingAssert = (mode, el, e, type) => {
   }
 
   const ASSERTION_NAME_LOOKUP = {
-    [ASSERTIONMODES.TEXT]: {
-      exact: {
-        positive: ASSERTIONNAMES.TEXT,
-        negative: ASSERTIONNAMES.TEXTNOTEQUALS,
-      },
-      contains: {
-        positive: ASSERTIONNAMES.TEXTCONTAINS,
-        negative: ASSERTIONNAMES.TEXTNOTCONTAINS,
-      },
-    },
-    [ASSERTIONMODES.VALUE]: {
-      exact: {
-        positive: ASSERTIONNAMES.VALUE,
-        negative: ASSERTIONNAMES.VALUENOTEQUALS,
-      },
-      contains: {
-        positive: ASSERTIONNAMES.VALUENOTCONTAINS,
-        negative: ASSERTIONNAMES.VALUECONTAINS,
-      },
-    },
-    [ASSERTIONMODES.ASSERTCURRENTURL]: {
-      exact: {
-        positive: ASSERTIONNAMES.ASSERTCURRENTURLEQUALS,
-        negative: ASSERTIONNAMES.ASSERTCURRENTURLNOTEQUALS,
-      },
-      contains: {
-        positive: ASSERTIONNAMES.ASSERTCURRENTURLCONTAINS,
-        negative: ASSERTIONNAMES.ASSERTCURRENTURLNOTCONTAINS,
-      },
-    },
-    [ASSERTIONMODES.ASSERTTEXTINPAGESOURCE]: {
-      exact: {
-        positive: ASSERTIONNAMES.ASSERTTEXTINPAGESOURCE,
-        negative: ASSERTIONNAMES.ASSERTTEXTINPAGESOURCENOTEQUALS,
-      },
-      contains: {
-        positive: ASSERTIONNAMES.ASSERTTEXTINPAGESOURCECONTAINS,
-        negative: ASSERTIONNAMES.ASSERTTEXTINPAGESOURCENOTCONTAINS,
-      },
-    },
     [ASSERTIONMODES.ASSERTCOOKIEVALUE]: {
       exact: {
         positive: ASSERTIONNAMES.ASSERTCOOKIEVALUEEQUALS,
@@ -256,56 +216,6 @@ window.showFloatingAssert = (mode, el, e, type) => {
     await closeDock();
   };
 
-  const floatingAssertDockOnConfirm = async (
-    expected,
-    isSoftAssert,
-    locatorName,
-    exact,
-    isNegative
-  ) => {
-    const assertionMapping = ASSERTION_NAME_LOOKUP[mode];
-    const category = exact ? "exact" : "contains";
-    const polarity = isNegative ? "negative" : "positive";
-    const assertName = assertionMapping[category][polarity];
-
-    window.__recordAction(
-      window.__buildData({
-        action: "assert",
-        isSoftAssert,
-        locatorName,
-        assertion: assertName,
-        // getModeSelected(mode),
-        expected,
-        el,
-        e,
-        text: textValue,
-      })
-    );
-    await closeDock();
-  };
-
-  const floatingAssertCurrentUrlConfirm = async (
-    expected,
-    isSoftAssert,
-    isNegative,
-    exactMatch
-  ) => {
-    const assertionMapping = ASSERTION_NAME_LOOKUP[mode];
-    const category = exactMatch ? "exact" : "contains";
-    const polarity = isNegative ? "negative" : "positive";
-    const assertionName = assertionMapping[category][polarity];
-
-    window.__recordAction(
-      window.__buildData({
-        action: "assert",
-        isSoftAssert,
-        assertion: assertionName,
-        expected,
-      })
-    );
-    await closeDock();
-  };
-
   const floatingCookieListDockConfirm = async (cookieList) => {
     window.__recordAction(
       window.__buildData({
@@ -318,25 +228,22 @@ window.showFloatingAssert = (mode, el, e, type) => {
 
   try {
     if (
-      type === ASSERTIONMODES.TEXT ||
-      type === ASSERTIONMODES.VALUE ||
-      type === ASSERTIONMODES.ASSERTTEXTINPAGESOURCE
+      type === ASSERTIONMODES.ASSERTTEXTEQUALS ||
+      type === ASSERTIONMODES.ASSERTVALUEEQUALS ||
+      type === ASSERTIONMODES.ASSERTTEXTINPAGESOURCEEQUALS
     ) {
       floatingAssertRoot.render(
         <FloatingAssertDock
           mode={mode}
           el={el}
+          e={e}
+          textValue={textValue}
           onCancel={closeDock}
-          onConfirm={floatingAssertDockOnConfirm}
         />
       );
-    } else if (type === ASSERTIONMODES.ASSERTCURRENTURL) {
+    } else if (type === ASSERTIONMODES.ASSERTCURRENTURLEQUALS) {
       floatingAssertRoot.render(
-        <CurrentUrlAssertDock
-          mode={mode}
-          onCancel={closeDock}
-          onConfirm={floatingAssertCurrentUrlConfirm}
-        />
+        <CurrentUrlAssertDock mode={mode} onCancel={closeDock} />
       );
     } else if (type === ASSERTIONMODES.ASSERTATTRIBUTEVALUEEQUALS) {
       floatingAssertRoot.render(
@@ -363,8 +270,6 @@ window.showFloatingAssert = (mode, el, e, type) => {
     ) {
       floatingAssertRoot.render(
         <AssertCheckedStateDock
-          // getAttributes={getElementAttributes}
-          // mode={mode}
           el={el}
           onCancel={closeDock}
           onConfirm={recordCheckboxRadioAssert}
