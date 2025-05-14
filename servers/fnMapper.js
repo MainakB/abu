@@ -1614,4 +1614,134 @@ export const ACTION_HANDLERS = {
       idx,
     ];
   },
+
+  [FUNCTIONMAPPER.GENERICVARMATCHEQUALS.key]: (arg, idx) => {
+    const varValComputed =
+      arg.expected &&
+      (arg.expected.startsWith("data") || arg.expected.startsWith("response"))
+        ? arg.expected
+        : `"${arg.expected}"`;
+
+    const matchType = arg.isSoftAssert ? "sMatch" : "match";
+    const stepComputed = `And ${matchType} ${arg.varName} ${FUNCTIONMAPPER.GENERICVARMATCHEQUALS.name} ${varValComputed}`;
+    return [
+      {
+        step: stepComputed,
+      },
+      idx,
+    ];
+  },
+  [FUNCTIONMAPPER.GENERICVARMATCHNOTEQUALS.key]: (arg, idx) => {
+    const varValComputed =
+      arg.expected &&
+      (arg.expected.startsWith("data") || arg.expected.startsWith("response"))
+        ? arg.expected
+        : `"${arg.expected}"`;
+
+    const matchType = arg.isSoftAssert ? "sMatch" : "match";
+    const stepComputed = `And ${matchType} ${arg.varName} ${FUNCTIONMAPPER.GENERICVARMATCHNOTEQUALS.name} ${varValComputed}`;
+    return [
+      {
+        step: stepComputed,
+      },
+      idx,
+    ];
+  },
+  [FUNCTIONMAPPER.GENERICVARMATCHCONTAINS.key]: (arg, idx) => {
+    const varValComputed =
+      arg.expected &&
+      (arg.expected.startsWith("data") || arg.expected.startsWith("response"))
+        ? arg.expected
+        : `"${arg.expected}"`;
+
+    const matchType = arg.isSoftAssert ? "sMatch" : "match";
+    const stepComputed = `And ${matchType} ${arg.varName} ${FUNCTIONMAPPER.GENERICVARMATCHCONTAINS.name} ${varValComputed}`;
+    return [
+      {
+        step: stepComputed,
+      },
+      idx,
+    ];
+  },
+  [FUNCTIONMAPPER.GENERICVARMATCHNOTCONTAINS.key]: (arg, idx) => {
+    const varValComputed =
+      arg.expected &&
+      (arg.expected.startsWith("data") || arg.expected.startsWith("response"))
+        ? arg.expected
+        : `"${arg.expected}"`;
+
+    const matchType = arg.isSoftAssert ? "sMatch" : "match";
+    const stepComputed = `And ${matchType} ${arg.varName} ${FUNCTIONMAPPER.GENERICVARMATCHNOTCONTAINS.name} ${varValComputed}`;
+    return [
+      {
+        step: stepComputed,
+      },
+      idx,
+    ];
+  },
+  [FUNCTIONMAPPER.GENERICVARMATCHSTARTSWITH.key]: (arg, idx) => {
+    const varValComputed =
+      arg.expected &&
+      (arg.expected.startsWith("data") || arg.expected.startsWith("response"))
+        ? arg.expected
+        : `"${arg.expected}"`;
+
+    const matchType = arg.isSoftAssert ? "sMatch" : "match";
+    const stepComputed = `And ${matchType} ${arg.varName} ${FUNCTIONMAPPER.GENERICVARMATCHSTARTSWITH.name} ${varValComputed}`;
+    return [
+      {
+        step: stepComputed,
+      },
+      idx,
+    ];
+  },
+
+  [FUNCTIONMAPPER.GENERICVARMATCHNOTSTARTSWITH.key]: (arg, idx) => {
+    const varValComputed =
+      arg.expected &&
+      (arg.expected.startsWith("data") || arg.expected.startsWith("response"))
+        ? arg.expected
+        : `"${arg.expected}"`;
+
+    const matchType = arg.isSoftAssert ? "sMatch" : "match";
+    const stepComputed = `And ${matchType} ${arg.varName} ${FUNCTIONMAPPER.GENERICVARMATCHNOTSTARTSWITH.name} ${varValComputed}`;
+    return [
+      {
+        step: stepComputed,
+      },
+      idx,
+    ];
+  },
+  [FUNCTIONMAPPER.GENERICVARMATCHENDSWITH.key]: (arg, idx) => {
+    const varValComputed =
+      arg.expected &&
+      (arg.expected.startsWith("data") || arg.expected.startsWith("response"))
+        ? arg.expected
+        : `"${arg.expected}"`;
+
+    const matchType = arg.isSoftAssert ? "sMatch" : "match";
+    const stepComputed = `And ${matchType} ${arg.varName} ${FUNCTIONMAPPER.GENERICVARMATCHENDSWITH.name} ${varValComputed}`;
+    return [
+      {
+        step: stepComputed,
+      },
+      idx,
+    ];
+  },
+  [FUNCTIONMAPPER.GENERICVARMATCHNOTENDSWITH.key]: (arg, idx) => {
+    const varValComputed =
+      arg.expected &&
+      (arg.expected.startsWith("data") || arg.expected.startsWith("response"))
+        ? arg.expected
+        : `"${arg.expected}"`;
+
+    const matchType = arg.isSoftAssert ? "sMatch" : "match";
+    const stepComputed = `And ${matchType} ${arg.varName} ${FUNCTIONMAPPER.GENERICVARMATCHNOTENDSWITH.name} ${varValComputed}`;
+    return [
+      {
+        step: stepComputed,
+      },
+      idx,
+    ];
+  },
 };

@@ -25,6 +25,8 @@ import TabbedAssertionDock from "./components/docked-panes/tabbed-assign-match/T
 import FloatingElementTextMatchDock from "./components/docked-panes/element-based-match/FloatingElementTextMatchDock.jsx";
 import FloatingApiRequestDock from "./components/docked-panes/api-request-dock/FloatingApiRequestDock.jsx";
 import FloatingGenericVarAssignmentDock from "./components/docked-panes/generic-variable-assignment/FloatingGenericVarAssignmentDock.jsx";
+import FloatingGenericVarMatchDock from "./components/docked-panes/generic-var-match-dock/FloatingGenericVarMatchDock.jsx";
+
 import { ASSERTIONMODES } from "./constants/index.js";
 
 let floatingAssertRoot = null;
@@ -334,6 +336,10 @@ window.showFloatingAssert = (mode, el, e, type) => {
     } else if (type === ASSERTIONMODES.GENERICVARASSIGN) {
       floatingAssertRoot.render(
         <FloatingGenericVarAssignmentDock onCancel={closeDock} />
+      );
+    } else if (type === ASSERTIONMODES.GENERICVARMATCHEQUALS) {
+      floatingAssertRoot.render(
+        <FloatingGenericVarMatchDock onCancel={closeDock} mode={mode} />
       );
     }
   } catch (err) {

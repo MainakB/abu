@@ -337,6 +337,29 @@ const ASSERTION_NAME_LOOKUP = {
       positive: ASSERTIONMODES.GENERICVARASSIGN,
     },
   },
+
+  [ASSERTIONMODES.GENERICVARMATCHEQUALS]: {
+    exact: {
+      positive: ASSERTIONMODES.GENERICVARMATCHEQUALS,
+      negative: ASSERTIONMODES.GENERICVARMATCHNOTEQUALS,
+    },
+    contains: {
+      positive: ASSERTIONMODES.GENERICVARMATCHCONTAINS,
+      negative: ASSERTIONMODES.GENERICVARMATCHNOTCONTAINS,
+    },
+  },
+  [ASSERTIONMODES.GENERICVARMATCHSTARTSWITH]: {
+    exact: {
+      positive: ASSERTIONMODES.GENERICVARMATCHSTARTSWITH,
+      negative: ASSERTIONMODES.GENERICVARMATCHNOTSTARTSWITH,
+    },
+  },
+  [ASSERTIONMODES.GENERICVARMATCHENDSWITH]: {
+    exact: {
+      positive: ASSERTIONMODES.GENERICVARMATCHENDSWITH,
+      negative: ASSERTIONMODES.GENERICVARMATCHNOTENDSWITH,
+    },
+  },
 };
 
 export const getElementAttributes = async (el) => {
@@ -1173,6 +1196,33 @@ export const onConfirmGenericVarAssignment = ({
       varName,
       expected: value,
       isReassignVar: isVarReasssign,
+    })
+  );
+  onCancel();
+};
+
+export const onConfirmGenericVarMatch = ({
+  varName,
+  expected,
+  mode,
+  softAssert,
+  isNegative,
+  exactMatch,
+  onCancel,
+}) => {
+  const assertionMapping = ASSERTION_NAME_LOOKUP[mode];
+  console.log("Received mode: ", mode);
+  console.log("Received ASSERTION_NAME_LOOKUP: ", ASSERTION_NAME_LOOKUP);
+  const category = !exactMatch ? "contains" : "exact";
+  const polarity = isNegative ? "negative" : "positive";
+  const assertionName = assertionMapping[category][polarity];
+  window.__recordAction(
+    window.__buildData({
+      action: "assert",
+      assertion: assertionName,
+      varName,
+      expected,
+      isSoftAssert: softAssert,
     })
   );
   onCancel();

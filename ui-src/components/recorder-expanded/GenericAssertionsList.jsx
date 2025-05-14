@@ -7,6 +7,7 @@ export default function GenericAssertionsList({
   getAssertDock,
 }) {
   const genericAssertionItems = [
+    [ASSERTIONMODES.GENERICVARMATCHEQUALS, "Generic Match"],
     [ASSERTIONMODES.ASSERTCOOKIEVALUEEQUALS, "Assert Cookie Value"],
     [ASSERTIONMODES.ASSERTCURRENTURLEQUALS, "Assert Current Url"],
     [ASSERTIONMODES.ASSERTTEXTINPAGESOURCEEQUALS, "Assert Text In Page Source"],
