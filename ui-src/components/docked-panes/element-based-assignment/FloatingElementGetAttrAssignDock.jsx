@@ -75,6 +75,8 @@ export default function FloatingElementGetAttrAssignDock({
     });
   };
 
+  const shouldNotShowLocator = loading || error || attributes.length === 0;
+
   return (
     <div
       id="floating-cookie-list-dock"
@@ -90,31 +92,35 @@ export default function FloatingElementGetAttrAssignDock({
       {loading && <div className="assert-loading">Loading attributes...</div>}
       {error && <div className="assert-error">Error: {error}</div>}
       {!loading && !error && attributes.length === 0 && (
-        <div className="assert-empty">No attributes found</div>
+        <div className="assert-dock-content">
+          <div className="assert-empty">No attributes found</div>
+        </div>
       )}
       <div className="pdf-text-container">
-        <VarName
-          varName={varName}
-          setVarName={setVarName}
-          varNameError={varNameError}
-          setVarNameError={setVarNameError}
-        />
         {/* Attribute Selector */}
         {attributes.length > 0 && selectedAttrIndex !== null && (
-          <div className="locator-name-container">
-            <label>Select Attribute</label>
-            <select
-              className="cookie-input"
-              value={selectedAttrIndex}
-              onChange={(e) => setSelectedAttrIndex(Number(e.target.value))}
-            >
-              {attributes.map((attr, index) => (
-                <option key={index} value={index}>
-                  {attr.name}
-                </option>
-              ))}
-            </select>
-          </div>
+          <>
+            <VarName
+              varName={varName}
+              setVarName={setVarName}
+              varNameError={varNameError}
+              setVarNameError={setVarNameError}
+            />
+            <div className="locator-name-container">
+              <label>Select Attribute</label>
+              <select
+                className="cookie-input"
+                value={selectedAttrIndex}
+                onChange={(e) => setSelectedAttrIndex(Number(e.target.value))}
+              >
+                {attributes.map((attr, index) => (
+                  <option key={index} value={index}>
+                    {attr.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </>
         )}
         {/* Attribute Value Display */}
         {selectedAttrIndex !== null && (
@@ -131,14 +137,15 @@ export default function FloatingElementGetAttrAssignDock({
         )}
       </div>
       <ConfirmCancelFooter
-        locatorName={locatorName}
-        setLocatorName={setLocatorName}
+        // locatorName={locatorName}
+        // setLocatorName={setLocatorName}
         onCancel={onCancel}
         onConfirm={handleConfirm}
         disableAutoFocus={true}
         disabled={
           varName.trim() === "" || !!varNameError || selectedAttrIndex === null
         }
+        {...(!shouldNotShowLocator ? { locatorName, setLocatorName } : {})}
       />
     </div>
   );

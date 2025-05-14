@@ -115,6 +115,7 @@
     httpHeader,
     httpPath,
     httpUrl,
+    isReassignVar,
   }) => {
     let selectors = null;
     let attributes = null;
@@ -145,7 +146,7 @@
       ...buildOptionalField("dbPassword", dbPassword),
       ...buildOptionalField("dbPortNum", dbPortNum),
       ...buildOptionalField("dbQuery", dbQuery),
-
+      ...buildOptionalField("isReassignVar", isReassignVar),
       ...buildOptionalField("httpStatus", httpStatus),
       ...buildOptionalField("httpMethod", httpMethod),
       ...buildOptionalField("httpPayload", httpPayload),

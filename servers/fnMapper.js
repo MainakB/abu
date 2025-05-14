@@ -1597,4 +1597,21 @@ export const ACTION_HANDLERS = {
       idx,
     ];
   },
+  [FUNCTIONMAPPER.GENERICVARASSIGN.key]: (arg, idx) => {
+    const varNameComputed =
+      arg.expected &&
+      (arg.expected.startsWith("data") || arg.expected.startsWith("response"))
+        ? arg.expected
+        : `"${arg.expected}"`;
+
+    const stepComputed = arg.isReassignVar
+      ? `* ${arg.varName} = ${varNameComputed}`
+      : `* ${FUNCTIONMAPPER.GENERICVARASSIGN.name} ${arg.varName} = ${varNameComputed}`;
+    return [
+      {
+        step: stepComputed,
+      },
+      idx,
+    ];
+  },
 };

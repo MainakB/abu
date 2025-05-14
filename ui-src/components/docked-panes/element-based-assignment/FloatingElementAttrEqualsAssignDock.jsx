@@ -104,6 +104,7 @@ export default function FloatingElementAttrEqualsAssignDock({
       selectedAssertions,
     });
   };
+  const shouldNotShowLocator = loading || error || attributes.length === 0;
 
   return (
     <div
@@ -116,18 +117,22 @@ export default function FloatingElementAttrEqualsAssignDock({
           <strong>Is Element Attribute Equals/Contains</strong>
         </div>
       </div>
-      <div className="pdf-text-container">
-        <VarName
-          varName={varName}
-          setVarName={setVarName}
-          varNameError={varNameError}
-          setVarNameError={setVarNameError}
-        />
-      </div>
+      {!loading && !error && attributes.length > 0 && (
+        <div className="pdf-text-container">
+          <VarName
+            varName={varName}
+            setVarName={setVarName}
+            varNameError={varNameError}
+            setVarNameError={setVarNameError}
+          />
+        </div>
+      )}
       {loading && <div className="assert-loading">Loading attributes...</div>}
       {error && <div className="assert-error">Error: {error}</div>}
       {!loading && !error && attributes.length === 0 && (
-        <div className="assert-empty">No attributes found</div>
+        <div className="assert-dock-content">
+          <div className="assert-empty">No attributes found</div>
+        </div>
       )}
       {!loading && !error && attributes.length > 0 && (
         <div className="assert-attributes-container">
@@ -190,14 +195,15 @@ export default function FloatingElementAttrEqualsAssignDock({
       )}
 
       <ConfirmCancelFooter
-        locatorName={locatorName}
-        setLocatorName={setLocatorName}
+        // locatorName={locatorName}
+        // setLocatorName={setLocatorName}
         onCancel={onCancel}
         onConfirm={handleConfirm}
         disableAutoFocus={true}
         disabled={
           varName.trim() === "" || !!varNameError || selectedAttrIndex === null
         }
+        {...(!shouldNotShowLocator ? { locatorName, setLocatorName } : {})}
       />
     </div>
   );

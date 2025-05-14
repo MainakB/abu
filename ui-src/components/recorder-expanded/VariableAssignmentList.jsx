@@ -22,6 +22,9 @@ export default function VariableAssignmentList({
     // [ASSERTIONMODES.GETTOOLTIPTEXT, "Get Tooltip Text"], TO DO
     [ASSERTIONMODES.GETINNERHTML, "Get Element's Inner HTML"],
   ];
+  const nonElementAssignmentItems = [
+    [ASSERTIONMODES.GENERICVARASSIGN, "Generic Variable Assignment"],
+  ];
 
   return (
     <div className="drawer-section">
@@ -35,6 +38,10 @@ export default function VariableAssignmentList({
         <ul className="drawer-list">
           {elementAssignmentItems.map(([mode, label]) =>
             getAssertDock(mode, label, false)
+          )}
+          {/* ASSERTIONMODES.HTTP, "📡", "API Request" */}
+          {nonElementAssignmentItems.map(([mode, label]) =>
+            getAssertDock(mode, label, true)
           )}
         </ul>
       )}

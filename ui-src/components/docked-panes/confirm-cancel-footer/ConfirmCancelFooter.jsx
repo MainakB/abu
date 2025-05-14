@@ -22,6 +22,8 @@ export default function ConfirmCancelFooter({
   enableAddResponseAssertion,
   disableAddResponseAssertion,
   handleSetAddResponseAssertion,
+  isVarReasssign,
+  setIsVarReasssign,
 }) {
   const updateLocatorName = (e) => {
     setLocatorName(e.target.value);
@@ -170,6 +172,28 @@ export default function ConfirmCancelFooter({
                 <span
                   className="info-tooltip-icon"
                   title="Fires the API request and fetches response data for assertions"
+                >
+                  ⓘ
+                </span>
+              </label>
+            </div>
+          )}
+
+        {typeof isVarReasssign !== "undefined" &&
+          typeof setIsVarReasssign !== "undefined" && (
+            <div className="docked-pane-footer-assert-container">
+              <input
+                id="varreassign-checkbox"
+                type="checkbox"
+                checked={isVarReasssign}
+                // onChange={() => setIsVarReasssign((prev) => !prev)}
+                onChange={setIsVarReasssign}
+              ></input>
+              <label htmlFor="varreassign-checkbox">
+                Reassign an existing variable
+                <span
+                  className="info-tooltip-icon"
+                  title="Reassign some value to an existing variable"
                 >
                   ⓘ
                 </span>

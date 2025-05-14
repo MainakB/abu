@@ -779,6 +779,16 @@ button.disabled:focus {
   gap: 4px !important; */
 }
 
+.cookie-name-hdr {
+  font-size: 14px !important;
+  font-weight: 500 !important;
+  margin-bottom: 15px !important;
+  background-color: #e0e0e0;
+  border-radius: 5px;
+  padding: 5px 0px !important;
+  text-align: center;
+}
+
 /* Ensure label text and asterisk stay together */
 .cookie-input-label>span:first-child,
 .delete-cookie-input-label>span:first-child {
@@ -1087,6 +1097,8 @@ button.disabled:focus {
   display: flex !important;
   flex-direction: column !important;
   gap: 12px !important;
+  margin-left: 10px;
+  margin-right: 10px;
 }
 
 .assert-attributes-container-wrapper {
@@ -1447,6 +1459,12 @@ html body #floating-assert-attribute-dock {
   border-radius: 10px 10px 0 0;
   display: flex;
   overflow: hidden !important;
+}
+
+.assert-resp-header-wrapper {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
 label .info-tooltip-icon {

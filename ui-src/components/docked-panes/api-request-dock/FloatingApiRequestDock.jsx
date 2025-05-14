@@ -89,6 +89,16 @@ export default function FloatingApiRequestDock({ onCancel }) {
     });
   };
 
+  const toggleSelectAll = () => {
+    const allSelected = responseJson.every((resp) => resp.checked);
+    setResponseJson((prevResp) =>
+      prevResp.map((resp) => ({
+        ...resp,
+        checked: !allSelected, // If all selected, unselect; otherwise select all
+      }))
+    );
+  };
+
   const handleSetAddResponseAssertion = async () => {
     const next = !addResponseAssertion;
     setAddResponseAssertion(next);
@@ -279,9 +289,25 @@ export default function FloatingApiRequestDock({ onCancel }) {
             apiResponse &&
             (responseJson ? (
               <div className="assert-attributes-container">
-                <label className="cookie-input-label">
-                  Response Assertions
-                </label>
+                <div className="assert-resp-header-wrapper">
+                  <div>
+                    <label className="cookie-input-label">
+                      Response Assertions
+                    </label>
+                  </div>
+                  <div className="assert-attributes-container-wrapper">
+                    <button
+                      className="assert-toggle-button-neg-pos"
+                      type="button"
+                      onClick={toggleSelectAll}
+                    >
+                      {responseJson.every((resp) => resp.checked)
+                        ? "Deselect All"
+                        : "Select All"}
+                    </button>
+                  </div>
+                </div>
+
                 {responseJson.map((attr, index) => (
                   <div key={index} className="assert-attribute-row">
                     <label className="assert-checkbox-container">

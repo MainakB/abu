@@ -91,9 +91,12 @@ export default function FloatingCookieListDock({ onConfirm, onCancel }) {
           {cookies.map((cookie, index) => (
             <CSSTransition key={index} timeout={300} classNames="cookie-item">
               <div key={index} className="cookie-item">
+                <div>
+                  <label className="cookie-name-hdr">Cookie {index + 1}</label>
+                </div>
                 <div className="cookie-input-row">
                   <label className="cookie-input-label">
-                    Name <span className="cookie-required">*</span>
+                    Name (Required)
                     <input
                       type="text"
                       className="cookie-input"
@@ -115,7 +118,7 @@ export default function FloatingCookieListDock({ onConfirm, onCancel }) {
                   </label>
 
                   <label className="cookie-input-label">
-                    Value <span className="cookie-required">*</span>
+                    Value (Required)
                     <input
                       type="text"
                       className="cookie-input"
@@ -135,7 +138,7 @@ export default function FloatingCookieListDock({ onConfirm, onCancel }) {
                     )}
                   </label>
 
-                  <button
+                  {/* <button
                     className="cookie-remove-button"
                     onClick={() => removeRow(index)}
                     disabled={cookies.length === 1}
@@ -143,22 +146,28 @@ export default function FloatingCookieListDock({ onConfirm, onCancel }) {
                     aria-label="Remove cookie"
                   >
                     🗑
-                  </button>
+                  </button> */}
                 </div>
 
                 <div className="cookie-additional-fields">
-                  <input
-                    placeholder="Domain"
-                    className="cookie-domain-input cookie-input"
-                    value={cookie.domain}
-                    onChange={(e) => update(index, "domain", e.target.value)}
-                  />
-                  <input
-                    placeholder="Path"
-                    className="cookie-path-input cookie-input"
-                    value={cookie.path}
-                    onChange={(e) => update(index, "path", e.target.value)}
-                  />
+                  <label className="cookie-input-label">
+                    Domain (Optional)
+                    <input
+                      placeholder="Domain"
+                      className="cookie-domain-input cookie-input"
+                      value={cookie.domain}
+                      onChange={(e) => update(index, "domain", e.target.value)}
+                    />
+                  </label>
+                  <label className="cookie-input-label">
+                    Path (Optional)
+                    <input
+                      placeholder="Path"
+                      className="cookie-path-input cookie-input"
+                      value={cookie.path}
+                      onChange={(e) => update(index, "path", e.target.value)}
+                    />
+                  </label>
                 </div>
 
                 <div className="cookie-options">
@@ -209,6 +218,15 @@ export default function FloatingCookieListDock({ onConfirm, onCancel }) {
                     />
                     Session
                   </label>
+                  <button
+                    className="hdr-remove-button"
+                    onClick={() => removeRow(index)}
+                    disabled={cookies.length === 1}
+                    title="Remove"
+                    aria-label="Remove cookie"
+                  >
+                    🗑
+                  </button>
                 </div>
               </div>
             </CSSTransition>

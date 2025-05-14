@@ -116,9 +116,15 @@ export default function AssertAttributeValueDock({
     // setSoftAssert(false);
   };
 
+  const shouldNotShowLocator = attributeStates.length === 0;
+
   return (
     <div
-      id="floating-assert-attribute-dock"
+      id={
+        shouldNotShowLocator
+          ? "floating-cookie-list-dock"
+          : "floating-assert-attribute-dock"
+      }
       onClick={(e) => e.stopPropagation()}
       onMouseDown={(e) => e.stopPropagation()}
     >
@@ -202,7 +208,6 @@ export default function AssertAttributeValueDock({
                 >
                   {attr.isSubstringMatch ? "contains" : "exact"}
                 </button>
-                
               </div>
             ))}
           </div>
@@ -210,13 +215,16 @@ export default function AssertAttributeValueDock({
       </div>
 
       <ConfirmCancelFooter
-        locatorName={locatorName}
-        setLocatorName={setLocatorName}
-        softAssert={softAssert}
-        setSoftAssert={setSoftAssert}
+        // locatorName={locatorName}
+        // setLocatorName={setLocatorName}
+        // softAssert={softAssert}
+        // setSoftAssert={setSoftAssert}
         onCancel={handleCancel}
         onConfirm={handleConfirm}
         disabled={!hasCheckedItems}
+        {...(!shouldNotShowLocator
+          ? { locatorName, setLocatorName, softAssert, setSoftAssert }
+          : {})}
       />
     </div>
   );

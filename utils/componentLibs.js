@@ -332,6 +332,11 @@ const ASSERTION_NAME_LOOKUP = {
       positive: ASSERTIONMODES.CHECKBOXNOTCHECKED,
     },
   },
+  [ASSERTIONMODES.GENERICVARASSIGN]: {
+    exact: {
+      positive: ASSERTIONMODES.GENERICVARASSIGN,
+    },
+  },
 };
 
 export const getElementAttributes = async (el) => {
@@ -801,7 +806,7 @@ export const onConfirmElemMatch = ({
   onCancel();
 };
 
-export const floatingAssertDockNonTextConfirm = async ({
+export const floatingAssertDockNonTextConfirm = ({
   isSoftAssert,
   isNegative,
   locatorName,
@@ -827,7 +832,7 @@ export const floatingAssertDockNonTextConfirm = async ({
       text: textValue,
     })
   );
-  await closeDock();
+  closeDock();
 };
 
 export const recordAttributesAssert = async ({
@@ -1153,4 +1158,22 @@ export const recordHttpRequest = async ({
   }
 
   closeDock();
+};
+
+export const onConfirmGenericVarAssignment = ({
+  varName,
+  value,
+  onCancel,
+  isVarReasssign,
+}) => {
+  window.__recordAction(
+    window.__buildData({
+      action: "assert",
+      assertion: ASSERTIONMODES.GENERICVARASSIGN,
+      varName,
+      expected: value,
+      isReassignVar: isVarReasssign,
+    })
+  );
+  onCancel();
 };
