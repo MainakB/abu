@@ -1256,8 +1256,10 @@ button.disabled:focus {
   border-color: #ef9a9a !important;
 }
 
+
 /* Visual feedback for substring match */
-.assert-toggle-button-neg-pos[title*="Substring"] {
+.assert-toggle-button-neg-pos[title*="Substring"],
+.assert-toggle-button-neg-pos[title*="Soft"] {
   /* background: #e3f2fd !important;
   border-color: #bbdefb !important;
   color: #1976d2 !important; */
@@ -1266,7 +1268,8 @@ button.disabled:focus {
   color: var(--recorder-text-color) !important;
 }
 
-.assert-toggle-button-neg-pos[title*="Substring"]:hover {
+.assert-toggle-button-neg-pos[title*="Substring"]:hover,
+.assert-toggle-button-neg-pos[title*="Soft"]:hover {
   background: #bbdefb !important;
   border-color: #90caf9 !important;
 }
@@ -1456,4 +1459,32 @@ label .info-tooltip-icon {
   /* color: var(--recorder-info-color) !important; */
   color: var(--recorder-subtle-color) !important;
   transition: color 0.2s ease;
+}
+
+.assert-loading-container {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px;
+  font-size: 14px;
+  color: var(--recorder-text-color);
+}
+
+.spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid #ccc;
+  border-top: 2px solid #007bff;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+
+  100% {
+    transform: rotate(360deg);
+  }
 }

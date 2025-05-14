@@ -202,28 +202,7 @@ export default function AssertAttributeValueDock({
                 >
                   {attr.isSubstringMatch ? "contains" : "exact"}
                 </button>
-                {/* <label
-                  className="assert-checkbox-container assert-toggle"
-                  title={
-                    attr.isSubstringMatch ? "Substring match" : "Equality match"
-                  }
-                >
-                  <input
-                    type="checkbox"
-                    className="assert-checkbox"
-                    checked={attr.isSubstringMatch}
-                    onChange={(e) =>
-                      updateAttribute(
-                        index,
-                        "isSubstringMatch",
-                        e.target.checked
-                      )
-                    }
-                  />
-                  <span className="assert-toggle-label">
-                    {attr.isSubstringMatch ? "contains" : "whole string"}
-                  </span>
-                </label> */}
+                
               </div>
             ))}
           </div>

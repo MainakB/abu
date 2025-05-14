@@ -18,6 +18,10 @@ export default function ConfirmCancelFooter({
   setStartsWith,
   endsWith,
   setEndsWith,
+  addResponseAssertion,
+  enableAddResponseAssertion,
+  disableAddResponseAssertion,
+  handleSetAddResponseAssertion,
 }) {
   const updateLocatorName = (e) => {
     setLocatorName(e.target.value);
@@ -146,6 +150,30 @@ export default function ConfirmCancelFooter({
                 onChange={() => setSoftAssert((prev) => !prev)}
               ></input>
               <label htmlFor="softassert-checkbox">Soft Assert</label>
+            </div>
+          )}
+
+        {typeof addResponseAssertion !== "undefined" &&
+          typeof handleSetAddResponseAssertion !== "undefined" && (
+            <div className="docked-pane-footer-assert-container">
+              <input
+                id="respassert-checkbox"
+                type="checkbox"
+                checked={addResponseAssertion}
+                onChange={handleSetAddResponseAssertion}
+                disabled={
+                  !enableAddResponseAssertion || disableAddResponseAssertion
+                }
+              ></input>
+              <label htmlFor="respassert-checkbox">
+                Add Response Assertions
+                <span
+                  className="info-tooltip-icon"
+                  title="Fires the API request and fetches response data for assertions"
+                >
+                  ⓘ
+                </span>
+              </label>
             </div>
           )}
 

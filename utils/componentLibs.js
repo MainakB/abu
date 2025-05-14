@@ -216,6 +216,18 @@ const ASSERTION_NAME_LOOKUP = {
       negative: ASSERTIONMODES.MATCHGETVALUENOTCONTAINS,
     },
   },
+
+  MATCHVARIABLESEQUALS: {
+    exact: {
+      positive: ASSERTIONMODES.MATCHVARIABLESEQUALS,
+      negative: ASSERTIONMODES.MATCHVARIABLESNOTEQUALS,
+    },
+    contains: {
+      positive: ASSERTIONMODES.MATCHVARIABLESCONTAINS,
+      negative: ASSERTIONMODES.MATCHVARIABLESNOTCONTAINS,
+    },
+  },
+
   [ASSERTIONMODES.MATCHGETVALUESTARTSWITH]: {
     exact: {
       positive: ASSERTIONMODES.MATCHGETVALUESTARTSWITH,
@@ -354,6 +366,24 @@ export const isValidUrl = (value) => {
   } catch (e) {
     return false;
   }
+};
+
+export const flattenJson = (obj, prefix = "", result = {}) => {
+  if (Array.isArray(obj)) {
+    obj.forEach((item, i) => {
+      const path = `${prefix}[${i}]`;
+      flattenJson(item, path, result);
+    });
+  } else if (typeof obj === "object" && obj !== null) {
+    Object.entries(obj).forEach(([key, value]) => {
+      const path = prefix ? `${prefix}.${key}` : key;
+      flattenJson(value, path, result);
+    });
+  } else {
+    result[prefix] = String(obj); // convert values to string
+  }
+
+  return result;
 };
 
 export const floatingDeleteCookieDockConfirm = (
@@ -1014,7 +1044,7 @@ export const recordDropdownOrderAssert = ({
   closeDock();
 };
 
-export const recordHttpRequest = ({
+export const recordHttpRequest = async ({
   host,
   path,
   method,
@@ -1022,6 +1052,7 @@ export const recordHttpRequest = ({
   body,
   closeDock,
   status,
+  responseAsserts,
 }) => {
   console.log({
     host,
@@ -1032,7 +1063,7 @@ export const recordHttpRequest = ({
     closeDock,
     status,
   });
-  window.__recordAction(
+  await window.__recordAction(
     window.__buildData({
       action: "assert",
       assertion: ASSERTIONMODES.HTTPHOST,
@@ -1041,7 +1072,7 @@ export const recordHttpRequest = ({
   );
 
   if (path.trim()) {
-    window.__recordAction(
+    await window.__recordAction(
       window.__buildData({
         action: "assert",
         assertion: ASSERTIONMODES.HTTPPATH,
@@ -1056,7 +1087,7 @@ export const recordHttpRequest = ({
       return acc;
     }, {});
 
-    window.__recordAction(
+    await window.__recordAction(
       window.__buildData({
         action: "assert",
         assertion: ASSERTIONMODES.HTTPHEADERS,
@@ -1066,7 +1097,7 @@ export const recordHttpRequest = ({
   }
 
   if (body.trim()) {
-    window.__recordAction(
+    await window.__recordAction(
       window.__buildData({
         action: "assert",
         assertion: ASSERTIONMODES.HTTPPAYLOAD,
@@ -1075,7 +1106,7 @@ export const recordHttpRequest = ({
     );
   }
 
-  window.__recordAction(
+  await window.__recordAction(
     window.__buildData({
       action: "assert",
       assertion: ASSERTIONMODES.HTTPMETHOD,
@@ -1083,13 +1114,43 @@ export const recordHttpRequest = ({
     })
   );
 
-  window.__recordAction(
+  await window.__recordAction(
     window.__buildData({
       action: "assert",
       assertion: ASSERTIONMODES.HTTPSTATUS,
       httpStatus: Number(status),
     })
   );
+
+  if (
+    responseAsserts &&
+    Array.isArray(responseAsserts) &&
+    responseAsserts.length
+  ) {
+    const assertionMapping =
+      ASSERTION_NAME_LOOKUP[ASSERTIONMODES.MATCHVARIABLESEQUALS];
+
+    for (let i = 0; i < responseAsserts.length; i++) {
+      const assertObj = responseAsserts[i];
+      const category = assertObj.isSubstringMatch ? "contains" : "exact";
+      const polarity = assertObj.isNegative ? "negative" : "positive";
+      const assertMode = assertionMapping[category][polarity];
+      const isSoftAssert = assertObj.isSoftAssert;
+
+      if (assertObj.name === "status") {
+        assertObj.name = "response.status";
+      }
+      await window.__recordAction(
+        window.__buildData({
+          action: "assert",
+          isSoftAssert,
+          assertion: assertMode,
+          varName: assertObj.name,
+          expected: assertObj.value,
+        })
+      );
+    }
+  }
 
   closeDock();
 };

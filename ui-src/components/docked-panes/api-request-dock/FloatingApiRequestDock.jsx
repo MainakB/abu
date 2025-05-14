@@ -4,6 +4,7 @@ import { useModeSocket } from "../../../hooks/useModeSocket.js";
 import {
   isValidUrl,
   recordHttpRequest,
+  flattenJson,
 } from "../../../../utils/componentLibs.js";
 
 const defaultHeader = () => ({ key: "", value: "" });
@@ -18,6 +19,10 @@ export default function FloatingApiRequestDock({ onCancel }) {
   const [touched, setTouched] = useState([]);
   const [body, setBody] = useState("");
   const [status, setStatus] = useState("");
+  const [addResponseAssertion, setAddResponseAssertion] = useState(false);
+  const [apiResponse, setApiResponse] = useState("");
+  const [responseJson, setResponseJson] = useState(null);
+  const [loading, setLoading] = useState(false);
 
   useModeSocket(onCancel);
 
@@ -59,6 +64,10 @@ export default function FloatingApiRequestDock({ onCancel }) {
     setHeaders([]); // empty
     setTouched([]);
     setBody("");
+    setAddResponseAssertion(false);
+    setApiResponse("");
+    setResponseJson(null);
+    setLoading(false);
   };
 
   const handleCancel = () => {
@@ -67,6 +76,7 @@ export default function FloatingApiRequestDock({ onCancel }) {
   };
 
   const handleConfirm = () => {
+    const responseAsserts = responseJson.filter((v) => v.checked);
     recordHttpRequest({
       host,
       path,
@@ -75,13 +85,77 @@ export default function FloatingApiRequestDock({ onCancel }) {
       body,
       status,
       closeDock: handleCancel,
+      responseAsserts,
     });
+  };
+
+  const handleSetAddResponseAssertion = async () => {
+    const next = !addResponseAssertion;
+    setAddResponseAssertion(next);
+    if (next) {
+      const requestMeta = {
+        host,
+        path,
+        method,
+        headers,
+        body,
+        status,
+      };
+
+      try {
+        setLoading(true);
+        const response = await fetch("http://localhost:3111/api/proxy", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(requestMeta),
+        });
+
+        const text = await response.text();
+        setApiResponse(text);
+        try {
+          const json = JSON.parse(text);
+          let toFlatten = { ...json };
+
+          if (typeof json.response === "string") {
+            try {
+              const parsedData = JSON.parse(json.response);
+              toFlatten.response = parsedData; // Replace string with parsed object
+            } catch (err) {
+              console.error(err);
+              // Leave it as-is if not valid JSON
+            }
+          }
+          const flat = flattenJson(toFlatten);
+
+          const attributes = Object.entries(flat).map(([key, val]) => ({
+            name: key,
+            value: String(val),
+            checked: false,
+            isNegative: false,
+            isSubstringMatch: false,
+            isSoftAssert: false,
+          }));
+          setResponseJson(attributes);
+        } catch {
+          setResponseJson(null);
+        }
+      } catch (err) {
+        setApiResponse(`❌ Error: ${err.message}`);
+      } finally {
+        setLoading(false);
+      }
+    } else {
+      setApiResponse(""); // Clear response if unchecked
+      setResponseJson(null);
+    }
   };
 
   return (
     <div
       // id="floating-api-request-dock"
-      id="floating-cookie-delete-dock"
+      id="floating-assert-attribute-dock"
       onClick={(e) => e.stopPropagation()}
       onMouseDown={(e) => e.stopPropagation()}
     >
@@ -195,10 +269,135 @@ export default function FloatingApiRequestDock({ onCancel }) {
               onChange={(e) => setStatus(e.target.value)}
             />
           </div>
+          {addResponseAssertion && loading && (
+            <div className="assert-loading-container">
+              <div className="spinner" />
+              <div className="assert-loading-label">Fetching response...</div>
+            </div>
+          )}
+          {addResponseAssertion &&
+            apiResponse &&
+            (responseJson ? (
+              <div className="assert-attributes-container">
+                <label className="cookie-input-label">
+                  Response Assertions
+                </label>
+                {responseJson.map((attr, index) => (
+                  <div key={index} className="assert-attribute-row">
+                    <label className="assert-checkbox-container">
+                      <input
+                        type="checkbox"
+                        className="assert-checkbox"
+                        checked={attr.checked}
+                        onChange={(e) =>
+                          setResponseJson((prev) =>
+                            prev.map((a, i) =>
+                              i === index
+                                ? { ...a, checked: e.target.checked }
+                                : a
+                            )
+                          )
+                        }
+                      />
+                    </label>
+
+                    <input
+                      type="text"
+                      className="assert-input assert-attribute-name"
+                      value={attr.name}
+                      readOnly
+                      disabled
+                      title={attr.name}
+                    />
+
+                    <button
+                      className="assert-toggle-button-neg-pos"
+                      title={
+                        attr.isNegative ? "Assert not equals" : "Assert equals"
+                      }
+                      onClick={() =>
+                        setResponseJson((prev) =>
+                          prev.map((a, i) =>
+                            i === index
+                              ? { ...a, isNegative: !a.isNegative }
+                              : a
+                          )
+                        )
+                      }
+                    >
+                      {attr.isNegative ? "≠" : "="}
+                    </button>
+
+                    <input
+                      type="text"
+                      className="assert-input assert-attribute-value"
+                      value={attr.value}
+                      onChange={(e) =>
+                        setResponseJson((prev) =>
+                          prev.map((a, i) =>
+                            i === index ? { ...a, value: e.target.value } : a
+                          )
+                        )
+                      }
+                    />
+
+                    <button
+                      className="assert-toggle-button-neg-pos"
+                      title={
+                        attr.isSubstringMatch
+                          ? "Substring match"
+                          : "Exact match"
+                      }
+                      onClick={() =>
+                        setResponseJson((prev) =>
+                          prev.map((a, i) =>
+                            i === index
+                              ? { ...a, isSubstringMatch: !a.isSubstringMatch }
+                              : a
+                          )
+                        )
+                      }
+                    >
+                      {attr.isSubstringMatch ? "contains" : "exact"}
+                    </button>
+
+                    <button
+                      className="assert-toggle-button-neg-pos"
+                      title={attr.isSoftAssert ? "Soft Match" : "Match"}
+                      onClick={() =>
+                        setResponseJson((prev) =>
+                          prev.map((a, i) =>
+                            i === index
+                              ? { ...a, isSoftAssert: !a.isSoftAssert }
+                              : a
+                          )
+                        )
+                      }
+                    >
+                      {attr.isSoftAssert ? "sMatch" : "match"}
+                    </button>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="http-response-container">
+                <label className="cookie-input-label">API Response</label>
+                <textarea
+                  className="assert-pdf-text-textarea"
+                  value={apiResponse}
+                  readOnly
+                  style={{ maxHeight: "200px", overflowY: "auto" }}
+                />
+              </div>
+            ))}
         </div>
       </div>
 
       <ConfirmCancelFooter
+        addResponseAssertion={addResponseAssertion}
+        enableAddResponseAssertion={/^\d+$/.test(status.trim())}
+        disableAddResponseAssertion={loading}
+        handleSetAddResponseAssertion={handleSetAddResponseAssertion}
         onCancel={handleCancel}
         onConfirm={handleConfirm}
         disabled={!isValid}

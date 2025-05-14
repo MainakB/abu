@@ -1412,6 +1412,43 @@ export const ACTION_HANDLERS = {
       loc.newIdx,
     ];
   },
+  [FUNCTIONMAPPER.MATCHVARIABLESEQUALS.key]: (arg, idx) => {
+    const matchType = arg.isSoftAssert ? "sMatch" : "match";
+    return [
+      {
+        step: `And ${matchType} ${arg.varName} == "${arg.expected}"`,
+      },
+      idx,
+    ];
+  },
+  [FUNCTIONMAPPER.MATCHVARIABLESNOTEQUALS.key]: (arg, idx) => {
+    const matchType = arg.isSoftAssert ? "sMatch" : "match";
+    return [
+      {
+        step: `And ${matchType} ${arg.varName} != "${arg.expected}"`,
+      },
+      idx,
+    ];
+  },
+  [FUNCTIONMAPPER.MATCHVARIABLESCONTAINS.key]: (arg, idx) => {
+    const matchType = arg.isSoftAssert ? "sMatch" : "match";
+    return [
+      {
+        step: `And ${matchType} ${arg.varName} contains "${arg.expected}"`,
+      },
+      idx,
+    ];
+  },
+  [FUNCTIONMAPPER.MATCHVARIABLESNOTCONTAINS.key]: (arg, idx) => {
+    const matchType = arg.isSoftAssert ? "sMatch" : "match";
+    return [
+      {
+        step: `And ${matchType} ${arg.varName} not contains "${arg.expected}"`,
+      },
+      idx,
+    ];
+  },
+
   [FUNCTIONMAPPER.PAGERELOAD.key]: (arg, idx) => {
     return [
       {

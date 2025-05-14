@@ -1,4 +1,4 @@
-import express from "express";
+import express, { response } from "express";
 import fs from "fs";
 import path from "path";
 import { mapData } from "./server-utils.js";
@@ -51,6 +51,28 @@ app.get("/record", (req, res) => {
 app.delete("/record", (req, res) => {
   liveActions = [];
   res.sendStatus(200);
+});
+
+app.post("/api/proxy", async (req, res) => {
+  const { host, path, method, headers, body, expectedStatus } = req.body;
+
+  try {
+    const url = new URL(path, host).toString();
+    const resp = await fetch(url, {
+      method,
+      headers,
+      body: ["POST", "PUT", "PATCH"].includes(method) ? body : undefined,
+    });
+
+    const text = await resp.text();
+    res.json({
+      // ok: resp.ok,
+      // status: resp.status,
+      response: text,
+    });
+  } catch (err) {
+    res.status(500).json({ ok: false, error: err.message });
+  }
 });
 
 app.listen(PORT, () => {
