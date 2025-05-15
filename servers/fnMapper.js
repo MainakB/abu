@@ -463,7 +463,7 @@ export const ACTION_HANDLERS = {
     const soft = arg.isSoftAssert ? ", isSoftAssert: true" : "";
     return [
       {
-        step: `And ${FUNCTIONMAPPER.ASSERTATTRIBUTEVALUEEQUALS.name}({po:"${loc.locKeyName}, atr: "${arg.attributeAssertPropName}", ea: "${arg.expected}"${soft}})`,
+        step: `And ${FUNCTIONMAPPER.ASSERTATTRIBUTEVALUEEQUALS.name}({po:"${loc.locKeyName}", atr: "${arg.attributeAssertPropName}", ea: "${arg.expected}"${soft}})`,
         locator: loc.result,
       },
       loc.newIdx,
