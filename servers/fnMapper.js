@@ -993,6 +993,54 @@ export const ACTION_HANDLERS = {
     ];
   },
 
+  [FUNCTIONMAPPER.SINGLEVARASSIGNEMAILCONFIG.key]: (arg, idx) => {
+    const emailServerId = `"serverId": "${arg.emailServerId}"`;
+    const emailSubject = `, "subject": "${arg.emailSubject}"`;
+    const emailSentFrom = arg.emailSentFrom
+      ? `, "sentFrom": "${arg.emailSentFrom}"`
+      : "";
+    const emailSentTo = arg.emailSentTo
+      ? `, "sentTo": "${arg.emailSentTo}"`
+      : "";
+    const emailFilter = arg.emailFilter
+      ? `, "filter": "${arg.emailFilter}"`
+      : "";
+    const emailReceivedBefore = arg.emailReceivedBefore
+      ? `, "receivedBefore": ${arg.emailReceivedBefore}`
+      : "";
+
+    return [
+      {
+        step: `* def ${arg.varName} = {${emailServerId}${emailSubject}${emailSentFrom}${emailSentTo}${emailFilter}${emailReceivedBefore}}`,
+      },
+      idx,
+    ];
+  },
+  [FUNCTIONMAPPER.GETEMAIL.key]: (arg, idx) => {
+    return [
+      {
+        step: `* def ${arg.varName} = ${FUNCTIONMAPPER.GETEMAIL.name}(${arg.expected})`,
+      },
+      idx,
+    ];
+  },
+  [FUNCTIONMAPPER.DELETEEMAIL.key]: (arg, idx) => {
+    return [
+      {
+        step: `And ${FUNCTIONMAPPER.DELETEEMAIL.name}(${arg.expected})`,
+      },
+      idx,
+    ];
+  },
+  [FUNCTIONMAPPER.DELETEALLEMAIL.key]: (arg, idx) => {
+    return [
+      {
+        step: `And ${FUNCTIONMAPPER.DELETEALLEMAIL.name}(${arg.expected})`,
+      },
+      idx,
+    ];
+  },
+
   [FUNCTIONMAPPER.SINGLEVARASSIGNDBCONFIG.key]: (arg, idx) => {
     return [
       {

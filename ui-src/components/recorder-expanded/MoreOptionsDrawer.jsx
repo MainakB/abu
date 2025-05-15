@@ -7,6 +7,7 @@ import GenericAssertionsList from "./GenericAssertionsList.jsx";
 import VariableAssignmentList from "./VariableAssignmentList.jsx";
 import DBAssignmentList from "./DBAssignmentList.jsx";
 import { ASSERTIONMODES } from "../../constants/index.js";
+import EmailAssignmentList from "./EmailAssignmentList.jsx";
 
 export default function MoreOptionsDrawer({
   isOpen,
@@ -115,11 +116,12 @@ export default function MoreOptionsDrawer({
         </div>
         <VariableAssignmentList {...sharedProps} />
         <DBAssignmentList {...sharedProps} />
+        <EmailAssignmentList {...sharedProps} />
         <ElementAssertionsList {...sharedProps} />
         <DropdownAssertionsList {...sharedProps} />
+        <GenericAssertionsList {...sharedProps} />
         <NetworkAssertionsList {...sharedProps} />
         <PdfAssertionsList {...sharedProps} />
-        <GenericAssertionsList {...sharedProps} />
       </div>
     </div>
   );

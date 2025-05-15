@@ -725,7 +725,7 @@ export const onConfirmDbAction = async ({
   const dbConfigData = {
     action: "assert",
     assertion: ASSERTIONMODES.SINGLEVARASSIGNDBCONFIG,
-    varName: `${varName}_config`,
+    varName: `${varName}DbConfig`,
     dbType,
     dbHostName: hostName,
     dbUserName: userName,
@@ -736,7 +736,7 @@ export const onConfirmDbAction = async ({
   const dbQueryData = {
     action: "assert",
     assertion: ASSERTIONMODES.SINGLEVARASSIGNDBQUERY,
-    varName: `${varName}_query`,
+    varName: `${varName}DbQuery`,
     dbQuery: query,
   };
 
@@ -1226,4 +1226,154 @@ export const onConfirmGenericVarMatch = ({
     })
   );
   onCancel();
+};
+
+export const onConfirmGetEmailFromServer = async ({
+  varName,
+  serverId,
+  subject,
+  filter,
+  sentFrom,
+  sentTo,
+  receivedBefore,
+  onCancel,
+}) => {
+  const emailConfigData = {
+    action: "assert",
+    assertion: ASSERTIONMODES.SINGLEVARASSIGNEMAILCONFIG,
+    varName: `${varName}EmailConfig`,
+    emailServerId: serverId,
+    emailSubject: subject,
+    ...(sentFrom ? { emailSentFrom: sentFrom } : {}),
+    ...(sentTo ? { emailSentTo: sentTo } : {}),
+    ...(filter ? { emailFilter: filter } : {}),
+    ...(receivedBefore ? { emailReceivedBefore: receivedBefore } : {}),
+  };
+
+  let jsonData = [];
+  try {
+    const liveData = await fetch("http://localhost:3111/record", {
+      headers: { "Content-Type": "application/json" },
+    });
+    jsonData = await liveData.json();
+  } catch (err) {
+    console.warn("Unable to fetch live recorded data:", err);
+  }
+
+  // Check if DB config already exists
+  const existingConfig =
+    Array.isArray(jsonData) &&
+    jsonData.find(
+      (v) =>
+        v.emailServerId === emailConfigData.dbType &&
+        v.emailSubject === emailConfigData.dbHostName &&
+        v.emailSentFrom &&
+        emailConfigData.emailSentFrom &&
+        v.emailSentFrom === emailConfigData.emailSentFrom &&
+        v.emailSentTo &&
+        emailConfigData.emailSentTo &&
+        v.emailSentTo === emailConfigData.emailSentTo &&
+        v.emailFilter &&
+        emailConfigData.emailFilter &&
+        v.emailFilter === emailConfigData.emailFilter &&
+        v.emailReceivedBefore !== undefined &&
+        emailConfigData.emailReceivedBefore !== undefined &&
+        v.emailReceivedBefore === emailConfigData.emailReceivedBefore
+    );
+
+  if (!existingConfig) {
+    await window.__recordAction(emailConfigData);
+  }
+
+  const configVarName = existingConfig?.varName || emailConfigData.varName;
+
+  // Final combined DB action
+  await Promise.all([
+    window.__recordAction(
+      window.__buildData({
+        action: "assert",
+        assertion: ASSERTIONMODES.GETEMAIL,
+        varName,
+        expected: configVarName,
+      })
+    ),
+    onCancel(),
+  ]);
+};
+
+export const onConfirmDeleteEmailFromServer = async ({
+  // serverId: emailConfig.serverId.trim(),
+  // subject: emailConfig.subject.trim(),
+  // sentFrom: emailConfig.sentFrom.trim() || null,
+  // sentTo: emailConfig.sentTo.trim() || null,
+  // receivedBefore: emailConfig.receivedBefore.trim() || null,
+  // deleteAllEmails,
+  // onCancel: handleCancel,
+  varName,
+  serverId,
+  subject,
+  sentFrom,
+  sentTo,
+  receivedBefore,
+  onCancel,
+  deleteAllEmails,
+}) => {
+  const emailConfigData = {
+    action: "assert",
+    assertion: ASSERTIONMODES.SINGLEVARASSIGNEMAILCONFIG,
+    varName: `${varName}EmailConfig`,
+    emailServerId: serverId,
+    emailSubject: subject,
+    ...(sentFrom ? { emailSentFrom: sentFrom } : {}),
+    ...(sentTo ? { emailSentTo: sentTo } : {}),
+    ...(receivedBefore ? { emailReceivedBefore: receivedBefore } : {}),
+  };
+
+  let jsonData = [];
+  try {
+    const liveData = await fetch("http://localhost:3111/record", {
+      headers: { "Content-Type": "application/json" },
+    });
+    jsonData = await liveData.json();
+  } catch (err) {
+    console.warn("Unable to fetch live recorded data:", err);
+  }
+
+  // Check if DB config already exists
+  const existingConfig =
+    Array.isArray(jsonData) &&
+    jsonData.find(
+      (v) =>
+        v.emailServerId === emailConfigData.dbType &&
+        v.emailSubject === emailConfigData.dbHostName &&
+        v.emailSentFrom &&
+        emailConfigData.emailSentFrom &&
+        v.emailSentFrom === emailConfigData.emailSentFrom &&
+        v.emailSentTo &&
+        emailConfigData.emailSentTo &&
+        v.emailSentTo === emailConfigData.emailSentTo &&
+        v.emailReceivedBefore !== undefined &&
+        emailConfigData.emailReceivedBefore !== undefined &&
+        v.emailReceivedBefore === emailConfigData.emailReceivedBefore
+    );
+
+  if (!existingConfig) {
+    window.__recordAction(emailConfigData);
+  }
+
+  const configVarName = existingConfig?.varName || emailConfigData.varName;
+
+  // Final combined DB action
+  window.__recordAction(
+    window.__buildData({
+      action: "assert",
+      assertion: deleteAllEmails
+        ? ASSERTIONMODES.DELETEEMAIL
+        : ASSERTIONMODES.DELETEALLEMAIL,
+      varName,
+      expected: configVarName,
+    })
+  );
+
+  await onCancel();
 };

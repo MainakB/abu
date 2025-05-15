@@ -24,6 +24,8 @@ export default function ConfirmCancelFooter({
   handleSetAddResponseAssertion,
   isVarReasssign,
   setIsVarReasssign,
+  deleteAllEmails,
+  setDeleteAllEmails,
 }) {
   const updateLocatorName = (e) => {
     setLocatorName(e.target.value);
@@ -198,6 +200,19 @@ export default function ConfirmCancelFooter({
                   ⓘ
                 </span>
               </label>
+            </div>
+          )}
+
+        {typeof deleteAllEmails !== "undefined" &&
+          typeof setDeleteAllEmails !== "undefined" && (
+            <div className="docked-pane-footer-assert-container">
+              <input
+                id="dlt-emails-checkbox"
+                type="checkbox"
+                checked={deleteAllEmails}
+                onChange={() => setDeleteAllEmails((prev) => !prev)}
+              ></input>
+              <label htmlFor="dlt-emails-checkbox">Delete All Emails</label>
             </div>
           )}
 

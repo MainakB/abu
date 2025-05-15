@@ -23,6 +23,7 @@ export default function RecorderPanel() {
     actions: false,
     varAssignments: false,
     dbAssignments: false,
+    emailAssignments: false,
   });
 
   const socket = new WebSocket("ws://localhost:8787");
@@ -161,6 +162,7 @@ export default function RecorderPanel() {
       actions: false,
       varAssignments: false,
       dbAssignments: false,
+      emailAssignments: false,
     });
   };
 
@@ -257,6 +259,7 @@ export default function RecorderPanel() {
         genericAssertions: section === "genericAssertions",
         varAssignments: section === "varAssignments",
         dbAssignments: section === "dbAssignments",
+        emailAssignments: section === "emailAssignments",
       };
     });
   };

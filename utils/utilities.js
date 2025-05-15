@@ -116,6 +116,13 @@
     httpPath,
     httpUrl,
     isReassignVar,
+
+    emailServerId,
+    emailSubject,
+    emailSentFrom,
+    emailSentTo,
+    emailFilter,
+    emailReceivedBefore,
   }) => {
     let selectors = null;
     let attributes = null;
@@ -154,6 +161,13 @@
       ...buildOptionalField("httpHeader", httpHeader),
       ...buildOptionalField("httpPath", httpPath),
       ...buildOptionalField("httpUrl", httpUrl),
+
+      ...buildOptionalField("emailServerId", emailServerId),
+      ...buildOptionalField("emailSubject", emailSubject),
+      ...buildOptionalField("emailSentFrom", emailSentFrom),
+      ...buildOptionalField("emailSentTo", emailSentTo),
+      ...buildOptionalField("emailFilter", emailFilter),
+      ...buildOptionalField("emailReceivedBefore", emailReceivedBefore),
 
       ...buildOptionalField(
         "elementIndex",

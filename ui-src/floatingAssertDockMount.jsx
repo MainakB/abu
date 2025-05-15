@@ -26,7 +26,8 @@ import FloatingElementTextMatchDock from "./components/docked-panes/element-base
 import FloatingApiRequestDock from "./components/docked-panes/api-request-dock/FloatingApiRequestDock.jsx";
 import FloatingGenericVarAssignmentDock from "./components/docked-panes/generic-variable-assignment/FloatingGenericVarAssignmentDock.jsx";
 import FloatingGenericVarMatchDock from "./components/docked-panes/generic-var-match-dock/FloatingGenericVarMatchDock.jsx";
-
+import FloatingEmailAssignDock from "./components/docked-panes/email-operations-dock/FloatingEmailAssignDock.jsx";
+import FloatingDeleteEmailDock from "./components/docked-panes/email-operations-dock/FloatingDeleteEmailDock.jsx";
 import { ASSERTIONMODES } from "./constants/index.js";
 
 let floatingAssertRoot = null;
@@ -340,6 +341,14 @@ window.showFloatingAssert = (mode, el, e, type) => {
     } else if (type === ASSERTIONMODES.GENERICVARMATCHEQUALS) {
       floatingAssertRoot.render(
         <FloatingGenericVarMatchDock onCancel={closeDock} mode={mode} />
+      );
+    } else if (type === ASSERTIONMODES.GETEMAIL) {
+      floatingAssertRoot.render(
+        <FloatingEmailAssignDock onCancel={closeDock} />
+      );
+    } else if (type === ASSERTIONMODES.DELETEEMAIL) {
+      floatingAssertRoot.render(
+        <FloatingDeleteEmailDock onCancel={closeDock} />
       );
     }
   } catch (err) {
