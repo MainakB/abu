@@ -840,6 +840,14 @@ export const ACTION_HANDLERS = {
       loc.newIdx,
     ];
   },
+  [FUNCTIONMAPPER.GETTITLE.key]: (arg, idx) => {
+    return [
+      {
+        step: `* def ${arg.varName} = ${FUNCTIONMAPPER.GETTITLE.name}()`,
+      },
+      idx,
+    ];
+  },
   [FUNCTIONMAPPER.ISCHECKBOXSELECTED.key]: (arg, idx) => {
     const loc = constructLocators(arg, idx);
     return [
@@ -1584,6 +1592,80 @@ export const ACTION_HANDLERS = {
     return [
       {
         step: `And ${FUNCTIONMAPPER.ASSERTCOOKIEVALUENOTCONTAINS.name}({nme:"${arg.cookieName}", et:"${arg.expected}"${soft}})`,
+      },
+      idx,
+    ];
+  },
+
+  [FUNCTIONMAPPER.TITLEEQUALS.key]: (arg, idx) => {
+    const matchType = arg.isSoftAssert ? "sMatch" : "match";
+    return [
+      {
+        step: `And ${matchType} ${FUNCTIONMAPPER.TITLEEQUALS.name}() == "${arg.expected}"`,
+      },
+      idx,
+    ];
+  },
+
+  [FUNCTIONMAPPER.TITLENOTEQUALS.key]: (arg, idx) => {
+    const matchType = arg.isSoftAssert ? "sMatch" : "match";
+    return [
+      {
+        step: `And ${matchType} ${FUNCTIONMAPPER.TITLENOTEQUALS.name}() != "${arg.expected}"`,
+      },
+      idx,
+    ];
+  },
+  [FUNCTIONMAPPER.TITLECONTAINS.key]: (arg, idx) => {
+    const matchType = arg.isSoftAssert ? "sMatch" : "match";
+    return [
+      {
+        step: `And ${matchType} ${FUNCTIONMAPPER.TITLECONTAINS.name}() contains "${arg.expected}"`,
+      },
+      idx,
+    ];
+  },
+  [FUNCTIONMAPPER.TITLENOTCONTAINS.key]: (arg, idx) => {
+    const matchType = arg.isSoftAssert ? "sMatch" : "match";
+    return [
+      {
+        step: `And ${matchType} ${FUNCTIONMAPPER.TITLENOTCONTAINS.name}() not contains "${arg.expected}"`,
+      },
+      idx,
+    ];
+  },
+  [FUNCTIONMAPPER.TITLESTARTSWITH.key]: (arg, idx) => {
+    const matchType = arg.isSoftAssert ? "sMatch" : "match";
+    return [
+      {
+        step: `And ${matchType} ${FUNCTIONMAPPER.TITLESTARTSWITH.name}() starts with "${arg.expected}"`,
+      },
+      idx,
+    ];
+  },
+  [FUNCTIONMAPPER.TITLENOTSTARTSWITH.key]: (arg, idx) => {
+    const matchType = arg.isSoftAssert ? "sMatch" : "match";
+    return [
+      {
+        step: `And ${matchType} ${FUNCTIONMAPPER.TITLENOTSTARTSWITH.name}() not starts with "${arg.expected}"`,
+      },
+      idx,
+    ];
+  },
+  [FUNCTIONMAPPER.TITLEENDSSWITH.key]: (arg, idx) => {
+    const matchType = arg.isSoftAssert ? "sMatch" : "match";
+    return [
+      {
+        step: `And ${matchType} ${FUNCTIONMAPPER.TITLEENDSSWITH.name}() ends with "${arg.expected}"`,
+      },
+      idx,
+    ];
+  },
+  [FUNCTIONMAPPER.TITLENOTENDSSWITH.key]: (arg, idx) => {
+    const matchType = arg.isSoftAssert ? "sMatch" : "match";
+    return [
+      {
+        step: `And ${matchType} ${FUNCTIONMAPPER.TITLENOTENDSSWITH.name}() not ends with "${arg.expected}"`,
       },
       idx,
     ];

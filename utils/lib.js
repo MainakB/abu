@@ -240,6 +240,8 @@ export const exposeRecorderControls = async (
   });
 
   await page.exposeBinding("__pageUrl", async () => page.url());
+
+  await page.exposeBinding("__getPageTitle", async () => page.title());
 };
 
 export const exposeContextBindings = async (ctx) => {

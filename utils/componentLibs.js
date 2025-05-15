@@ -360,6 +360,28 @@ const ASSERTION_NAME_LOOKUP = {
       negative: ASSERTIONMODES.GENERICVARMATCHNOTENDSWITH,
     },
   },
+  [ASSERTIONMODES.TITLEEQUALS]: {
+    exact: {
+      positive: ASSERTIONMODES.TITLEEQUALS,
+      negative: ASSERTIONMODES.TITLENOTEQUALS,
+    },
+    contains: {
+      positive: ASSERTIONMODES.TITLECONTAINS,
+      negative: ASSERTIONMODES.TITLENOTCONTAINS,
+    },
+  },
+  [ASSERTIONMODES.TITLEENDSSWITH]: {
+    exact: {
+      positive: ASSERTIONMODES.TITLEENDSSWITH,
+      negative: ASSERTIONMODES.TITLENOTENDSSWITH,
+    },
+  },
+  [ASSERTIONMODES.TITLESTARTSWITH]: {
+    exact: {
+      positive: ASSERTIONMODES.TITLESTARTSWITH,
+      negative: ASSERTIONMODES.TITLENOTSTARTSWITH,
+    },
+  },
 };
 
 export const getElementAttributes = async (el) => {
@@ -1082,15 +1104,6 @@ export const recordHttpRequest = async ({
   status,
   responseAsserts,
 }) => {
-  console.log({
-    host,
-    path,
-    method,
-    headers,
-    body,
-    closeDock,
-    status,
-  });
   await window.__recordAction(
     window.__buildData({
       action: "assert",
@@ -1211,8 +1224,6 @@ export const onConfirmGenericVarMatch = ({
   onCancel,
 }) => {
   const assertionMapping = ASSERTION_NAME_LOOKUP[mode];
-  console.log("Received mode: ", mode);
-  console.log("Received ASSERTION_NAME_LOOKUP: ", ASSERTION_NAME_LOOKUP);
   const category = !exactMatch ? "contains" : "exact";
   const polarity = isNegative ? "negative" : "positive";
   const assertionName = assertionMapping[category][polarity];
@@ -1376,4 +1387,40 @@ export const onConfirmDeleteEmailFromServer = async ({
   );
 
   await onCancel();
+};
+
+export const onConfirmPageTitleAssignment = ({ varName, onCancel }) => {
+  window.__recordAction(
+    window.__buildData({
+      action: "assert",
+      assertion: ASSERTIONMODES.GETTITLE,
+      // getModeSelected(mode),
+      varName,
+    })
+  );
+  onCancel();
+};
+
+export const onConfirmPageTitleMatch = ({
+  softAssert,
+  onCancel,
+  mode,
+  isNegative,
+  exactMatch,
+  expected,
+}) => {
+  const assertionMapping = ASSERTION_NAME_LOOKUP[mode];
+  const category = !exactMatch ? "contains" : "exact";
+  const polarity = isNegative ? "negative" : "positive";
+  const assertionName = assertionMapping[category][polarity];
+
+  window.__recordAction(
+    window.__buildData({
+      action: "assert",
+      assertion: assertionName,
+      isSoftAssert: softAssert,
+      expected,
+    })
+  );
+  onCancel();
 };

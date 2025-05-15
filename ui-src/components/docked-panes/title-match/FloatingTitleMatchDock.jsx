@@ -1,20 +1,27 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { ASSERTIONMODES } from "../../../constants/index.js";
-import { onConfirmGenericVarMatch } from "../../../../utils/componentLibs.js";
+import { onConfirmPageTitleMatch } from "../../../../utils/componentLibs.js";
 import ConfirmCancelFooter from "../confirm-cancel-footer/ConfirmCancelFooter.jsx";
-import ExistingVarNamesList from "../variable-name/ExistingVarNamesList.jsx";
 import { useModeSocket } from "../../../hooks/useModeSocket.js";
 
-const getAltMode = (mode, startsWith, endsWith) => {
-  if (endsWith) return ASSERTIONMODES.GENERICVARMATCHENDSWITH;
-  if (startsWith) return ASSERTIONMODES.GENERICVARMATCHSTARTSWITH;
-  return mode;
+const getTextAreaData = async () => {
+  let title = "";
+  try {
+    title = await window.__getPageTitle();
+  } catch {}
+  return title;
 };
 
-export default function FloatingGenericVarMatchDock({ onCancel, mode }) {
-  const [selectedVarIndex, setSelectedVarIndex] = useState(0);
-  const [existingVarNames, setExistingVarNames] = useState([]);
-  const [textAreaValue, setTextAreaValue] = useState("");
+const getAltMode = (mode, startsWith, endsWith) => {
+  if (startsWith) return ASSERTIONMODES.TITLESTARTSWITH;
+  if (endsWith) return ASSERTIONMODES.TITLEENDSSWITH;
+
+  return ASSERTIONMODES.TITLEEQUALS;
+};
+
+export default function FloatingTitleMatchDock({ mode, onCancel, tabbed }) {
+  const expectedInputRef = useRef(null);
+  const [expected, setExpected] = useState("");
   const [isNegative, setIsNegative] = useState(false);
   const [softAssert, setSoftAssert] = useState(false);
   const [exactMatch, setExactMatch] = useState(true);
@@ -23,58 +30,58 @@ export default function FloatingGenericVarMatchDock({ onCancel, mode }) {
 
   useModeSocket(onCancel);
 
+  useEffect(() => {
+    const fetchTitle = async () => {
+      const result = await getTextAreaData();
+      setExpected(result);
+    };
+    fetchTitle();
+  }, []);
+
+  useEffect(() => {
+    expectedInputRef.current.focus();
+  }, []);
+
+  const handleVarNameChange = (e) => {
+    const expectedValue = e.target.value;
+    setExpected(expectedValue);
+  };
+
   const handleCancel = () => {
-    setSelectedVarIndex(0);
-    setExistingVarNames([]);
-    setTextAreaValue("");
-    setIsNegative(false);
-    setSoftAssert(false);
-    setExactMatch(true);
-    setStartsWith(false);
-    setEndsWith(false);
     onCancel();
   };
 
   const handleConfirm = () => {
-    const selectedVarName = existingVarNames[selectedVarIndex];
-
-    const paylaod = {
-      varName: selectedVarName,
-      expected: textAreaValue,
-      mode: getAltMode(mode, startsWith, endsWith),
+    if (!expected.trim()) return;
+    onConfirmPageTitleMatch({
       softAssert,
+      onCancel,
+      mode: getAltMode(mode, startsWith, endsWith),
       isNegative,
       exactMatch,
-      onCancel: handleCancel,
-    };
-    onConfirmGenericVarMatch(paylaod);
+      expected,
+    });
   };
 
   return (
     <div
-      id="floating-tab-list-dock"
+      id={tabbed ? "floating-tab-list-dock" : "floating-cookie-list-dock"}
       onClick={(e) => e.stopPropagation()}
       onMouseDown={(e) => e.stopPropagation()}
     >
       <div className="assert-dock-content">
         <div className="assert-dock-header">
-          <strong>Match And Soft Match</strong>
+          <strong>Match Page Title</strong>
         </div>
       </div>
       <div className="pdf-text-container">
-        <ExistingVarNamesList
-          selectedVarIndex={selectedVarIndex}
-          setSelectedVarIndex={setSelectedVarIndex}
-          existingVarNames={existingVarNames}
-          setExistingVarNames={setExistingVarNames}
-        />
-
         <div className="locator-name-container">
-          <label>Assignment Value (Required)</label>
+          <label>Current Page Title (Required)</label>
           <textarea
+            ref={expectedInputRef}
             className="assert-pdf-text-textarea"
-            value={textAreaValue}
-            onChange={(e) => setTextAreaValue(e.target.value)}
+            value={expected}
+            onChange={(e) => setExpected(e.target.value)}
           />
         </div>
       </div>
@@ -84,7 +91,7 @@ export default function FloatingGenericVarMatchDock({ onCancel, mode }) {
         onCancel={handleCancel}
         onConfirm={handleConfirm}
         disableAutoFocus={true}
-        disabled={textAreaValue === ""}
+        disabled={expected === ""}
         isNegative={isNegative}
         setIsNegative={setIsNegative}
         exactMatch={exactMatch}

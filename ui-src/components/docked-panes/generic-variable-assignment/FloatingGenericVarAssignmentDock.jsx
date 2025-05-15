@@ -51,19 +51,8 @@ export default function FloatingGenericVarAssignmentDock({ onCancel }) {
       onCancel: handleCancel,
       isVarReasssign,
     };
-    console.log("paylaod: ", paylaod);
-    onConfirmGenericVarAssignment(paylaod);
 
-    // onConfirmTextValAssignment({
-    //   varName,
-    //   locatorName,
-    //   onCancel,
-    //   el,
-    //   e,
-    //   textValue,
-    //   mode,
-    //   isNegative,
-    // });
+    onConfirmGenericVarAssignment(paylaod);
   };
 
   const getLabel = (reAssign) => {

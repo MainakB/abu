@@ -28,6 +28,8 @@ import FloatingGenericVarAssignmentDock from "./components/docked-panes/generic-
 import FloatingGenericVarMatchDock from "./components/docked-panes/generic-var-match-dock/FloatingGenericVarMatchDock.jsx";
 import FloatingEmailAssignDock from "./components/docked-panes/email-operations-dock/FloatingEmailAssignDock.jsx";
 import FloatingDeleteEmailDock from "./components/docked-panes/email-operations-dock/FloatingDeleteEmailDock.jsx";
+import FloatingTitleAssignmentDock from "./components/docked-panes/title-assignment/FloatingTitleAssignmentDock.jsx";
+import FloatingTitleMatchDock from "./components/docked-panes/title-match/FloatingTitleMatchDock.jsx";
 import { ASSERTIONMODES } from "./constants/index.js";
 
 let floatingAssertRoot = null;
@@ -270,6 +272,37 @@ window.showFloatingAssert = (mode, el, e, type) => {
                   onCancel={closeDock}
                   e={e}
                   textValue={textValue}
+                  tabbed={true}
+                />
+              ),
+            },
+          ]}
+        />
+      );
+    } else if (type === ASSERTIONMODES.GETTITLE) {
+      floatingAssertRoot.render(
+        <TabbedAssertionDock
+          defaultTab="assignment"
+          tabs={[
+            {
+              key: "assignment",
+              label: "Assignment",
+              component: (
+                <FloatingTitleAssignmentDock
+                  mode={mode}
+                  onCancel={closeDock}
+                  tabbed={true}
+                  overrideConfirmCancelFlexEnd={true}
+                />
+              ),
+            },
+            {
+              key: "match",
+              label: "Match",
+              component: (
+                <FloatingTitleMatchDock
+                  mode={mode}
+                  onCancel={closeDock}
                   tabbed={true}
                 />
               ),
