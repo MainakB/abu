@@ -30,6 +30,7 @@ import FloatingEmailAssignDock from "./components/docked-panes/email-operations-
 import FloatingDeleteEmailDock from "./components/docked-panes/email-operations-dock/FloatingDeleteEmailDock.jsx";
 import FloatingTitleAssignmentDock from "./components/docked-panes/title-assignment/FloatingTitleAssignmentDock.jsx";
 import FloatingTitleMatchDock from "./components/docked-panes/title-match/FloatingTitleMatchDock.jsx";
+import FloatingElementAttrMatchDock from "./components/docked-panes/element-based-match/FloatingElementAttrMatchDock.jsx";
 import { ASSERTIONMODES } from "./constants/index.js";
 
 let floatingAssertRoot = null;
@@ -322,12 +323,51 @@ window.showFloatingAssert = (mode, el, e, type) => {
       );
     } else if (type === ASSERTIONMODES.ISATTRIBUTEEQUALS) {
       floatingAssertRoot.render(
-        <FloatingElementAttrEqualsAssignDock
-          mode={mode}
-          el={el}
-          onCancel={closeDock}
-          e={e}
-          textValue={textValue}
+        // <FloatingElementAttrEqualsAssignDock
+        //     mode={mode}
+        //     el={el}
+        //     onCancel={closeDock}
+        //     e={e}
+        //     textValue={textValue}
+        //   />
+        // );
+        <TabbedAssertionDock
+          defaultTab="assignment"
+          tabs={[
+            {
+              key: "assignment",
+              label: "Assignment",
+              component: (
+                <FloatingElementAttrEqualsAssignDock
+                  mode={mode}
+                  el={el}
+                  onCancel={closeDock}
+                  e={e}
+                  textValue={textValue}
+                  tabbed={true}
+                  overrideConfirmCancelFlexEnd={true}
+                />
+              ),
+            },
+            {
+              key: "match",
+              label: "Match",
+              component: (
+                <FloatingElementAttrMatchDock
+                  // mode={mode}
+                  // onCancel={closeDock}
+                  // tabbed={true}
+                  mode={mode}
+                  el={el}
+                  onCancel={closeDock}
+                  e={e}
+                  textValue={textValue}
+                  tabbed={true}
+                  overrideConfirmCancelFlexEnd={true}
+                />
+              ),
+            },
+          ]}
         />
       );
     } else if (

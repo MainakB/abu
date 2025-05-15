@@ -91,6 +91,11 @@ export const ASSERTIONMODES = {
   MATCHGETINNERHTMLENDSWITH: "MATCHGETINNERHTMLENDSWITH",
   MATCHGETINNERHTMLNOTENDSWITH: "MATCHGETINNERHTMLNOTENDSWITH",
 
+  MATCHATTRIBUTEEQUALS: "MATCHATTRIBUTEEQUALS",
+  MATCHATTRIBUTENOTEQUALS: "MATCHATTRIBUTENOTEQUALS",
+  MATCHATTRIBUTECONTAINS: "MATCHATTRIBUTECONTAINS",
+  MATCHATTRIBUTENOTCONTAINS: "MATCHATTRIBUTENOTCONTAINS",
+
   GETVALUE: "GETVALUE",
   GETTITLE: "GETTITLE",
 
@@ -215,7 +220,7 @@ export const FUNCTIONMAPPER = {
   },
   ASSERTCOOKIEVALUEEQUALS: {
     key: ASSERTIONMODES.ASSERTCOOKIEVALUEEQUALS,
-    name: "assertCookieValueEquals",
+    name: "assertCookieValueByName",
   },
   ASSERTCOOKIEVALUENOTEQUALS: {
     key: ASSERTIONMODES.ASSERTCOOKIEVALUENOTEQUALS,
@@ -265,11 +270,11 @@ export const FUNCTIONMAPPER = {
   },
   ASSERTTEXTCONTAINS: {
     key: ASSERTIONMODES.ASSERTTEXTCONTAINS,
-    name: "elementTextContains",
+    name: "assertElementContainsText",
   },
   ASSERTTEXTNOTCONTAINS: {
     key: ASSERTIONMODES.ASSERTTEXTNOTCONTAINS,
-    name: "elementTextNotContains",
+    name: "assertElementNotContainsText",
   },
   ASSERTVALUECONTAINS: {
     key: ASSERTIONMODES.ASSERTVALUECONTAINS,
@@ -317,19 +322,19 @@ export const FUNCTIONMAPPER = {
 
   CHECKBOXCHECKED: {
     key: ASSERTIONMODES.CHECKBOXCHECKED,
-    name: "assertCheckboxChecked",
+    name: "assertCheckboxSelected",
   },
   CHECKBOXNOTCHECKED: {
     key: ASSERTIONMODES.CHECKBOXNOTCHECKED,
-    name: "assertCheckboxChecked", // Same as CHECKBOXCHECKED as boolean determines checked or not checked
+    name: "assertCheckboxNotSelected", // Same as CHECKBOXCHECKED as boolean determines checked or not checked
   },
   RADIOCHECKED: {
     key: ASSERTIONMODES.RADIOCHECKED,
-    name: "assertRadioChecked",
+    name: "assertRadioButtonSelected",
   },
   RADIONOTCHECKED: {
     key: ASSERTIONMODES.RADIONOTCHECKED,
-    name: "assertRadioChecked",
+    name: "assertRadioButtonNotSelected",
   },
 
   DROPDOWNSELECTED: {
@@ -363,16 +368,16 @@ export const FUNCTIONMAPPER = {
   },
   DROPDOWNCONTAINS: {
     key: ASSERTIONMODES.DROPDOWNCONTAINS,
-    name: "assertValueInDropDownList",
+    name: "assertDropDownHasOption",
   },
 
   ASSERTVISIBILITY: {
     key: ASSERTIONMODES.ASSERTVISIBILITY,
-    name: "assertElementVisible",
+    name: "assertElementDisplayed",
   },
   ASSERTINVISIBILITY: {
     key: ASSERTIONMODES.ASSERTINVISIBILITY,
-    name: "assertElementNotVisible",
+    name: "assertElementNotDisplayed",
   },
   ASSERTENABLED: {
     key: ASSERTIONMODES.ASSERTENABLED,
@@ -428,11 +433,11 @@ export const FUNCTIONMAPPER = {
   },
   ISATTRIBUTECONTAINS: {
     key: ASSERTIONMODES.ISATTRIBUTECONTAINS,
-    name: "isAttributeContains",
+    name: "isAttrContains",
   },
   ISATTRIBUTENOTCONTAINS: {
     key: ASSERTIONMODES.ISATTRIBUTENOTCONTAINS,
-    name: "isAttributeNotContains",
+    name: "isAttrNotContains",
   },
 
   ISENABLED: {
@@ -837,5 +842,22 @@ export const FUNCTIONMAPPER = {
   TITLENOTENDSSWITH: {
     key: ASSERTIONMODES.TITLENOTENDSSWITH,
     name: "title",
+  },
+
+  MATCHATTRIBUTEEQUALS: {
+    key: ASSERTIONMODES.MATCHATTRIBUTEEQUALS,
+    name: "attribute",
+  },
+  MATCHATTRIBUTENOTEQUALS: {
+    key: ASSERTIONMODES.MATCHATTRIBUTENOTEQUALS,
+    name: "attribute",
+  },
+  MATCHATTRIBUTECONTAINS: {
+    key: ASSERTIONMODES.MATCHATTRIBUTECONTAINS,
+    name: "attribute",
+  },
+  MATCHATTRIBUTENOTCONTAINS: {
+    key: ASSERTIONMODES.MATCHATTRIBUTENOTCONTAINS,
+    name: "attribute",
   },
 };

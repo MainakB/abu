@@ -1,14 +1,18 @@
 import React, { useState, useEffect } from "react";
 import { ASSERTIONMODES } from "../../../constants/index.js";
 import {
-  onConfirmAttrEqlValAssignment,
+  onConfirmAttrMatchValAssignment,
   getElementAttributes,
 } from "../../../../utils/componentLibs.js";
 import ConfirmCancelFooter from "../confirm-cancel-footer/ConfirmCancelFooter.jsx";
-import VarName from "../variable-name/VarName.jsx";
+
 import { useModeSocket } from "../../../hooks/useModeSocket.js";
 
-export default function FloatingElementAttrEqualsAssignDock({
+const getAltMode = () => {
+  return ASSERTIONMODES.MATCHATTRIBUTEEQUALS;
+};
+
+export default function FloatingElementAttrMatchDock({
   el,
   e,
   textValue,
@@ -18,10 +22,8 @@ export default function FloatingElementAttrEqualsAssignDock({
   overrideConfirmCancelFlexEnd,
 }) {
   const [locatorName, setLocatorName] = useState("");
-  const [varName, setVarName] = useState("");
   const [varNameError, setVarNameError] = useState("");
   const [attributes, setAttributes] = useState([]);
-  const [selectedAttrIndex, setSelectedAttrIndex] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -43,6 +45,8 @@ export default function FloatingElementAttrEqualsAssignDock({
               // checked: shouldCheck,
               isNegative: false,
               isSubstringMatch: false,
+              isSoftAssert: false,
+              checked: false,
             };
           });
         } else {
@@ -54,6 +58,8 @@ export default function FloatingElementAttrEqualsAssignDock({
                 // checked: shouldCheck,
                 isNegative: false,
                 isSubstringMatch: false,
+                isSoftAssert: false,
+                checked: false,
               };
             }
           );
@@ -78,47 +84,61 @@ export default function FloatingElementAttrEqualsAssignDock({
     );
   };
 
+  const handleCancel = () => {
+    setLocatorName("");
+    setVarNameError("");
+    setAttributes([]);
+    setLoading(true);
+    setError(null);
+    onCancel();
+  };
+
   const handleConfirm = () => {
-    if (
-      !varName.trim() ||
-      selectedAttrIndex === null ||
-      !attributes[selectedAttrIndex]
-    )
-      return;
+    // const selectedAssertions = {
+    //   attributeName: selectedAttr.name,
+    //   value: selectedAttr.value,
+    //   isNegative: selectedAttr.isNegative,
+    //   isSubstringMatch: selectedAttr.isSubstringMatch,
+    //   isSoftAssert: selectedAttr.isSoftAssert,
+    // };
+    const selectedAssertions = attributes
+      .filter((attr) => attr.checked)
+      .map((attr) => ({
+        attributeName: attr.name,
+        value: attr.value,
+        isNegative: attr.isNegative,
+        isSubstringMatch: attr.isSubstringMatch,
+        isSoftAssert: attr.isSoftAssert,
+        locatorName,
+      }));
 
-    const selectedAttr = attributes[selectedAttrIndex];
-
-    const selectedAssertions = {
-      attributeName: selectedAttr.name,
-      value: selectedAttr.value,
-      isNegative: selectedAttr.isNegative,
-      isSubstringMatch: selectedAttr.isSubstringMatch,
-    };
-
-    onConfirmAttrEqlValAssignment({
-      varName,
-      locatorName,
-      onCancel,
+    onConfirmAttrMatchValAssignment({
       el,
       e,
+      selectedAssertions: selectedAssertions,
+      locatorName,
+      closeDock: handleCancel,
       textValue,
-      mode,
-      selectedAssertions,
+      mode: getAltMode(),
     });
   };
+
   const shouldNotShowLocator = loading || error || attributes.length === 0;
+  const hasCheckedItems = attributes.some((attr) => attr.checked);
+
+  const toggleSelectAll = () => {
+    const allSelected = attributes.every((attr) => attr.checked);
+    setAttributes((prevAttributes) =>
+      prevAttributes.map((attr) => ({
+        ...attr,
+        checked: !allSelected, // If all selected, unselect; otherwise select all
+      }))
+    );
+  };
 
   let wrapperClassName = "floating-cookie-list-dock";
-  if (tabbed) {
-    if (
-      overrideConfirmCancelFlexEnd &&
-      !(
-        mode === ASSERTIONMODES.ISPRESENT ||
-        mode === ASSERTIONMODES.ISDISPLAYED ||
-        mode === ASSERTIONMODES.ISELEMENTCLICKABLE ||
-        mode === ASSERTIONMODES.ISENABLED
-      )
-    ) {
+  if (tabbed && !shouldNotShowLocator) {
+    if (overrideConfirmCancelFlexEnd) {
       wrapperClassName = "floating-tab-list-dock-justifyend";
     } else {
       wrapperClassName = "floating-tab-list-dock";
@@ -136,16 +156,6 @@ export default function FloatingElementAttrEqualsAssignDock({
           <strong>Is Element Attribute Equals/Contains</strong>
         </div>
       </div>
-      {!loading && !error && attributes.length > 0 && (
-        <div className="pdf-text-container">
-          <VarName
-            varName={varName}
-            setVarName={setVarName}
-            varNameError={varNameError}
-            setVarNameError={setVarNameError}
-          />
-        </div>
-      )}
       {loading && <div className="assert-loading">Loading attributes...</div>}
       {error && <div className="assert-error">Error: {error}</div>}
       {!loading && !error && attributes.length === 0 && (
@@ -155,15 +165,28 @@ export default function FloatingElementAttrEqualsAssignDock({
       )}
       {!loading && !error && attributes.length > 0 && (
         <div className="assert-attributes-container">
+          <div className="assert-attributes-container-wrapper">
+            <button
+              className="assert-toggle-button-neg-pos"
+              type="button"
+              onClick={toggleSelectAll}
+            >
+              {attributes.every((attr) => attr.checked)
+                ? "Deselect All"
+                : "Select All"}
+            </button>
+          </div>
           {attributes.map((attr, index) => (
             <div key={index} className="assert-attribute-row">
               <label className="assert-checkbox-container">
                 <input
-                  type="radio"
+                  type="checkbox"
                   name="attributeSelect"
                   className="assert-checkbox"
-                  checked={selectedAttrIndex === index}
-                  onChange={() => setSelectedAttrIndex(index)}
+                  checked={attr.checked}
+                  onChange={(e) =>
+                    updateAttribute(index, "checked", e.target.checked)
+                  }
                 />
               </label>
 
@@ -208,6 +231,15 @@ export default function FloatingElementAttrEqualsAssignDock({
               >
                 {attr.isSubstringMatch ? "contains" : "exact"}
               </button>
+              <button
+                className="assert-toggle-button-neg-pos"
+                title={attr.isSoftAssert ? "Soft Match" : "Match"}
+                onClick={() =>
+                  updateAttribute(index, "isSoftAssert", !attr.isSoftAssert)
+                }
+              >
+                {attr.isSoftAssert ? "sMatch" : "match"}
+              </button>
             </div>
           ))}
         </div>
@@ -219,9 +251,7 @@ export default function FloatingElementAttrEqualsAssignDock({
         onCancel={onCancel}
         onConfirm={handleConfirm}
         disableAutoFocus={true}
-        disabled={
-          varName.trim() === "" || !!varNameError || selectedAttrIndex === null
-        }
+        disabled={!hasCheckedItems}
         {...(!shouldNotShowLocator ? { locatorName, setLocatorName } : {})}
       />
     </div>

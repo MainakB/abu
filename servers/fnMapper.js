@@ -688,6 +688,52 @@ export const ACTION_HANDLERS = {
       loc.newIdx,
     ];
   },
+
+  [FUNCTIONMAPPER.MATCHATTRIBUTEEQUALS.key]: (arg, idx) => {
+    const loc = constructLocators(arg, idx);
+    const matchType = arg.isSoftAssert ? "sMatch" : "match";
+    return [
+      {
+        step: `And ${matchType} ${FUNCTIONMAPPER.MATCHATTRIBUTEEQUALS.name}({po:"${loc.locKeyName}", atr:"${arg.attributeAssertPropName}"}) == "${arg.expectedAttribute}"`,
+        locator: loc.result,
+      },
+      loc.newIdx,
+    ];
+  },
+  [FUNCTIONMAPPER.MATCHATTRIBUTENOTEQUALS.key]: (arg, idx) => {
+    const loc = constructLocators(arg, idx);
+    const matchType = arg.isSoftAssert ? "sMatch" : "match";
+    return [
+      {
+        step: `And ${matchType} ${FUNCTIONMAPPER.MATCHATTRIBUTENOTEQUALS.name}({po:"${loc.locKeyName}", atr:"${arg.attributeAssertPropName}"}) != "${arg.expectedAttribute}"`,
+        locator: loc.result,
+      },
+      loc.newIdx,
+    ];
+  },
+  [FUNCTIONMAPPER.MATCHATTRIBUTECONTAINS.key]: (arg, idx) => {
+    const loc = constructLocators(arg, idx);
+    const matchType = arg.isSoftAssert ? "sMatch" : "match";
+    return [
+      {
+        step: `And ${matchType} ${FUNCTIONMAPPER.MATCHATTRIBUTECONTAINS.name}({po:"${loc.locKeyName}", atr:"${arg.attributeAssertPropName}"}) contains "${arg.expectedAttribute}"`,
+        locator: loc.result,
+      },
+      loc.newIdx,
+    ];
+  },
+  [FUNCTIONMAPPER.MATCHATTRIBUTENOTCONTAINS.key]: (arg, idx) => {
+    const loc = constructLocators(arg, idx);
+    const matchType = arg.isSoftAssert ? "sMatch" : "match";
+    return [
+      {
+        step: `And ${matchType} ${FUNCTIONMAPPER.MATCHATTRIBUTENOTCONTAINS.name}({po:"${loc.locKeyName}", atr:"${arg.attributeAssertPropName}"}) not contains "${arg.expectedAttribute}"`,
+        locator: loc.result,
+      },
+      loc.newIdx,
+    ];
+  },
+
   [FUNCTIONMAPPER.ISATTRIBUTEEQUALS.key]: (arg, idx) => {
     const loc = constructLocators(arg, idx);
     return [

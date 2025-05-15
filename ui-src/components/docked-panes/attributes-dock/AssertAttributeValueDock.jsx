@@ -89,6 +89,10 @@ export default function AssertAttributeValueDock({
   const hasCheckedItems = attributeStates.some((attr) => attr.checked);
 
   const handleCancel = () => {
+    setAttributeStates([]);
+    setLoading(true);
+    setError(null);
+    setLocatorName("");
     setSoftAssert(false);
     onCancel();
   };

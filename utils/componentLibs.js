@@ -382,6 +382,16 @@ const ASSERTION_NAME_LOOKUP = {
       negative: ASSERTIONMODES.TITLENOTSTARTSWITH,
     },
   },
+  [ASSERTIONMODES.MATCHATTRIBUTEEQUALS]: {
+    exact: {
+      positive: ASSERTIONMODES.MATCHATTRIBUTEEQUALS,
+      negative: ASSERTIONMODES.MATCHATTRIBUTENOTEQUALS,
+    },
+    contains: {
+      positive: ASSERTIONMODES.MATCHATTRIBUTECONTAINS,
+      negative: ASSERTIONMODES.MATCHATTRIBUTENOTCONTAINS,
+    },
+  },
 };
 
 export const getElementAttributes = async (el) => {
@@ -643,6 +653,53 @@ export const onConfirmAttrEqlValAssignment = async ({
     })
   );
   await onCancel();
+};
+
+export const onConfirmAttrMatchValAssignment = async ({
+  el,
+  e,
+  selectedAssertions,
+  locatorName,
+  closeDock,
+  textValue,
+  mode,
+}) => {
+  const assertionMapping = ASSERTION_NAME_LOOKUP[mode];
+
+  for (let i = 0; i < selectedAssertions.length; i++) {
+    const attrObj = selectedAssertions[i];
+    const category = attrObj.isSubstringMatch ? "contains" : "exact";
+    const polarity = attrObj.isNegative ? "negative" : "positive";
+    const attrMode = assertionMapping[category][polarity];
+
+    const locSubstring = attrObj.attributeName
+      .replace(/[ -]/g, "_")
+      .toLowerCase();
+
+    console.log(
+      locatorName && locatorName !== ""
+        ? { locatorName: `${locatorName}_${locSubstring}` }
+        : locatorName,
+      locSubstring,
+      locatorName
+    );
+    await window.__recordAction(
+      window.__buildData({
+        action: "assert",
+        ...(locatorName && locatorName !== ""
+          ? { locatorName: `${locatorName}_${locSubstring}` }
+          : locatorName),
+        isSoftAssert: attrObj.isSoftAssert,
+        assertion: attrMode,
+        attributeAssertPropName: attrObj.attributeName,
+        expectedAttribute: attrObj.value,
+        el,
+        e,
+        textValue,
+      })
+    );
+  }
+  closeDock();
 };
 
 export const onConfirmRadioCheckboxAssignment = async ({
