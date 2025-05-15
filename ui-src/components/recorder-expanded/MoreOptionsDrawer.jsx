@@ -8,6 +8,22 @@ import VariableAssignmentList from "./VariableAssignmentList.jsx";
 import DBAssignmentList from "./DBAssignmentList.jsx";
 import { ASSERTIONMODES } from "../../constants/index.js";
 import EmailAssignmentList from "./EmailAssignmentList.jsx";
+// import AIAssistedSearch from "./AIAssistedSearch.jsx";
+
+const ALL_OPTIONS = [
+  { label: "Assert Element Visible", mode: ASSERTIONMODES.ASSERTVISIBILITY },
+  { label: "Assert Element Present", mode: ASSERTIONMODES.ASSERTPRESENCE },
+  {
+    label: "Assert Attribute Value",
+    mode: ASSERTIONMODES.ASSERTATTRIBUTEVALUEEQUALS,
+  },
+  { label: "Assert Text Equals", mode: ASSERTIONMODES.ASSERTTEXTEQUALS },
+  { label: "Add Cookies", mode: ASSERTIONMODES.ADDCOOKIES },
+  { label: "Take Screenshot", mode: ASSERTIONMODES.TAKESCREENSHOT },
+  { label: "Page Reload", mode: ASSERTIONMODES.PAGERELOAD },
+  { label: "API Request", mode: ASSERTIONMODES.HTTP },
+  // ...and so on
+];
 
 export default function MoreOptionsDrawer({
   isOpen,
@@ -73,6 +89,12 @@ export default function MoreOptionsDrawer({
     <div className="drawer">
       <div className="drawer-content">
         <div className="drawer-section">
+          {/* <AIAssistedSearch
+            options={ALL_OPTIONS}
+            onSelect={(mode) => {
+              onMenuSelectionLaunchDock(mode); // or onMenuSelection(mode)
+            }}
+          /> */}
           <div
             className="drawer-title"
             onClick={() => onToggleSection("actions")}

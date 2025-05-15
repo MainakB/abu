@@ -78,7 +78,11 @@ export const updateInitialRecorderState = async (
 
   globalRecorderMode.value = recorderState;
   await page.evaluate((value) => {
-    localStorage.setItem("recorderMode", value);
+    try {
+      localStorage.setItem("recorderMode", value);
+    } catch (err) {
+      console.warn("⚠️ Could not write to localStorage:", err);
+    }
   }, globalRecorderMode.value);
 };
 
@@ -101,7 +105,11 @@ export const injectScripts = async (
   await page.waitForLoadState("domcontentloaded");
   if (!initialPage) {
     await page.evaluate((value) => {
-      localStorage.setItem("recorderMode", value);
+      try {
+        localStorage.setItem("recorderMode", value);
+      } catch (err) {
+        console.warn("⚠️ Could not write to localStorage:", err);
+      }
     }, recoderModeValue);
   }
   const cssValue = `
@@ -192,7 +200,11 @@ export const exposeRecorderControls = async (
     "__syncRecorderStatusOnInternalSwitchTab",
     async () => {
       await page.evaluate((value) => {
-        localStorage.setItem("recorderMode", value);
+        try {
+          localStorage.setItem("recorderMode", value);
+        } catch (err) {
+          console.warn("⚠️ Could not write to localStorage:", err);
+        }
       }, globalRecorderMode.value);
     }
   );
