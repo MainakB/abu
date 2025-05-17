@@ -3,3 +3,4 @@ injected/
 recordings/
 listProjectTree.js
 .DS_Store
+.env

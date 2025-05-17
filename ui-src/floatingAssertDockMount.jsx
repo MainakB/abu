@@ -31,6 +31,7 @@ import FloatingDeleteEmailDock from "./components/docked-panes/email-operations-
 import FloatingTitleAssignmentDock from "./components/docked-panes/title-assignment/FloatingTitleAssignmentDock.jsx";
 import FloatingTitleMatchDock from "./components/docked-panes/title-match/FloatingTitleMatchDock.jsx";
 import FloatingElementAttrMatchDock from "./components/docked-panes/element-based-match/FloatingElementAttrMatchDock.jsx";
+import FloatingChatWithLLMDock from "./components/docked-panes/ai-chat/FloatingChatWithLLMDock.jsx";
 import { ASSERTIONMODES } from "./constants/index.js";
 
 let floatingAssertRoot = null;
@@ -422,6 +423,10 @@ window.showFloatingAssert = (mode, el, e, type) => {
     } else if (type === ASSERTIONMODES.DELETEEMAIL) {
       floatingAssertRoot.render(
         <FloatingDeleteEmailDock onCancel={closeDock} />
+      );
+    } else if (type === ASSERTIONMODES.AICHAT) {
+      floatingAssertRoot.render(
+        <FloatingChatWithLLMDock onCancel={closeDock} />
       );
     }
   } catch (err) {

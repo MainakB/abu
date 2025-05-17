@@ -1,6 +1,13 @@
 import express, { response } from "express";
 import fs from "fs";
 import path from "path";
+import "dotenv/config";
+import Anthropic from "@anthropic-ai/sdk";
+import OpenAI from "openai";
+import { Ollama } from "ollama";
+import { json } from "stream/consumers";
+import { parseLLMTestSteps } from "./llmTestStepParser.js";
+import { callLLM } from "./callOpenAI.js";
 import { mapData } from "./server-utils.js";
 
 const app = express();
@@ -75,6 +82,48 @@ app.post("/api/proxy", async (req, res) => {
   }
 });
 
+app.post("/api/gptchat", async (req, res) => {
+  const { prompt } = req.body;
+
+  if (!prompt || typeof prompt !== "string") {
+    return res.status(400).json({ error: "Missing or invalid input text." });
+  }
+
+  try {
+    const steps = await parseLLMTestSteps(prompt, callLLM);
+    return res.json({ steps });
+  } catch (err) {
+    console.error("LLM parsing error:", err.message);
+    return res.status(500).json({
+      error: "Failed to parse steps from LLM.",
+      detail: err.message,
+    });
+  }
+});
+
+app.post("/api/llamachat", async (req, res) => {
+  try {
+    const ollama = new Ollama({ host: "http://127.0.0.1:11434" });
+    const { prompt } = req.body;
+
+    if (!prompt) {
+      return res.status(400).json({ error: "Prompt is required" });
+    }
+
+    const response = await ollama.generate({
+      model: "gemma:2b",
+      prompt,
+      system: ENHANCED_BASE_PROMPT,
+      format: json,
+    });
+    console.log(response.response);
+    res.json({ response: response.response });
+  } catch (error) {
+    console.error("Error calling OpenAI API:", error);
+    res.status(500).json({ error: "Failed to process your request" });
+  }
+});
+
 app.listen(PORT, () => {
   console.log(`🟢 Recorder Store Server running at http://localhost:${PORT}`);
 });
@@ -94,14 +143,7 @@ const getFilePath = (FILE_NAME, isLocatorFile) => {
 };
 
 const writeLiveToFile = (action, fileName, ai) => {
-  // const basePath = process.cwd();
-  // const recordingsDir = path.join(basePath, "recordings");
-  // const filePath = path.join(recordingsDir, fileName);
   let output = "";
-  // Ensure the directory exists
-  // if (!fs.existsSync(recordingsDir)) {
-  //   fs.mkdirSync(recordingsDir, { recursive: true });
-  // }
 
   const filePath = getFilePath(fileName, false);
 

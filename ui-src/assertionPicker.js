@@ -90,6 +90,7 @@
           return;
 
         if (
+          mode === assertionModes.AICHAT ||
           mode === assertionModes.HTTP ||
           mode === assertionModes.ADDCOOKIES ||
           mode === assertionModes.DELETECOOKIES ||

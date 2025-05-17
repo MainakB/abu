@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
+import { Sparkles, Eye, TypeOutline, CaseSensitive } from "lucide-react";
 import MoreOptionsDrawer from "./recorder-expanded/MoreOptionsDrawer.jsx";
 import { ASSERTIONMODES } from "../constants/index.js";
 
@@ -280,11 +281,11 @@ export default function RecorderPanel() {
         </button>
 
         <button
-          title="Inspect element"
-          className={getClassNameForAssert(mode, "inspect")}
-          onClick={async () => await toggleMode("inspect")}
+          title="AI Chat"
+          className={getClassNameForAssert(mode, ASSERTIONMODES.AICHAT)}
+          onClick={() => toggleModeLaunchDock(ASSERTIONMODES.AICHAT)}
         >
-          🖱️
+          <Sparkles size={16} color="#007bff" /> {/* Blue */}
         </button>
         <button
           title="Assert visibility"
@@ -297,7 +298,7 @@ export default function RecorderPanel() {
           }
           disabled={window.__isPaused()}
         >
-          {tickMap.visibility ? "✅" : "👁️"}
+          {tickMap.visibility ? "✅" : <Eye size={16} color="#3b4850" />}
         </button>
         <button
           title="Assert text"
@@ -310,7 +311,8 @@ export default function RecorderPanel() {
           }
           disabled={window.__isPaused()}
         >
-          {tickMap.text ? "✅" : "🆎"}
+          {tickMap.text ? "✅" : <TypeOutline size={16} color="#3b4850" />}
+          {/* {tickMap.text ? "✅" : "🆎"} */}
         </button>
         <button
           title="Assert value"
@@ -323,7 +325,8 @@ export default function RecorderPanel() {
           }
           disabled={window.__isPaused()}
         >
-          {tickMap.value ? "✅" : "📝"}
+          {tickMap.value ? "✅" : <CaseSensitive size={18} color="#3b4850" />}
+          {/* {tickMap.value ? "✅" : "📝"} */}
         </button>
 
         <button
