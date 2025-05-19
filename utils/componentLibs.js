@@ -304,6 +304,12 @@ const ASSERTION_NAME_LOOKUP = {
   [ASSERTIONMODES.DROPDOWNCONTAINS]: {
     exact: {
       positive: ASSERTIONMODES.DROPDOWNCONTAINS,
+      negative: ASSERTIONMODES.DROPDOWNNOTCONTAINS,
+    },
+  },
+  [ASSERTIONMODES.DROPDOWNOPTIONSBYPARTIALTEXT]: {
+    exact: {
+      positive: ASSERTIONMODES.DROPDOWNOPTIONSBYPARTIALTEXT,
     },
   },
   [ASSERTIONMODES.DROPDOWNVALUESARE]: {
@@ -444,6 +450,125 @@ export const flattenJson = (obj, prefix = "", result = {}) => {
   }
 
   return result;
+};
+
+const getAssertSubType = (assertionSubType) => {
+  if (!assertionSubType) return "is";
+
+  switch (assertionSubType) {
+    case "equals":
+      return `equals`;
+    case "not equals":
+      return `not equals`;
+    case "contains":
+      return `contains`;
+    case "not contains":
+      return `not contains`;
+    case "starts with":
+      return `starts with`;
+    case "not starts with":
+      return `not starts with`;
+    case "ends with":
+      return `ends with`;
+    case "not ends with":
+      return `not ends with`;
+  }
+};
+
+const getAssert = (step, position, name, typeToUse) => {
+  const { target, value, assertionType, assertionSubType } = step;
+
+  if (!assertionType) return null;
+
+  switch (assertionType) {
+    case "title":
+      return `I will assert that page ${typeToUse} ${getAssertSubType(
+        assertionSubType
+      )} ${value ? `"${value}"` : ""}`;
+    case "text":
+      return `I will assert that text in${position} ${name}${typeToUse} ${getAssertSubType(
+        assertionSubType
+      )} ${value ? `"${value}"` : ""}`;
+    case "visible":
+      return `I will assert that${position} ${name}${typeToUse} is visible`;
+    case "notVisible":
+      return `I will assert that${position} ${name}${typeToUse} is not visible`;
+    case "exists":
+      return `I will assert that${position} ${name}${typeToUse} is existing`;
+    case "notExists":
+      return `I will assert that${position} ${name}${typeToUse} is not existing`;
+    default:
+      return "is";
+  }
+};
+
+export const generateAssistantMessage = (step, index) => {
+  console.log("Step is: ", step);
+  const stepNumber = index + 1;
+  const { intent, target, value, assertionType, variableName, compareTo } =
+    step;
+
+  const name = target?.name ? `"${target?.name}"` : "";
+  const position = target?.position != null ? ` #${target.position}` : "";
+  const context = target?.context ? ` in context "${target.context}"` : "";
+  const typeToUse = target?.type ? ` ${target.type}` : "";
+
+  switch (intent) {
+    case "click":
+    case "doubleClick":
+    case "rightClick":
+    case "hover":
+      return `Step ${stepNumber}: I will perform a ${intent} on${position} ${name}${typeToUse}${context}. Would you like to record this step?`;
+
+    case "input":
+      return `Step ${stepNumber}: I will type value "${value}" in the${position} ${name}${typeToUse} field${context}. Would you like to record this step?`;
+
+    case "assert":
+      return `Step ${stepNumber}: ${getAssert(
+        step,
+        position,
+        name,
+        typeToUse
+      )}. Would you like to record this step?`;
+
+    case "navigate":
+      return `Step ${stepNumber}: I will navigate to "${value}". Would you like to record this step?`;
+
+    case "refresh":
+      return `Step ${stepNumber}: I will refresh the page. Would you like to record this step?`;
+
+    case "verifyTitle":
+      return `Step ${stepNumber}: I will verify the page title${
+        value ? ` is "${value}"` : ""
+      }. Would you like to record this step?`;
+
+    case "store":
+      return `Step ${stepNumber}: I will store the ${assertionType} of ${target.type} "${name}"${context} into variable "${variableName}". Would you like to record this step?`;
+
+    case "comparePosition":
+      return `Step ${stepNumber}: I will check that ${
+        target.type
+      } "${name}" is ${compareTo?.relation} ${compareTo?.target.type} "${
+        compareTo?.target.name || `#${compareTo?.target.position}`
+      }." Would you like to record this step?`;
+
+    case "uploadFile":
+      return `Step ${stepNumber}: I will upload file "${value}" to ${target.type} "${name}". Would you like to record this step?`;
+
+    case "visualMatch":
+      return `Step ${stepNumber}: I will perform a visual match of ${target.type} "${name}". Would you like to record this step?`;
+
+    case "log":
+      return `Step ${stepNumber}: I will log "${value}" to the test output. Would you like to record this step?`;
+
+    case "highlight":
+      return `Step ${stepNumber}: I will highlight ${target.type} "${name}" for visibility. Would you like to record this step?`;
+
+    case "keyboardPress":
+      return `Step ${stepNumber}: I will hit "${value}" on the keyboard. Would you like to record this step?`;
+    default:
+      return `Step ${stepNumber}: I will perform "${intent}" on ${target.type} "${name}". Would you like to record this step?`;
+  }
 };
 
 export const floatingDeleteCookieDockConfirm = (
@@ -928,6 +1053,28 @@ export const floatingAssertDockNonTextConfirm = ({
       action: "assert",
       locatorName,
       isSoftAssert,
+      assertion: assertName,
+      el,
+      e,
+      text: textValue,
+    })
+  );
+  closeDock();
+};
+
+export const floatingHandleHoverConfirm = ({
+  locatorName,
+  closeDock,
+  textValue,
+  el,
+  e,
+}) => {
+  const assertName = ASSERTIONMODES.HOVER;
+
+  window.__recordAction(
+    window.__buildData({
+      action: "assert",
+      locatorName,
       assertion: assertName,
       el,
       e,

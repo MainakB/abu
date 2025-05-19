@@ -1,73 +1,10 @@
 import React, { useState, useEffect, useRef } from "react";
 import { Send, Check, X } from "lucide-react";
+import { generateAssistantMessage } from "../../../../utils/componentLibs.js";
 import ConfirmCancelFooter from "../confirm-cancel-footer/ConfirmCancelFooter.jsx";
 import { useModeSocket } from "../../../hooks/useModeSocket.js";
 
 const baseMessage = "Hi! What action would you like me to perform on the page?";
-function generateAssistantMessage(step, index) {
-  const stepNumber = index + 1;
-  const { intent, target, value, assertionType, variableName, compareTo } =
-    step;
-
-  const name =
-    target?.name ||
-    (target?.position != null ? `#${target.position}` : "unnamed element");
-  const context = target?.context ? ` in context "${target.context}"` : "";
-
-  switch (intent) {
-    case "click":
-    case "doubleClick":
-    case "rightClick":
-    case "hover":
-      return `Step ${stepNumber}: I will perform a ${intent} on ${target.type} "${name}"${context}. Would you like to record this step?`;
-
-    case "input":
-      return `Step ${stepNumber}: I will input "${value}" into ${target.type} "${name}"${context}. Would you like to record this step?`;
-
-    case "assert":
-      return `Step ${stepNumber}: I will assert that ${
-        target.type
-      } "${name}"${context} has ${assertionType}${
-        value ? ` = "${value}"` : ""
-      }. Would you like to record this step?`;
-
-    case "navigate":
-      return `Step ${stepNumber}: I will navigate to "${value}". Would you like to record this step?`;
-
-    case "refresh":
-      return `Step ${stepNumber}: I will refresh the page. Would you like to record this step?`;
-
-    case "verifyTitle":
-      return `Step ${stepNumber}: I will verify the page title${
-        value ? ` is "${value}"` : ""
-      }. Would you like to record this step?`;
-
-    case "store":
-      return `Step ${stepNumber}: I will store the ${assertionType} of ${target.type} "${name}"${context} into variable "${variableName}". Would you like to record this step?`;
-
-    case "comparePosition":
-      return `Step ${stepNumber}: I will check that ${
-        target.type
-      } "${name}" is ${compareTo?.relation} ${compareTo?.target.type} "${
-        compareTo?.target.name || `#${compareTo?.target.position}`
-      }." Would you like to record this step?`;
-
-    case "uploadFile":
-      return `Step ${stepNumber}: I will upload file "${value}" to ${target.type} "${name}". Would you like to record this step?`;
-
-    case "visualMatch":
-      return `Step ${stepNumber}: I will perform a visual match of ${target.type} "${name}". Would you like to record this step?`;
-
-    case "log":
-      return `Step ${stepNumber}: I will log "${value}" to the test output. Would you like to record this step?`;
-
-    case "highlight":
-      return `Step ${stepNumber}: I will highlight ${target.type} "${name}" for visibility. Would you like to record this step?`;
-
-    default:
-      return `Step ${stepNumber}: I will perform "${intent}" on ${target.type} "${name}". Would you like to record this step?`;
-  }
-}
 
 export default function FloatingChatWithLLMDock({ onCancel }) {
   const [messages, setMessages] = useState([
@@ -156,6 +93,19 @@ export default function FloatingChatWithLLMDock({ onCancel }) {
     if (!step) return;
 
     triggerIconAnimation();
+
+    // Execute the action using the __executeAction binding
+    window.__executeAction(step)
+      .then((result) => {
+        if (result.success) {
+          console.log("✅ Action executed successfully:", step);
+        } else {
+          console.error("❌ Error executing action:", step, result.error);
+        }
+      })
+      .catch((error) => {
+        console.error("❌ Error executing action:", step, error);
+      });
 
     setMessages((prev) => {
       const updated = [...prev];

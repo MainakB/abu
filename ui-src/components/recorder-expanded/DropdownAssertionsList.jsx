@@ -10,6 +10,10 @@ export default function DropdownAssertionsList({
     [ASSERTIONMODES.DROPDOWNSELECTED, "Assert Dropdown Selected"],
     [ASSERTIONMODES.DROPDOWNCOUNTIS, "Assert Dropdown Count"],
     [ASSERTIONMODES.DROPDOWNCONTAINS, "Assert Dropdown Contains"],
+    [
+      ASSERTIONMODES.DROPDOWNOPTIONSBYPARTIALTEXT,
+      "Assert Dropdown Contains By Partial Text",
+    ],
     [ASSERTIONMODES.DROPDOWNVALUESARE, "Assert Dropdown Values"],
     [ASSERTIONMODES.DROPDOWNINALPHABETICORDER, "Assert Dropdown Ordering"],
     [ASSERTIONMODES.DROPDOWNDUPLICATECOUNT, "Assert Dropdown Duplicate Count"],

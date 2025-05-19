@@ -335,20 +335,20 @@
 
     const key = `${calledFrom}-${thisTabId}`;
 
-    fetch("http://localhost:3111/record", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        action: "switchToWindow",
-        tabId: thisTabId,
-        attributes: {
-          eventKey: key,
-          url: url || "",
-          title: title || "",
-        },
-        timestamp: Date.now(),
-      }),
-    });
+      fetch("http://localhost:3111/record", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "switchToWindow",
+          tabId: thisTabId,
+          attributes: {
+            eventKey: key,
+            url: url || "",
+            title: title || "",
+          },
+          timestamp: Date.now(),
+        }),
+      });
   };
 
   window.__setupDomObserver = () => {

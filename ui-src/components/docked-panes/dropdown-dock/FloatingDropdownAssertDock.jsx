@@ -73,6 +73,10 @@ function getHeader(modeValue) {
     return "Assert Dropdown Contains";
   }
 
+  if (modeValue === ASSERTIONMODES.DROPDOWNOPTIONSBYPARTIALTEXT) {
+    return "Assert Dropdown Contains Option By Partial Text";
+  }
+
   if (modeValue === ASSERTIONMODES.DROPDOWNCOUNTIS) {
     return "Assert Dropdown Count";
   }
@@ -94,7 +98,11 @@ export default function FloatingDropdownAssertDock({ el, mode, onCancel, e }) {
   const [header, setHeader] = useState(() => getHeader(mode));
   const [expected, setExpected] = useState(() => {
     if (mode === ASSERTIONMODES.DROPDOWNCOUNTIS) return getDropdownCount(el);
-    if (mode === ASSERTIONMODES.DROPDOWNCONTAINS) return "";
+    if (
+      mode === ASSERTIONMODES.DROPDOWNCONTAINS ||
+      mode === ASSERTIONMODES.DROPDOWNOPTIONSBYPARTIALTEXT
+    )
+      return "";
     if (mode === ASSERTIONMODES.DROPDOWNVALUESARE)
       return getDropdownOrder(el, false);
     if (mode === ASSERTIONMODES.DROPDOWNSELECTED)
@@ -153,6 +161,7 @@ export default function FloatingDropdownAssertDock({ el, mode, onCancel, e }) {
         onCancel={handleCancel}
         onConfirm={handleConfirm}
         {...(mode === ASSERTIONMODES.DROPDOWNCOUNTIS ||
+        mode === ASSERTIONMODES.DROPDOWNCONTAINS ||
         mode === ASSERTIONMODES.DROPDOWNSELECTED
           ? { isNegative, setIsNegative }
           : {})}

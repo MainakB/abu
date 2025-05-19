@@ -40,7 +40,10 @@
         currentInput = null;
         initialValue = null;
       }
-      if (Object.values(assertionModes).includes(mode)) {
+      if (
+        Object.values(assertionModes).includes(mode) &&
+        mode !== assertionModes.AICHAT
+      ) {
         e.preventDefault();
         e.stopPropagation();
         e.stopImmediatePropagation();

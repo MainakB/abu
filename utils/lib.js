@@ -254,6 +254,293 @@ export const exposeRecorderControls = async (
   await page.exposeBinding("__pageUrl", async () => page.url());
 
   await page.exposeBinding("__getPageTitle", async () => page.title());
+
+  // await page.exposeBinding("__executeAction", async (source, action) => {
+  //   const htmlTagTypeMapping = {
+  //     button: ["button", "div"],
+  //     link: ["a"],
+  //     hyperlink: ["a"],
+  //     input: ["input"],
+  //     textbox: ["input"],
+  //     header: ["h1", "h2", "h3", "h4", "span", "label", "header"],
+  //     radio: ["input"],
+  //     "radio-button": ["input"],
+  //     checkbox: ["input"],
+  //   };
+
+  //   function escapeForXPath(str) {
+  //     if (!str.includes(`"`)) {
+  //       return `"${str}"`; // Wrap in double quotes
+  //     }
+  //     if (!str.includes(`'`)) {
+  //       return `'${str}'`; // Wrap in single quotes
+  //     }
+
+  //     // Contains both ' and ", use concat() XPath function
+  //     return (
+  //       "concat(" +
+  //       str
+  //         .split(`"`)
+  //         .map((part, i, arr) =>
+  //           i < arr.length - 1 ? `"${part}", '"', ` : `"${part}"`
+  //         )
+  //         .join("") +
+  //       ")"
+  //     );
+  //   }
+
+  //   try {
+  //     console.log("Action is: ", action);
+
+  //     if (action.intent === "navigate") {
+  //       console.log("Navigate to : ", action.value);
+  //       await page.goto(action.value || "");
+  //       return { success: true };
+  //     }
+
+  //     const tagCandidates =
+  //       htmlTagTypeMapping[action.target.type?.toLowerCase()] || [];
+
+  //     // const safeName = escapeForXPath
+  //     const fallbackLocator = action.target.name
+  //       ? page.locator(
+  //           `xpath=.//*[text()=${escapeForXPath(
+  //             action.target.name
+  //           )}]|.//*[@aria-label=${escapeForXPath(
+  //             action.target.name
+  //           )}]|.//*[name=${escapeForXPath(
+  //             action.target.name
+  //           )}]|.//*[title=${escapeForXPath(
+  //             action.target.name
+  //           )}]|.//*[aria-describedBy=${escapeForXPath(
+  //             action.target.name
+  //           )}]|.//*[@placeholder=${escapeForXPath(action.target.name)}]`
+  //         )
+  //       : null;
+
+  //     // Try each tag type until we find a visible matching element
+  //     const tagAttempts = fallbackLocator
+  //       ? [null, ...tagCandidates]
+  //       : tagCandidates;
+
+  //     for (const tag of tagAttempts) {
+  //       let locator = null;
+  //       let nameMatchXPath = null;
+
+  //       if (tag === null && fallbackLocator) {
+  //         locator = fallbackLocator;
+  //       } else if (tag) {
+  //         locator = page.locator(tag);
+  //       }
+
+  //       if (!locator) continue;
+
+  //       const elements = await locator.all();
+  //       const visibleElements = [];
+
+  //       for (const el of elements) {
+  //         if (await el.isVisible()) visibleElements.push(el);
+  //       }
+
+  //       // Check if we need to do a refined search
+  //       if (
+  //         fallbackLocator &&
+  //         tag &&
+  //         visibleElements.length > 1 &&
+  //         (await fallbackLocator.count()) > 1
+  //       ) {
+  //         // Narrow down: build combined XPath with tag filter
+  //         const name = action.target.name;
+  //         if (!name) continue;
+  //         const safeName = escapeForXPath(name);
+  //         const xpath = `
+  //               .//${tag}[text()=${safeName}] |
+  //               .//${tag}[@aria-label=${safeName}] |
+  //               .//${tag}[@name=${safeName}] |
+  //               .//${tag}[@title=${safeName}] |
+  //               .//${tag}[@aria-describedBy=${safeName}] |
+  //               .//${tag}[@placeholder=${safeName}]
+  //             `.trim();
+
+  //         console.log(`🔍 Refined XPath: ${xpath}`);
+  //         locator = page.locator(`xpath=${xpath}`);
+  //         const refinedVisible = [];
+
+  //         for (const el of await locator.all()) {
+  //           if (await el.isVisible()) refinedVisible.push(el);
+  //         }
+
+  //         if (refinedVisible.length === 0) continue;
+
+  //         visibleElements.splice(0, visibleElements.length, ...refinedVisible);
+  //       }
+
+  //       if (visibleElements.length === 0) continue;
+
+  //       const targetIndex = action.target.position
+  //         ? action.target.position - 1
+  //         : 0;
+  //       const element = visibleElements[targetIndex] || visibleElements[0];
+  //       if (!element) continue;
+  //       console.log("Switch to intent: ", action);
+  //       // 🎯 Execute the action
+  //       switch (action.intent) {
+  //         case "click":
+  //           await element.click();
+  //           break;
+  //         case "input":
+  //           await element.type(action.value || "");
+  //           break;
+  //         case "hover":
+  //           await element.hover();
+  //         default:
+  //           console.warn("⚠️ Unknown action intent:", action.intent);
+  //           return { success: false, error: "Unknown action intent" };
+  //       }
+
+  //       console.log("✅ Action executed successfully:", action);
+  //       return { success: true };
+  //     }
+
+  //     console.warn("⚠️ No visible elements found after tag retries:", action);
+  //     return { success: false, error: "No visible elements found" };
+  //   } catch (error) {
+  //     console.error("❌ Error executing action:", action, error);
+  //     return { success: false, error: error.message };
+  //   }
+  // });
+
+  await page.exposeBinding("__executeAction", async (source, action) => {
+    const htmlTagTypeMapping = {
+      button: ["button", "div"],
+      link: ["a"],
+      hyperlink: ["a"],
+      input: ["input"],
+      textbox: ["input"],
+      header: ["h1", "h2", "h3", "h4", "span", "label", "header"],
+      radio: ["input"],
+      "radio-button": ["input"],
+      checkbox: ["input"],
+    };
+
+    function escapeForXPath(str) {
+      if (!str.includes(`"`)) return `"${str}"`;
+      if (!str.includes(`'`)) return `'${str}'`;
+      return (
+        "concat(" +
+        str
+          .split(`"`)
+          .map((s, i, arr) => (i < arr.length - 1 ? `"${s}", '"', ` : `"${s}"`))
+          .join("") +
+        ")"
+      );
+    }
+
+    try {
+      console.log("Action is: ", action);
+
+      if (action.intent === "navigate") {
+        await page.goto(action.value || "");
+        return { success: true };
+      }
+
+      const name = action.target.name;
+      const safeName = name ? escapeForXPath(name) : null;
+      const tagCandidates =
+        htmlTagTypeMapping[action.target.type?.toLowerCase()] || [];
+
+      const locatorAttempts = [];
+
+      // 1. tag + name combinations (most specific)
+      if (name && tagCandidates.length > 0) {
+        for (const tag of tagCandidates) {
+          const xpath = `
+          .//${tag}[text()=${safeName}] |
+          .//${tag}[@aria-label=${safeName}] |
+          .//${tag}[@name=${safeName}] |
+          .//${tag}[@title=${safeName}] |
+          .//${tag}[@aria-describedBy=${safeName}] |
+          .//${tag}[@placeholder=${safeName}]
+        `.trim();
+          locatorAttempts.push({
+            strategy: "tag+name",
+            locator: page.locator(`xpath=${xpath}`),
+          });
+        }
+      }
+
+      // 2. name-only XPath
+      if (name) {
+        const xpath = `
+        .//*[text()=${safeName}] |
+        .//*[@aria-label=${safeName}] |
+        .//*[name=${safeName}] |
+        .//*[@title=${safeName}] |
+        .//*[@aria-describedBy=${safeName}] |
+        .//*[@placeholder=${safeName}]
+      `.trim();
+        locatorAttempts.push({
+          strategy: "name-only",
+          locator: page.locator(`xpath=${xpath}`),
+        });
+      }
+
+      // 3. tag-only locator
+      if (tagCandidates.length > 0) {
+        for (const tag of tagCandidates) {
+          locatorAttempts.push({
+            strategy: "tag-only",
+            locator: page.locator(tag),
+          });
+        }
+      }
+
+      // 4. Attempt each locator in order
+      for (const { locator, strategy } of locatorAttempts) {
+        const all = await locator.all();
+        const visible = [];
+        for (const el of all) {
+          if (await el.isVisible()) visible.push(el);
+        }
+
+        if (visible.length === 0) continue;
+
+        const targetIndex = action.target.position
+          ? action.target.position - 1
+          : 0;
+        const element = visible[targetIndex] || visible[0];
+        if (!element) continue;
+
+        console.log(`🎯 Matched using strategy: ${strategy}`);
+
+        switch (action.intent) {
+          case "click":
+            await element.click();
+            break;
+          case "input":
+            await element.type(action.value || "");
+            break;
+          case "hover":
+            await element.hover();
+            break;
+          default:
+            return { success: false, error: "Unknown action intent" };
+        }
+
+        console.log("✅ Action executed successfully:", action);
+        return { success: true };
+      }
+
+      console.warn(
+        "⚠️ No visible elements found after all strategies:",
+        action
+      );
+      return { success: false, error: "No visible elements found" };
+    } catch (error) {
+      console.error("❌ Error executing action:", error);
+      return { success: false, error: error.message };
+    }
+  });
 };
 
 export const exposeContextBindings = async (ctx) => {

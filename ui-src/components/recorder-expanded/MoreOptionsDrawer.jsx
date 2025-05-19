@@ -50,6 +50,18 @@ export default function MoreOptionsDrawer({
     </li>
   );
 
+  const getElementDockView = (modeVal, icon, label) => (
+    <li
+      role="button"
+      tabIndex={0}
+      onKeyDown={(e) => e.key === "Enter" && handler()}
+      className={getClassName(currentMode, modeVal)}
+      onClick={async () => onMenuSelection(modeVal)}
+    >
+      <span className="icon">{icon}</span> {label}
+    </li>
+  );
+
   const getNonElementMonoStep = (modeVal, icon, label) => (
     <li
       role="button"
@@ -114,6 +126,7 @@ export default function MoreOptionsDrawer({
                 "🔄",
                 "Page Reload"
               )}
+              {getElementDockView(ASSERTIONMODES.HOVER, "🖱️", "Mouse Hover")}
               {getNonElementDockView(
                 ASSERTIONMODES.ADDCOOKIES,
                 "🍪",

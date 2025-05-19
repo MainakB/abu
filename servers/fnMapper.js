@@ -182,6 +182,21 @@ const constructLocators = (arg, locatorIndex) => {
 };
 
 export const ACTION_HANDLERS = {
+  [FUNCTIONMAPPER.CLOSETAB.key]: (arg, idx) => [
+    {
+      step: `And ${FUNCTIONMAPPER.CLOSETAB.name}()`,
+      aiStep: `And close current tab`,
+    },
+    idx,
+  ],
+  [FUNCTIONMAPPER.NEWTAB.key]: (arg, idx) => [
+    {
+      step: `And ${FUNCTIONMAPPER.NEWTAB.name}()`,
+      aiStep: `And open a new tab`,
+    },
+    idx,
+  ],
+
   [FUNCTIONMAPPER.NAVIGATE.key]: (arg, idx) => [
     {
       step: `Given ${FUNCTIONMAPPER.NAVIGATE.name} "${arg.url}"`,
@@ -228,6 +243,18 @@ export const ACTION_HANDLERS = {
       {
         step: `And ${FUNCTIONMAPPER.CLICK.name}({po:"${loc.locKeyName}"})`,
         aiStep: arg.text ? `And click on "${arg.text}"` : null,
+        locator: loc.result,
+      },
+      loc.newIdx,
+    ];
+  },
+
+  [FUNCTIONMAPPER.HOVER.key]: (arg, idx) => {
+    const loc = constructLocators(arg, idx);
+    return [
+      {
+        step: `And ${FUNCTIONMAPPER.HOVER.name}({po:"${loc.locKeyName}"})`,
+        aiStep: arg.text ? `And mouse hover on "${arg.text}"` : null,
         locator: loc.result,
       },
       loc.newIdx,
@@ -590,6 +617,29 @@ export const ACTION_HANDLERS = {
     return [
       {
         step: `And ${FUNCTIONMAPPER.DROPDOWNCONTAINS.name}({po:"${loc.locKeyName}", txt: "${arg.expected}"${soft}})`,
+        locator: loc.result,
+      },
+      loc.newIdx,
+    ];
+  },
+
+  [FUNCTIONMAPPER.DROPDOWNNOTCONTAINS.key]: (arg, idx) => {
+    const loc = constructLocators(arg, idx);
+    const soft = arg.isSoftAssert ? ", isSoftAssert: true" : "";
+    return [
+      {
+        step: `And ${FUNCTIONMAPPER.DROPDOWNNOTCONTAINS.name}({po:"${loc.locKeyName}", txt: "${arg.expected}"${soft}})`,
+        locator: loc.result,
+      },
+      loc.newIdx,
+    ];
+  },
+  [FUNCTIONMAPPER.DROPDOWNOPTIONSBYPARTIALTEXT.key]: (arg, idx) => {
+    const loc = constructLocators(arg, idx);
+    const soft = arg.isSoftAssert ? ", isSoftAssert: true" : "";
+    return [
+      {
+        step: `And ${FUNCTIONMAPPER.DROPDOWNOPTIONSBYPARTIALTEXT.name}({po:"${loc.locKeyName}", txt: "${arg.expected}"${soft}})`,
         locator: loc.result,
       },
       loc.newIdx,

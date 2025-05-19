@@ -32,6 +32,7 @@ import FloatingTitleAssignmentDock from "./components/docked-panes/title-assignm
 import FloatingTitleMatchDock from "./components/docked-panes/title-match/FloatingTitleMatchDock.jsx";
 import FloatingElementAttrMatchDock from "./components/docked-panes/element-based-match/FloatingElementAttrMatchDock.jsx";
 import FloatingChatWithLLMDock from "./components/docked-panes/ai-chat/FloatingChatWithLLMDock.jsx";
+import FloatingMouseHoverDock from "./components/docked-panes/mouse-actions-dock/FloatingMouseHoverDock.jsx";
 import { ASSERTIONMODES } from "./constants/index.js";
 
 let floatingAssertRoot = null;
@@ -175,8 +176,18 @@ window.showFloatingAssert = (mode, el, e, type) => {
       floatingAssertRoot.render(
         <FloatingDeleteCookieDock onCancel={closeDock} />
       );
+    } else if (type === ASSERTIONMODES.HOVER) {
+      floatingAssertRoot.render(
+        <FloatingMouseHoverDock
+          onCancel={closeDock}
+          el={el}
+          e={e}
+          textValue={textValue}
+        />
+      );
     } else if (
       type === ASSERTIONMODES.DROPDOWNCONTAINS ||
+      type === ASSERTIONMODES.DROPDOWNOPTIONSBYPARTIALTEXT ||
       type === ASSERTIONMODES.DROPDOWNCOUNTIS ||
       type === ASSERTIONMODES.DROPDOWNCOUNTISNOT ||
       type === ASSERTIONMODES.DROPDOWNNOTSELECTED ||

@@ -1657,6 +1657,25 @@ label .info-tooltip-icon {
   font-size: 10px !important;
 }
 
+.chat-icon-retry-button {
+  margin-top: 6px !important;
+  background: #ffeeba !important;
+  border: 1px solid #f5c6cb !important;
+  padding: 6px 10px !important;
+  border-radius: 4px;
+  font-size: 13px !important;
+  opacity: 1;
+  cursor: pointer;
+}
+
+/* Modifier for when typing is in progress */
+.chat-icon-retry-button--disabled {
+  background: #f8f9fa !important;
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+
 @keyframes ellipsis {
   0% {
     content: '';

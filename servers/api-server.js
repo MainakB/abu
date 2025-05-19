@@ -2,7 +2,6 @@ import express, { response } from "express";
 import fs from "fs";
 import path from "path";
 import "dotenv/config";
-import Anthropic from "@anthropic-ai/sdk";
 import OpenAI from "openai";
 import { Ollama } from "ollama";
 import { json } from "stream/consumers";

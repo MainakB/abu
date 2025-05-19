@@ -38,13 +38,13 @@ export const LLMTestActionSchema = z.object({
     "screenshot",
     "highlight",
     "log",
-    "visualMatch"
+    "visualMatch",
   ]),
   target: z.object({
     type: z.string(),
     name: z.string().nullable(),
     position: z.number().int().positive().nullable(),
-    context: z.string().nullable()
+    context: z.string().nullable(),
   }),
   value: z.string().nullable(),
   assertionType: z
@@ -52,6 +52,7 @@ export const LLMTestActionSchema = z.object({
       "text",
       "value",
       "visible",
+      "notVisible",
       "title",
       "url",
       "count",
@@ -68,7 +69,19 @@ export const LLMTestActionSchema = z.object({
       "containsText",
       "ariaLabel",
       "contrastRatio",
-      "isVisibleInViewport"
+      "isVisibleInViewport",
+    ])
+    .nullable(),
+  assertionSubType: z
+    .enum([
+      "equals",
+      "not equals",
+      "contains",
+      "not contains",
+      "starts with",
+      "not starts with",
+      "ends with",
+      "not ends with",
     ])
     .nullable(),
   isSoft: z.boolean().nullable(),
@@ -79,11 +92,11 @@ export const LLMTestActionSchema = z.object({
         type: z.string(),
         name: z.string().nullable(),
         position: z.number().int().positive().nullable(),
-        context: z.string().nullable()
+        context: z.string().nullable(),
       }),
-      relation: z.enum(["before", "after", "above", "below"])
+      relation: z.enum(["before", "after", "above", "below"]),
     })
-    .nullable()
+    .nullable(),
 });
 
 export const LLMTestActionArraySchema = z.array(LLMTestActionSchema);
@@ -106,7 +119,7 @@ export async function validateLLMResponse(llmOutputText) {
       return {
         valid: false,
         reason: "Schema validation failed",
-        errors: result.error.format()
+        errors: result.error.format(),
       };
     }
 
@@ -115,7 +128,7 @@ export async function validateLLMResponse(llmOutputText) {
     return {
       valid: false,
       reason: err.message,
-      raw: llmOutputText
+      raw: llmOutputText,
     };
   }
 }

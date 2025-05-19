@@ -15,6 +15,7 @@ import {
   exposeContextBindings,
   startServers,
 } from "./utils/lib.js";
+import { ASSERTIONMODES } from "./ui-src/constants/index.js";
 
 startServers();
 const __filename = fileURLToPath(import.meta.url);
@@ -98,31 +99,93 @@ context.on("page", async (newPage) => {
     __dirname
   );
   const url = newPage.url();
+  let isManualNewTab = false;
   if (!url.includes("about:blank") && firstUrlCaptured) {
-    const title = await newPage.title();
-    const eventKey = `newPage-${tabId}`;
-    await Promise.all([
-      injectToLocalStorage(newPage, false),
-      injectToSessionStorage(newPage, [
-        { key: "tabId", value: tabId },
-        { key: "url", value: url },
-        { key: "title", value: title },
-      ]),
-    ]);
     if (globalRecorderMode.value !== "pause") {
-      // ✅ Record the switchToWindow action
-      await fetch("http://localhost:3111/record", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          action: "switchToWindow",
-          tabId,
-          attributes: { url, title, eventKey },
-          timestamp: Date.now(),
-        }),
-      });
+      const title = await newPage.title();
+      const eventKey = `newPage-${tabId}`;
+      if (
+        (url && url.includes("//newtab/")) ||
+        (title && title.includes("//newtab/"))
+      ) {
+        await newPage.goto("about:blank");
+        isManualNewTab = true;
+      } else {
+        await Promise.all([
+          injectToLocalStorage(newPage, false),
+          injectToSessionStorage(newPage, [
+            { key: "tabId", value: tabId },
+            { key: "url", value: url },
+            { key: "title", value: title },
+          ]),
+        ]);
+        // ✅ Record the switchToWindow action
+        await fetch("http://localhost:3111/record", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            action: "switchToWindow",
+            tabId,
+            attributes: { url, title, eventKey },
+            timestamp: Date.now(),
+          }),
+        });
+      }
     }
   }
+
+  newPage.on("framenavigated", async (frame) => {
+    if (frame === newPage.mainFrame() && isManualNewTab) {
+      let navurl = frame.url();
+      if (
+        navurl === "about:blank" ||
+        (typeof navurl === "string" && !navurl.startsWith("http"))
+      )
+        return;
+
+      if (!navurl.includes("about:blank") && isManualNewTab) {
+        isManualNewTab = false;
+        await newPage.waitForLoadState("domcontentloaded");
+
+        // ✅ Wait for origin to stabilize
+        await newPage.waitForFunction(() => location.origin !== "null");
+
+        // Optional: small buffer
+        await newPage.waitForTimeout(500);
+
+        const titleVal = await newPage.title();
+        if (!newPage.isClosed()) {
+          await Promise.all([
+            injectToLocalStorage(newPage, false),
+            injectToSessionStorage(newPage, [
+              { key: "tabId", value: tabId },
+              { key: "url", value: navurl },
+              { key: "title", value: titleVal },
+            ]),
+          ]);
+          await fetch("http://localhost:3111/record", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              action: ASSERTIONMODES.NEWTAB,
+              timestamp: Date.now(),
+            }),
+          });
+          await fetch("http://localhost:3111/record", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              action: "navigate",
+              url: navurl,
+              tabId: tabId,
+              attributes: { titleVal },
+              timestamp: Date.now(),
+            }),
+          });
+        }
+      }
+    }
+  });
 });
 
 firstPage.on("framenavigated", async (frame) => {
