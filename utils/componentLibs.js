@@ -975,13 +975,13 @@ export const onConfirmDbAction = async ({
     );
 
   if (!existingQuery) {
-    window.__recordAction(dbQueryData);
+    await window.__recordAction(dbQueryData);
   }
 
   const queryVarName = existingQuery?.varName || dbQueryData.varName;
 
   // Final combined DB action
-  window.__recordAction(
+  await window.__recordAction(
     window.__buildData({
       action: "assert",
       assertion: dbAction,

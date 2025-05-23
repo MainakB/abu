@@ -116,6 +116,10 @@
 #floating-cookie-list-dock .docked-pane-footer-confirm-cancel,
 #floating-tab-list-dock .docked-pane-footer-confirm-cancel,
 #floating-cookie-delete-dock .docked-pane-footer-confirm-cancel,
+#floating-assert-dock-root .docked-pane-footer-confirm-cancel,
+#floating-cookie-list-dock .docked-pane-footer-confirm-cancel-spaced,
+#floating-tab-list-dock .docked-pane-footer-confirm-cancel-spaced,
+#floating-cookie-delete-dock .docked-pane-footer-confirm-cancel-spaced,
 .docked-pane-locator-container {
   background: var(--recorder-panel-footer) !important;
   border-top: 1px solid var(--recorder-border-color) !important;
@@ -325,6 +329,17 @@ button.disabled:focus {
   background: #fafafa !important;
   display: flex !important;
   justify-content: flex-end !important;
+  gap: 10px !important;
+  border-radius: 0 0 10px 10px !important;
+}
+
+#floating-cookie-list-dock .docked-pane-footer-confirm-cancel-spaced,
+#floating-cookie-delete-dock .docked-pane-footer-confirm-cancel-spaced {
+  border-top: 1px solid #ddd !important;
+  padding: 10px 12px !important;
+  background: #fafafa !important;
+  display: flex !important;
+  justify-content: space-between !important;
   gap: 10px !important;
   border-radius: 0 0 10px 10px !important;
 }

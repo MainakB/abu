@@ -3,9 +3,7 @@ import path from "path";
 import { program } from "commander";
 import inquirer from "inquirer";
 import { spawn, execSync } from "child_process";
-import { fileURLToPath } from "url";
-import { dirname } from "path";
-import { v4 as uuidv4 } from "uuid";
+import chalk from "chalk";
 
 import { RecorderConfig } from "../servers/RecorderConfig.js";
 
@@ -50,8 +48,14 @@ async function getCliOptions() {
   const srcPath = path.join(baseFolder, "src");
 
   if (!fs.existsSync(srcPath)) {
-    console.error(`src/ folder not found in ${baseFolder}`);
-    process.exit(1);
+    console.warn(
+      chalk.red(
+        `🔥🔥🔥 src/ folder not found in ${baseFolder}. Creating one automatically, but make sure you are in an existing test project folder to be able to replay the recording.\n`
+      )
+    );
+    fs.mkdirSync(srcPath, { recursive: true });
+
+    // process.exit(1);
   }
 
   const srcSubfolders = fs
@@ -59,6 +63,10 @@ async function getCliOptions() {
     .filter((f) => f.isDirectory())
     .map((f) => f.name);
 
+  if (srcSubfolders.length === 0) {
+    fs.mkdirSync(path.join(srcPath, "recordings"), { recursive: true });
+    srcSubfolders.push("recordings");
+  }
   let selectedFolder = srcSubfolders[0];
   if (srcSubfolders.length > 1) {
     const folderPrompt = await inquirer.prompt([
@@ -411,10 +419,27 @@ export const exposeRecorderControls = async (
     if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
 
     await fs.promises.writeFile(filePath, JSON.stringify(sorted, null, 2));
-    if (debugMode)
+    if (debugMode) {
       console.log(
-        `✅ ${steps.length} steps saved to ${filePath}. Run recorded test with the coomand "npx abc --customer=recordings --tags=@recordedTest --platform=dev"`
+        `✅ ${
+          steps.length
+        } steps saved to ${filePath}. Run recorded test with the coomand ${chalk.green(
+          chalk.blue.underline.bold(
+            "npx abc --customer=recordings --tags=@recordedTest --platform=dev"
+          )
+        )} ✅ ✅ ✅ ✅\n`
       );
+    } else {
+      console.log(
+        `\n✅ ✅ ✅ ✅ Run recorded test with the coomand ${chalk.green(
+          chalk.blue.underline.bold(
+            "npx abc --customer=recordings --tags=@recordedTest --platform=dev"
+          )
+        )} ✅ ✅ ✅ ✅\n`
+      );
+    }
+
+    chalk;
 
     await browser.close();
     stopServers(debugMode);

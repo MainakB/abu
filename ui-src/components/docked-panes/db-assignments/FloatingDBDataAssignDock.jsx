@@ -20,6 +20,11 @@ export default function FloatingDBDataAssignDock({ mode, onCancel }) {
   const [showPassword, setShowPassword] = useState(false);
   const [varName, setVarName] = useState("");
   const [varNameError, setVarNameError] = useState("");
+  // const [status, setStatus] = useState("");
+  // const [addDbAssertion, setAddDbAssertion] = useState(false);
+  // const [dbResponse, setDbResponse] = useState("");
+  // const [dbResponseJson, setDbResponseJson] = useState(null);
+  // const [loading, setLoading] = useState(false);
 
   const [dbConfig, setDbConfig] = useState({
     host: "",
@@ -27,9 +32,29 @@ export default function FloatingDBDataAssignDock({ mode, onCancel }) {
     password: "",
     port: "",
     query: "",
+    database: "",
+    ssl: false,
   });
 
   useModeSocket(onCancel);
+
+  const handleCancel = () => {
+    setSelectedActnIndex(0);
+    setSelectedDbTypeIndex(0);
+    setShowPassword(false);
+    setVarName("");
+    setVarNameError("");
+    setDbConfig({
+      host: "",
+      user: "",
+      password: "",
+      port: "",
+      query: "",
+      database: "",
+      ssl: false,
+    });
+    onCancel();
+  };
 
   const handleConfirm = useCallback(() => {
     if (
@@ -38,23 +63,97 @@ export default function FloatingDBDataAssignDock({ mode, onCancel }) {
       !dbConfig.port.trim() ||
       !dbConfig.user.trim() ||
       !dbConfig.password.trim() ||
+      !dbConfig.database.trim() ||
       !dbConfig.query.trim()
     ) {
       return;
     }
 
+    const connHost =
+      (dbConfig.host.trim().endsWith("/")
+        ? dbConfig.host.trim()
+        : `${dbConfig.host.trim()}/`) +
+      (dbConfig.database !== "" ? dbConfig.database.trim() : "") +
+      (dbConfig.ssl ? "?ssl=true" : "");
+
     onConfirmDbAction({
       dbAction: DB_ACTIONS[selectedActnIndex].key,
       dbType: DB_TYPES[selectedDbTypeIndex],
       varName: varName.trim(),
-      hostName: dbConfig.host.trim(),
+      hostName: connHost,
       userName: dbConfig.user.trim(),
       password: dbConfig.password.trim(),
       portNum: dbConfig.port.trim(),
+      // ssl: dbConfig.isSsl,
+      // database: dbConfig.database.trim(),
       query: dbConfig.query.trim(),
-      onCancel,
+      onCancel: handleCancel,
     });
   }, [varName, dbConfig, selectedActnIndex, selectedDbTypeIndex, onCancel]);
+
+  // const handleSetAddDbAssertion = async () => {
+  //   const next = !addDbAssertion;
+  //   setAddDbAssertion(next);
+  //   if (next) {
+  //     const requestMeta = {
+  //       host: dbConfig.host,
+  //       user: dbConfig.user,
+  //       password: dbConfig.password,
+  //       port: dbConfig.port,
+  //       ssl: dbConfig.isSsl,
+  //       database: dbConfig.database,
+  //       query: dbConfig.query,
+  //     };
+
+  //     try {
+  //       setLoading(true);
+  //       const response = await fetch("http://localhost:3111/api/dbproxy", {
+  //         method: "POST",
+  //         headers: {
+  //           "Content-Type": "application/json",
+  //         },
+  //         body: JSON.stringify(requestMeta),
+  //       });
+
+  //       const text = await response.text();
+  //       setDbResponse(text);
+  //       try {
+  //         const json = JSON.parse(text);
+  //         let toFlatten = { ...json };
+
+  //         if (typeof json.response === "string") {
+  //           try {
+  //             const parsedData = JSON.parse(json.response);
+  //             toFlatten.response = parsedData; // Replace string with parsed object
+  //           } catch (err) {
+  //             console.error(err);
+  //             // Leave it as-is if not valid JSON
+  //           }
+  //         }
+  //         const flat = flattenJson(toFlatten);
+
+  //         const attributes = Object.entries(flat).map(([key, val]) => ({
+  //           name: key,
+  //           value: String(val),
+  //           checked: false,
+  //           isNegative: false,
+  //           isSubstringMatch: false,
+  //           isSoftAssert: false,
+  //         }));
+  //         setDbResponseJson(attributes);
+  //       } catch {
+  //         setDbResponseJson(null);
+  //       }
+  //     } catch (err) {
+  //       setDbResponse(`❌ Error: ${err.message}`);
+  //     } finally {
+  //       setLoading(false);
+  //     }
+  //   } else {
+  //     setDbResponse(""); // Clear response if unchecked
+  //     setDbResponseJson(null);
+  //   }
+  // };
 
   return (
     <div
@@ -175,6 +274,32 @@ export default function FloatingDBDataAssignDock({ mode, onCancel }) {
             }
             placeholder="Enter port number..."
           />
+          <input
+            type="text"
+            className="assert-input assert-attribute-name"
+            value={dbConfig.database}
+            onChange={(e) =>
+              setDbConfig((prev) => ({ ...prev, database: e.target.value }))
+            }
+            placeholder="Enter DB name..."
+          />
+
+          <div className="docked-pane-footer-assert-container">
+            <input
+              id="dbSsl-checkbox"
+              type="checkbox"
+              checked={dbConfig.ssl}
+              onChange={(e) =>
+                setDbConfig((prev) => ({ ...prev, ssl: !prev.ssl }))
+              }
+            ></input>
+            <label htmlFor="dbSsl-checkbox">
+              SSL
+              <span className="info-tooltip-icon" title="Is SSL Enabled">
+                ⓘ
+              </span>
+            </label>
+          </div>
         </div>
         <div className="assert-attribute-row">
           <textarea
@@ -186,9 +311,145 @@ export default function FloatingDBDataAssignDock({ mode, onCancel }) {
             placeholder="Enter DB query to run.."
           />
         </div>
+        {/* {addDbAssertion && loading && (
+          <div className="assert-loading-container">
+            <div className="spinner" />
+            <div className="assert-loading-label">Fetching response...</div>
+          </div>
+        )}
+        {addDbAssertion &&
+          dbResponse &&
+          (dbResponseJson ? (
+            <div className="assert-attributes-container">
+              <div className="assert-resp-header-wrapper">
+                <div>
+                  <label className="cookie-input-label">DB Assertions</label>
+                </div>
+                <div className="assert-attributes-container-wrapper">
+                  <button
+                    className="assert-toggle-button-neg-pos"
+                    type="button"
+                    onClick={toggleSelectAll}
+                  >
+                    {dbResponseJson.every((resp) => resp.checked)
+                      ? "Deselect All"
+                      : "Select All"}
+                  </button>
+                </div>
+              </div>
+
+              {dbResponseJson.map((attr, index) => (
+                <div key={index} className="assert-attribute-row">
+                  <label className="assert-checkbox-container">
+                    <input
+                      type="checkbox"
+                      className="assert-checkbox"
+                      checked={attr.checked}
+                      onChange={(e) =>
+                        setDbResponseJson((prev) =>
+                          prev.map((a, i) =>
+                            i === index
+                              ? { ...a, checked: e.target.checked }
+                              : a
+                          )
+                        )
+                      }
+                    />
+                  </label>
+
+                  <input
+                    type="text"
+                    className="assert-input assert-attribute-name"
+                    value={attr.name}
+                    readOnly
+                    disabled
+                    title={attr.name}
+                  />
+
+                  <button
+                    className="assert-toggle-button-neg-pos"
+                    title={
+                      attr.isNegative ? "Assert not equals" : "Assert equals"
+                    }
+                    onClick={() =>
+                      setDbResponseJson((prev) =>
+                        prev.map((a, i) =>
+                          i === index ? { ...a, isNegative: !a.isNegative } : a
+                        )
+                      )
+                    }
+                  >
+                    {attr.isNegative ? "≠" : "="}
+                  </button>
+
+                  <input
+                    type="text"
+                    className="assert-input assert-attribute-value"
+                    value={attr.value}
+                    onChange={(e) =>
+                      setDbResponseJson((prev) =>
+                        prev.map((a, i) =>
+                          i === index ? { ...a, value: e.target.value } : a
+                        )
+                      )
+                    }
+                  />
+
+                  <button
+                    className="assert-toggle-button-neg-pos"
+                    title={
+                      attr.isSubstringMatch ? "Substring match" : "Exact match"
+                    }
+                    onClick={() =>
+                      setDbResponseJson((prev) =>
+                        prev.map((a, i) =>
+                          i === index
+                            ? { ...a, isSubstringMatch: !a.isSubstringMatch }
+                            : a
+                        )
+                      )
+                    }
+                  >
+                    {attr.isSubstringMatch ? "contains" : "exact"}
+                  </button>
+
+                  <button
+                    className="assert-toggle-button-neg-pos"
+                    title={attr.isSoftAssert ? "Soft Match" : "Match"}
+                    onClick={() =>
+                      setDbResponseJson((prev) =>
+                        prev.map((a, i) =>
+                          i === index
+                            ? { ...a, isSoftAssert: !a.isSoftAssert }
+                            : a
+                        )
+                      )
+                    }
+                  >
+                    {attr.isSoftAssert ? "sMatch" : "match"}
+                  </button>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="http-response-container">
+              <label className="cookie-input-label">DB Response</label>
+              <textarea
+                className="assert-pdf-text-textarea"
+                value={dbResponse}
+                readOnly
+                style={{ maxHeight: "200px", overflowY: "auto" }}
+              />
+            </div>
+          ))} */}
       </div>
 
       <ConfirmCancelFooter
+        // isSpaced={true}
+        // addDbAssertion={addDbAssertion}
+        // enableAddDbAssertion={true}
+        // disableAddDbAssertion={loading}
+        // handleSetAddDbAssertion={handleSetAddDbAssertion}
         onCancel={onCancel}
         onConfirm={handleConfirm}
         disableAutoFocus={true}
@@ -197,6 +458,7 @@ export default function FloatingDBDataAssignDock({ mode, onCancel }) {
           !!varNameError ||
           !dbConfig.host.trim() ||
           !dbConfig.port.trim() ||
+          !dbConfig.database.trim() ||
           !dbConfig.user.trim() ||
           !dbConfig.password.trim() ||
           !dbConfig.query.trim()

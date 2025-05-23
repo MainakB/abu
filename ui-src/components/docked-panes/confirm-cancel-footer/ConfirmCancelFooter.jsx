@@ -26,6 +26,11 @@ export default function ConfirmCancelFooter({
   setIsVarReasssign,
   deleteAllEmails,
   setDeleteAllEmails,
+  addDbAssertion,
+  enableAddDbAssertion,
+  disableAddDbAssertion,
+  handleSetAddDbAssertion,
+  isSpaced,
 }) {
   const updateLocatorName = (e) => {
     setLocatorName(e.target.value);
@@ -61,6 +66,10 @@ export default function ConfirmCancelFooter({
     setExactMatch((prev) => !prev);
   };
 
+  const classNameValue = isSpaced
+    ? "docked-pane-footer-confirm-cancel-spaced"
+    : "docked-pane-footer-confirm-cancel";
+
   return (
     <div>
       {typeof locatorName !== "undefined" &&
@@ -73,7 +82,7 @@ export default function ConfirmCancelFooter({
             />
           </div>
         )}
-      <div className="docked-pane-footer-confirm-cancel">
+      <div className={classNameValue}>
         {typeof isNegative !== "undefined" &&
           typeof setIsNegative !== "undefined" && (
             <div className="docked-pane-footer-assert-container">
@@ -171,6 +180,28 @@ export default function ConfirmCancelFooter({
               ></input>
               <label htmlFor="respassert-checkbox">
                 Add Response Assertions
+                <span
+                  className="info-tooltip-icon"
+                  title="Fires the API request and fetches response data for assertions"
+                >
+                  ⓘ
+                </span>
+              </label>
+            </div>
+          )}
+
+        {typeof addDbAssertion !== "undefined" &&
+          typeof handleSetAddDbAssertion !== "undefined" && (
+            <div className="docked-pane-footer-assert-container">
+              <input
+                id="respassert-checkbox"
+                type="checkbox"
+                checked={addDbAssertion}
+                onChange={handleSetAddDbAssertion}
+                disabled={!enableAddDbAssertion || disableAddDbAssertion}
+              ></input>
+              <label htmlFor="respassert-checkbox">
+                Add DB Assertions
                 <span
                   className="info-tooltip-icon"
                   title="Fires the API request and fetches response data for assertions"
