@@ -83,6 +83,26 @@
   color: var(--recorder-text-color) !important;
 }
 
+@media (max-width: 768px) {
+
+  .recorder-panel,
+  .recorder-panel *,
+  .drawer,
+  .drawer *,
+  #floating-cookie-list-dock,
+  #floating-cookie-list-dock *,
+  #floating-tab-list-dock,
+  #floating-tab-list-dock *,
+  #floating-cookie-delete-dock,
+  #floating-cookie-delete-dock *,
+  #floating-assert-dock-root,
+  #floating-assert-dock-root *,
+  #floating-assert-attribute-dock,
+  #floating-assert-attribute-dock * {
+    font-size: 12px;
+  }
+}
+
 #floating-assert-dock-root,
 #floating-cookie-list-dock,
 #floating-tab-list-dock,
@@ -446,6 +466,13 @@ button.disabled:focus {
   font-size: 14px !important;
   border-radius: 10px !important;
   overflow: hidden !important;
+}
+
+@media (max-width: 768px) {
+  #floating-assert-dock-root {
+    max-width: 99vw !important;
+    font-size: 12px !important;
+  }
 }
 
 .assert-dock-content {
@@ -1096,6 +1123,13 @@ button.disabled:focus {
   display: flex !important;
   flex-direction: column !important;
   box-sizing: border-box !important;
+}
+
+@media (max-width: 768px) {
+  #floating-assert-attribute-dock {
+    min-width: 320px !important;
+    width: 99vw !important;
+  }
 }
 
 .assert-attributes-container {

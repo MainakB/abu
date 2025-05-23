@@ -1,6 +1,7 @@
 export const ASSERTIONMODES = {
   SELECT: "SELECT",
   CLICK: "CLICK",
+  JSCLICK: "JSCLICK",
   HOVER: "HOVER",
   INPUT: "INPUT",
   AICHAT: "AICHAT",
@@ -211,6 +212,7 @@ export const ASSERTIONMODES = {
   GENERICVARMATCHNOTENDSWITH: "GENERICVARMATCHNOTENDSWITH",
   CLOSETAB: "CLOSETAB",
   NEWTAB: "NEWTAB",
+  FILEUPLOAD: "FILEUPLOAD",
 };
 
 export const FUNCTIONMAPPER = {
@@ -225,11 +227,16 @@ export const FUNCTIONMAPPER = {
     name: "newTab",
   },
   CLICK: { key: ASSERTIONMODES.CLICK, name: "click" },
+  JSCLICK: { key: ASSERTIONMODES.JSCLICK, name: "jsClick" },
   HOVER: { key: ASSERTIONMODES.HOVER, name: "mouseHover" },
   INPUT: { key: ASSERTIONMODES.INPUT, name: "input" },
   SELECT: {
     key: ASSERTIONMODES.SELECT,
     name: "dropdown",
+  },
+  FILEUPLOAD: {
+    key: ASSERTIONMODES.FILEUPLOAD,
+    name: "upload",
   },
   ASSERTCOOKIEVALUEEQUALS: {
     key: ASSERTIONMODES.ASSERTCOOKIEVALUEEQUALS,
@@ -418,7 +425,10 @@ export const FUNCTIONMAPPER = {
     key: ASSERTIONMODES.ASSERTABSENCE,
     name: "assertElementNotPresent",
   },
-  ADDCOOKIES: "addCookies",
+  ADDCOOKIES: {
+    key: ASSERTIONMODES.ADDCOOKIES,
+    name: "setCookie",
+  },
   DELETECOOKIES: {
     key: ASSERTIONMODES.DELETECOOKIES,
     name: "clearCookies",

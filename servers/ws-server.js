@@ -5,10 +5,14 @@ let clients = new Set();
 
 let currentMode = "record";
 let activeTabId = null;
+const args = process.argv.slice(2); // ['--port', '3111']
+const debugModeIndex = args.indexOf("--debugMode");
+const debugMode =
+  debugModeIndex !== -1 ? args[debugModeIndex + 1] === "true" : false;
 
 wss.on("connection", function connection(ws) {
   clients.add(ws);
-  console.log("🧩 Client connected");
+  if (debugMode) console.log("🧩 Client connected");
 
   ws.send(JSON.stringify({ type: "mode", mode: currentMode }));
   if (activeTabId) {
@@ -18,7 +22,7 @@ wss.on("connection", function connection(ws) {
   ws.on("message", function incoming(message) {
     try {
       const data = JSON.parse(message);
-      console.log("🧩 Received data: ", data);
+      if (debugMode) console.log("🧩 Received data: ", data);
 
       if (data.type === "mode") {
         currentMode = data.mode;
@@ -62,8 +66,9 @@ wss.on("connection", function connection(ws) {
 
   ws.on("close", () => {
     clients.delete(ws);
-    console.log("❌ Client disconnected");
+    if (debugMode) console.log("❌ Client disconnected");
   });
 });
 
-console.log("🟢 WebSocket server running on ws://localhost:8787");
+if (debugMode)
+  console.log("🟢 WebSocket server running on ws://localhost:8787");

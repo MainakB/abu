@@ -1,34 +1,216 @@
 import fs from "fs";
 import path from "path";
+import { program } from "commander";
+import inquirer from "inquirer";
 import { spawn, execSync } from "child_process";
 import { fileURLToPath } from "url";
 import { dirname } from "path";
 import { v4 as uuidv4 } from "uuid";
 
+import { RecorderConfig } from "../servers/RecorderConfig.js";
+
 let apiServer = null;
 let wsServer = null;
 
-export const startServers = () => {
-  apiServer = spawn("node", ["servers/api-server.js"], {
-    stdio: "inherit",
+function ensureExtension(fileName, requiredExt) {
+  if (!fileName) return "";
+  return fileName.endsWith(requiredExt)
+    ? fileName
+    : `${fileName}${requiredExt}`;
+}
+
+function ensureTagName(tagName) {
+  if (!tagName) return "";
+  return tagName.startsWith("@") ? tagName : `@${tagName}`;
+}
+
+async function getCliOptions() {
+  if (
+    !program._optionValues ||
+    Object.keys(program._optionValues).length === 0
+  ) {
+    program
+      .option(
+        "-b, --base <baseFolder>",
+        "Base folder (under which src/ exists)"
+      )
+      .option("-f, --feature <featureFile>", "Feature file name to output")
+      .option("-l, --locator <locatorFile>", "Locator file name to output")
+      .option("--featureName <featureName>", "Feature name to use")
+      .option("--scenario <scenarioName>", "Scenario name to use")
+      .option("--tag <tagName>", "Tag name to use")
+      .option("--debug");
+
+    program.parse(process.argv);
+  }
+
+  const options = program.opts();
+
+  const baseFolder = options.base || process.cwd();
+  const srcPath = path.join(baseFolder, "src");
+
+  if (!fs.existsSync(srcPath)) {
+    console.error(`src/ folder not found in ${baseFolder}`);
+    process.exit(1);
+  }
+
+  const srcSubfolders = fs
+    .readdirSync(srcPath, { withFileTypes: true })
+    .filter((f) => f.isDirectory())
+    .map((f) => f.name);
+
+  let selectedFolder = srcSubfolders[0];
+  if (srcSubfolders.length > 1) {
+    const folderPrompt = await inquirer.prompt([
+      {
+        type: "list",
+        name: "folder",
+        message: "Select a subfolder from src:",
+        choices: srcSubfolders,
+      },
+    ]);
+    selectedFolder = folderPrompt.folder;
+  }
+
+  const prompts = [];
+
+  if (!options.feature) {
+    prompts.push({
+      type: "input",
+      name: "feature",
+      message: "Enter feature file name (without .feature extension):",
+    });
+  }
+
+  if (!options.locator) {
+    prompts.push({
+      type: "input",
+      name: "locator",
+      message: "Enter locator file name (without .ts extension):",
+    });
+  }
+
+  if (!options.featureName) {
+    prompts.push({
+      type: "input",
+      name: "featureName",
+      message: "Enter feature name (optional):",
+    });
+  }
+
+  if (!options.scenario) {
+    prompts.push({
+      type: "input",
+      name: "scenario",
+      message: "Enter scenario name (optional):",
+    });
+  }
+
+  if (!options.tag) {
+    prompts.push({
+      type: "input",
+      name: "tag",
+      message: "Enter tag name (optional):",
+    });
+  }
+
+  const answers = await inquirer.prompt(prompts);
+
+  const result = {
+    selectedSrcFolder: path.join(srcPath, selectedFolder),
+    // selectedFolder,
+    featureFile: ensureExtension(
+      options.feature || answers.feature,
+      ".feature"
+    ),
+    locatorFile: ensureExtension(options.locator || answers.locator, ".ts"),
+    featureName: options.featureName || answers.featureName,
+    scenarioName: options.scenario || answers.scenario,
+    tagName: ensureTagName(options.tag || answers.tag),
+    basePath: baseFolder,
+    debug: options.debug || false, // To set to true use -- --debug flag in run command
+  };
+
+  return result;
+}
+
+const waitForServer = async (debugMode, timeoutMs = 15000) => {
+  const url = "http://localhost:3111/api/health";
+  const start = Date.now();
+  while (Date.now() - start < timeoutMs) {
+    try {
+      const res = await fetch(url);
+      if (res.ok) return;
+    } catch (err) {
+      if (debugMode) console.warn("⏳ Waiting for server to be ready...");
+      // wait and try again
+    }
+    await new Promise((r) => setTimeout(r, 200));
+  }
+  throw new Error(
+    `❌ Server at ${url} did not become ready within ${timeoutMs}ms`
+  );
+};
+
+export const startAndSaveCliConfig = async () => {
+  const cliConfigEntries = await getCliOptions();
+  const recorderConfig = new RecorderConfig(cliConfigEntries);
+
+  return recorderConfig.toJSON();
+  // const recordingsDir = path.join(process.cwd(), ".recording_metadata");
+  // // return path.join(process.cwd(), "recordings", FILE_NAME);
+  // const filePath = path.join(recordingsDir, ".recorder-config.json");
+  // const dir = path.dirname(filePath);
+  // if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+  // fs.writeFileSync(
+  //   filePath,
+  //   JSON.stringify(recorderConfig.toJSON(), null, 2),
+  //   "utf-8"
+  // );
+};
+
+export const initRecorderConfig = async (recorderConfig) => {
+  await waitForServer(recorderConfig.debug);
+  await fetch("http://localhost:3111/api/recorder/config", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(recorderConfig),
   });
-  wsServer = spawn("node", ["servers/ws-server.js"], {
+};
+
+export const startServers = (debugMode) => {
+  apiServer = spawn(
+    "node",
+    ["servers/api-server.js", "--debugMode", debugMode],
+    {
+      stdio: "inherit",
+    }
+  );
+  wsServer = spawn("node", ["servers/ws-server.js", "--debugMode", debugMode], {
     stdio: "inherit",
   });
 };
 
-const stopServers = () => {
-  console.log("🛑 Shutting down servers...");
+const stopServers = (debugMode) => {
+  if (debugMode) console.log("🛑 Shutting down servers...");
   apiServer.kill();
   wsServer.kill();
   process.exit(0);
 };
 
-export const ensureChromiumInstalled = (chromium) => {
+export const ensureChromiumInstalled = (chromium, debugMode) => {
   const executablePath = chromium.executablePath();
   if (!fs.existsSync(executablePath)) {
     console.log("🔧 Chromium not found. Installing...");
-    execSync("npx playwright install chromium", { stdio: "inherit" });
+    if (debugMode) {
+      execSync("npx playwright install chromium", { stdio: "inherit" });
+    } else {
+      try {
+        execSync("npx playwright install chromium", { stdio: "pipe" });
+      } catch (e) {
+        console.error("❌ Failed to install Chromium:", e.stderr.toString());
+      }
+    }
   } else {
     console.log("✅ Chromium is already installed");
   }
@@ -183,7 +365,8 @@ export const exposeRecorderControls = async (
   page,
   dirName,
   globalRecorderMode,
-  browser
+  browser,
+  debugMode
 ) => {
   await page.exposeBinding("__toggleRecording", async () => {
     await updateInitialRecorderState(page, globalRecorderMode, false);
@@ -210,7 +393,9 @@ export const exposeRecorderControls = async (
   );
 
   await page.exposeBinding("__stopRecording", async () => {
-    console.log("🛑 Stopping recording. Fetching actions from store...");
+    if (debugMode)
+      console.log("🛑 Stopping recording. Fetching actions from store...");
+
     const steps = await fetch("http://localhost:3111/record").then((res) =>
       res.json()
     );
@@ -220,29 +405,19 @@ export const exposeRecorderControls = async (
       ...steps.filter((a) => a.action !== "navigate"),
     ];
 
-    const recordingsDir = path.join(
-      process.cwd(),
-      "src",
-      "recordings",
-      "jsonMetadata"
-    );
+    const recordingsDir = path.join(process.cwd(), ".recording_metadata");
     const filePath = path.join(recordingsDir, `test-${Date.now()}.json`);
     const dir = path.dirname(filePath);
     if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
-    //   return filePath;
 
-    // const filePath = path.join(
-    //   dirName,
-    //   "recordings",
-    //   `test-${Date.now()}.json`
-    // );
     await fs.promises.writeFile(filePath, JSON.stringify(sorted, null, 2));
-    console.log(
-      `✅ ${steps.length} steps saved to ${filePath}. Run recorded test with the coomand "npx abc --customer=recordings --tags=@recordedTest --platform=dev"`
-    );
+    if (debugMode)
+      console.log(
+        `✅ ${steps.length} steps saved to ${filePath}. Run recorded test with the coomand "npx abc --customer=recordings --tags=@recordedTest --platform=dev"`
+      );
 
     await browser.close();
-    stopServers();
+    stopServers(debugMode);
     process.exit(0);
   });
 
@@ -254,161 +429,6 @@ export const exposeRecorderControls = async (
   await page.exposeBinding("__pageUrl", async () => page.url());
 
   await page.exposeBinding("__getPageTitle", async () => page.title());
-
-  // await page.exposeBinding("__executeAction", async (source, action) => {
-  //   const htmlTagTypeMapping = {
-  //     button: ["button", "div"],
-  //     link: ["a"],
-  //     hyperlink: ["a"],
-  //     input: ["input"],
-  //     textbox: ["input"],
-  //     header: ["h1", "h2", "h3", "h4", "span", "label", "header"],
-  //     radio: ["input"],
-  //     "radio-button": ["input"],
-  //     checkbox: ["input"],
-  //   };
-
-  //   function escapeForXPath(str) {
-  //     if (!str.includes(`"`)) {
-  //       return `"${str}"`; // Wrap in double quotes
-  //     }
-  //     if (!str.includes(`'`)) {
-  //       return `'${str}'`; // Wrap in single quotes
-  //     }
-
-  //     // Contains both ' and ", use concat() XPath function
-  //     return (
-  //       "concat(" +
-  //       str
-  //         .split(`"`)
-  //         .map((part, i, arr) =>
-  //           i < arr.length - 1 ? `"${part}", '"', ` : `"${part}"`
-  //         )
-  //         .join("") +
-  //       ")"
-  //     );
-  //   }
-
-  //   try {
-  //     console.log("Action is: ", action);
-
-  //     if (action.intent === "navigate") {
-  //       console.log("Navigate to : ", action.value);
-  //       await page.goto(action.value || "");
-  //       return { success: true };
-  //     }
-
-  //     const tagCandidates =
-  //       htmlTagTypeMapping[action.target.type?.toLowerCase()] || [];
-
-  //     // const safeName = escapeForXPath
-  //     const fallbackLocator = action.target.name
-  //       ? page.locator(
-  //           `xpath=.//*[text()=${escapeForXPath(
-  //             action.target.name
-  //           )}]|.//*[@aria-label=${escapeForXPath(
-  //             action.target.name
-  //           )}]|.//*[name=${escapeForXPath(
-  //             action.target.name
-  //           )}]|.//*[title=${escapeForXPath(
-  //             action.target.name
-  //           )}]|.//*[aria-describedBy=${escapeForXPath(
-  //             action.target.name
-  //           )}]|.//*[@placeholder=${escapeForXPath(action.target.name)}]`
-  //         )
-  //       : null;
-
-  //     // Try each tag type until we find a visible matching element
-  //     const tagAttempts = fallbackLocator
-  //       ? [null, ...tagCandidates]
-  //       : tagCandidates;
-
-  //     for (const tag of tagAttempts) {
-  //       let locator = null;
-  //       let nameMatchXPath = null;
-
-  //       if (tag === null && fallbackLocator) {
-  //         locator = fallbackLocator;
-  //       } else if (tag) {
-  //         locator = page.locator(tag);
-  //       }
-
-  //       if (!locator) continue;
-
-  //       const elements = await locator.all();
-  //       const visibleElements = [];
-
-  //       for (const el of elements) {
-  //         if (await el.isVisible()) visibleElements.push(el);
-  //       }
-
-  //       // Check if we need to do a refined search
-  //       if (
-  //         fallbackLocator &&
-  //         tag &&
-  //         visibleElements.length > 1 &&
-  //         (await fallbackLocator.count()) > 1
-  //       ) {
-  //         // Narrow down: build combined XPath with tag filter
-  //         const name = action.target.name;
-  //         if (!name) continue;
-  //         const safeName = escapeForXPath(name);
-  //         const xpath = `
-  //               .//${tag}[text()=${safeName}] |
-  //               .//${tag}[@aria-label=${safeName}] |
-  //               .//${tag}[@name=${safeName}] |
-  //               .//${tag}[@title=${safeName}] |
-  //               .//${tag}[@aria-describedBy=${safeName}] |
-  //               .//${tag}[@placeholder=${safeName}]
-  //             `.trim();
-
-  //         console.log(`🔍 Refined XPath: ${xpath}`);
-  //         locator = page.locator(`xpath=${xpath}`);
-  //         const refinedVisible = [];
-
-  //         for (const el of await locator.all()) {
-  //           if (await el.isVisible()) refinedVisible.push(el);
-  //         }
-
-  //         if (refinedVisible.length === 0) continue;
-
-  //         visibleElements.splice(0, visibleElements.length, ...refinedVisible);
-  //       }
-
-  //       if (visibleElements.length === 0) continue;
-
-  //       const targetIndex = action.target.position
-  //         ? action.target.position - 1
-  //         : 0;
-  //       const element = visibleElements[targetIndex] || visibleElements[0];
-  //       if (!element) continue;
-  //       console.log("Switch to intent: ", action);
-  //       // 🎯 Execute the action
-  //       switch (action.intent) {
-  //         case "click":
-  //           await element.click();
-  //           break;
-  //         case "input":
-  //           await element.type(action.value || "");
-  //           break;
-  //         case "hover":
-  //           await element.hover();
-  //         default:
-  //           console.warn("⚠️ Unknown action intent:", action.intent);
-  //           return { success: false, error: "Unknown action intent" };
-  //       }
-
-  //       console.log("✅ Action executed successfully:", action);
-  //       return { success: true };
-  //     }
-
-  //     console.warn("⚠️ No visible elements found after tag retries:", action);
-  //     return { success: false, error: "No visible elements found" };
-  //   } catch (error) {
-  //     console.error("❌ Error executing action:", action, error);
-  //     return { success: false, error: error.message };
-  //   }
-  // });
 
   await page.exposeBinding("__executeAction", async (source, action) => {
     const htmlTagTypeMapping = {
@@ -437,8 +457,6 @@ export const exposeRecorderControls = async (
     }
 
     try {
-      console.log("Action is: ", action);
-
       if (action.intent === "navigate") {
         await page.goto(action.value || "");
         return { success: true };

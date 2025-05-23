@@ -4,3 +4,5 @@ recordings/
 listProjectTree.js
 .DS_Store
 .env
+.recording_metadata
+.clineignore

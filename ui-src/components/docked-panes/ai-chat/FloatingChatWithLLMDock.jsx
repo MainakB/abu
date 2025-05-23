@@ -42,7 +42,6 @@ export default function FloatingChatWithLLMDock({ onCancel }) {
       const data = await res.json();
       const { steps } = data; // assuming response is the JSON array inside triple backticks
       setTotalStepsFromLLM(steps.length);
-      console.log("Response is: ", data);
       if (Array.isArray(steps) && steps.length > 0) {
         const firstStep = steps[0];
         const stepNumber = finalizedSteps.length + 1;
@@ -95,7 +94,8 @@ export default function FloatingChatWithLLMDock({ onCancel }) {
     triggerIconAnimation();
 
     // Execute the action using the __executeAction binding
-    window.__executeAction(step)
+    window
+      .__executeAction(step)
       .then((result) => {
         if (result.success) {
           console.log("✅ Action executed successfully:", step);

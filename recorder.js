@@ -1,9 +1,11 @@
+#!/usr/bin/env node
 import fs from "fs";
 import path from "path";
 import { chromium } from "playwright";
 import { fileURLToPath } from "url";
 import { dirname } from "path";
 import { v4 as uuidv4 } from "uuid";
+
 import {
   ensureChromiumInstalled,
   injectToLocalStorage,
@@ -14,17 +16,22 @@ import {
   exposeRecorderControls,
   exposeContextBindings,
   startServers,
+  startAndSaveCliConfig,
+  initRecorderConfig,
 } from "./utils/lib.js";
 import { ASSERTIONMODES } from "./ui-src/constants/index.js";
 
-startServers();
+const recorderConfig = await startAndSaveCliConfig();
+await startServers(recorderConfig.debug);
+await initRecorderConfig(recorderConfig);
+
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 const globalRecorderMode = {
   value: "record",
 };
 
-ensureChromiumInstalled(chromium);
+ensureChromiumInstalled(chromium, recorderConfig.debug);
 
 const browser = await chromium.launch({
   headless: false,
@@ -74,7 +81,13 @@ let firstUrlCaptured = false;
 
 // Handle first page
 const firstPage = await context.newPage();
-await exposeRecorderControls(firstPage, __dirname, globalRecorderMode, browser);
+await exposeRecorderControls(
+  firstPage,
+  __dirname,
+  globalRecorderMode,
+  browser,
+  recorderConfig.debug
+);
 const firstTabId = uuidv4();
 await injectScripts(
   firstPage,
@@ -87,9 +100,15 @@ await injectScripts(
 
 // Handle new tabs/windows
 context.on("page", async (newPage) => {
-  await exposeRecorderControls(newPage, __dirname, globalRecorderMode, browser);
+  await exposeRecorderControls(
+    newPage,
+    __dirname,
+    globalRecorderMode,
+    browser,
+    recorderConfig.debug
+  );
   const tabId = uuidv4();
-  console.log("🆕 New tab opened:", tabId);
+  if (recorderConfig.debug) console.log("🆕 New tab opened:", tabId);
   await injectScripts(
     newPage,
     false,
@@ -197,7 +216,9 @@ firstPage.on("framenavigated", async (frame) => {
       await updateInitialRecorderState(firstPage, globalRecorderMode, true);
       const title = await firstPage.title();
 
-      console.log("🌐 First page navigation recorded:", url);
+      if (recorderConfig.debug)
+        console.log("🌐 First page navigation recorded:", url);
+
       const tabId = uuidv4();
       await Promise.all([
         injectToLocalStorage(firstPage, true),

@@ -95,6 +95,36 @@ const getExportTypes = (key) => {
   }
 };
 
+function isPossiblyHidden(attributes = {}) {
+  const attrEntries = Object.entries(attributes);
+  if (attrEntries.length === 0) return false;
+
+  const attr = Object.entries(attributes).reduce((acc, [k, v]) => {
+    acc[k.toLowerCase()] = v;
+    return acc;
+  }, {});
+
+  const classString = attr["class"] || "";
+  const styleString = attr["style"] || "";
+
+  return (
+    "hidden" in attr ||
+    attr["aria-hidden"] === "true" ||
+    attr["type"] === "hidden" ||
+    attr["role"] === "presentation" ||
+    attr["role"] === "none" ||
+    attr["inert"] !== undefined ||
+    attr["aria-disabled"] === "true" ||
+    attr["disabled"] !== undefined ||
+    classString.includes("hidden") ||
+    classString.includes("sr-only") ||
+    classString.includes("invisible") ||
+    styleString.includes("display: none") ||
+    styleString.includes("visibility: hidden") ||
+    styleString.includes("opacity: 0")
+  );
+}
+
 const constructLocators = (arg, locatorIndex) => {
   const argSelectors = arg.selectors;
   const attr = arg.attributes;
@@ -181,6 +211,45 @@ const constructLocators = (arg, locatorIndex) => {
   return { result, newIdx, locKeyName };
 };
 
+const getOrdinalIndex = (arg) => {
+  if (
+    arg.elementIndex !== undefined &&
+    /^\d+$/.test(arg.elementIndex) &&
+    arg.elementIndex >= 0
+  ) {
+    let temp = arg.elementIndex + 1;
+    let elIndex = converter.toOrdinal(temp);
+    let ordinalPrefix = `${elIndex} `;
+    return ordinalPrefix;
+  }
+  return "";
+};
+
+const clickOnTypes = (tagNameValue) => {
+  if (!tagNameValue) return "";
+  const tagName = tagNameValue.toLowerCase();
+
+  if (tagName === "button" || tagName === "input") return ` ${tagName}`;
+  if (tagName === "a") return " link";
+  return "";
+};
+
+function stringifyWithoutQuotes(objArray) {
+  return `[${objArray
+    .map((obj) => {
+      const props = Object.entries(obj).map(([key, value]) => {
+        // Add quotes only around string **values**, not keys
+        const safeValue =
+          typeof value === "string" && !value.startsWith('"')
+            ? `"${value}"`
+            : value;
+        return `${key}:${safeValue}`;
+      });
+      return `{${props.join(", ")}}`;
+    })
+    .join(", ")}]`;
+}
+
 export const ACTION_HANDLERS = {
   [FUNCTIONMAPPER.CLOSETAB.key]: (arg, idx) => [
     {
@@ -219,9 +288,45 @@ export const ACTION_HANDLERS = {
 
   [FUNCTIONMAPPER.SWITCHFRAME.key]: (arg, idx) => {
     const loc = constructLocators(arg, idx);
+    const elIndex =
+      arg.iframeDepth !== undefined && /^\d+$/.test(arg.iframeDepth)
+        ? converter.toOrdinal(arg.iframeDepth)
+        : -1;
+
+    let nameValue = null;
+    let type = null;
+    if (
+      arg.selectors.iframes &&
+      Array.isArray(arg.selectors.iframes) &&
+      arg.selectors.iframes.length
+    ) {
+      if (arg.selectors.iframes[0].title) {
+        nameValue = arg.selectors.iframes[0].title;
+        type = "title";
+      } else if (arg.selectors.iframes[0].name) {
+        nameValue = arg.selectors.iframes[0].name;
+        type = "name";
+      } else if (arg.selectors.iframes[0].src) {
+        nameValue = arg.selectors.iframes[0].src;
+        type = "src";
+      } else if (arg.selectors.iframes[0].id) {
+        nameValue = arg.selectors.iframes[0].id;
+        type = "id";
+      } else if (arg.selectors.iframes[0].className) {
+        nameValue = arg.selectors.iframes[0].className;
+        type = "className";
+      }
+    }
+
     return [
       {
         step: `And ${FUNCTIONMAPPER.SWITCHFRAME.name}("${loc.locKeyName}")`,
+        aiStep:
+          elIndex !== -1 && type && nameValue
+            ? `And switch to iframe at depth ${elIndex} and ${type} ${nameValue}`
+            : type && nameValue
+            ? `And switch to iframe with ${type} equals to ${nameValue}`
+            : `And ${FUNCTIONMAPPER.SWITCHFRAME.name}("${loc.locKeyName}")`,
         locator: loc.result,
       },
       idx,
@@ -232,6 +337,7 @@ export const ACTION_HANDLERS = {
     return [
       {
         step: `And ${FUNCTIONMAPPER.SWITCHTODEFAULTFRAME.name}()`,
+        aiStep: `And switch to default frame`,
       },
       idx,
     ];
@@ -239,10 +345,17 @@ export const ACTION_HANDLERS = {
 
   [FUNCTIONMAPPER.CLICK.key]: (arg, idx) => {
     const loc = constructLocators(arg, idx);
+    const elIndex = getOrdinalIndex(arg);
+    let isJsClick = isPossiblyHidden(arg.attributes);
+    const fnName = FUNCTIONMAPPER[isJsClick ? "JSCLICK" : "CLICK"].name;
     return [
       {
-        step: `And ${FUNCTIONMAPPER.CLICK.name}({po:"${loc.locKeyName}"})`,
-        aiStep: arg.text ? `And click on "${arg.text}"` : null,
+        step: `And ${fnName}({po:"${loc.locKeyName}"})`,
+        aiStep: arg.text
+          ? `And ${fnName} on "${arg.text}"${clickOnTypes(arg.tagName)}`
+          : arg.tagName && elIndex !== ""
+          ? `And ${fnName} ${elIndex}${arg.tagName} tag`
+          : `And ${fnName}({po:"${loc.locKeyName}"})`,
         locator: loc.result,
       },
       loc.newIdx,
@@ -251,10 +364,17 @@ export const ACTION_HANDLERS = {
 
   [FUNCTIONMAPPER.HOVER.key]: (arg, idx) => {
     const loc = constructLocators(arg, idx);
+    const elIndex = getOrdinalIndex(arg);
     return [
       {
         step: `And ${FUNCTIONMAPPER.HOVER.name}({po:"${loc.locKeyName}"})`,
-        aiStep: arg.text ? `And mouse hover on "${arg.text}"` : null,
+        aiStep: arg.text
+          ? `And mouse hover on "${arg.text}"`
+          : elIndex !== ""
+          ? `And mouse hover on ${elIndex}element of type ${arg.tagName.toLowerCase()} and value "${
+              arg.text
+            }"`
+          : `And ${FUNCTIONMAPPER.HOVER.name}({po:"${loc.locKeyName}"})`,
         locator: loc.result,
       },
       loc.newIdx,
@@ -274,25 +394,36 @@ export const ACTION_HANDLERS = {
       arg.attributes?.["aria-label"] ||
       arg.attributes?.name ||
       null;
-    const inputLabelToUse = inputLabel ? `"${inputLabel}"` : null;
+    const inputLabelToUse = inputLabel ? `"${inputLabel}" ` : "";
 
-    // let elIndex = -1;
-    let ordinalPrefix = "";
-    if (arg.elementIndex !== undefined && arg.elementIndex >= 0) {
-      let temp = arg.elementIndex + 1;
-      let elIndex = converter.toOrdinal(temp);
-      ordinalPrefix = `${elIndex} `;
-    }
+    const ordinalPrefix = getOrdinalIndex(arg);
 
     return [
       {
         step: `And ${FUNCTIONMAPPER.INPUT.name}({po:"${loc.locKeyName}", txt:"${arg.value}"${doEnterAfterInput}})`,
         aiStep:
           arg.value && arg.keyPressed && arg.keyPressed === "Enter"
-            ? `And type "${arg.value}" to the ${ordinalPrefix}${inputLabelToUse} input field and hit enter`
+            ? `And type "${arg.value}" to the ${ordinalPrefix}${inputLabelToUse}input field and hit enter`
             : arg.value
-            ? `And type "${arg.value}" to the ${ordinalPrefix}${inputLabelToUse} input field`
+            ? `And type "${arg.value}" to the ${ordinalPrefix}${inputLabelToUse}input field`
             : null,
+        locator: loc.result,
+      },
+      loc.newIdx,
+    ];
+  },
+
+  [FUNCTIONMAPPER.FILEUPLOAD.key]: (arg, idx) => {
+    const loc = constructLocators(arg, idx);
+    const elIndex = getOrdinalIndex(arg);
+    const trailingString =
+      elIndex === "" && arg.text
+        ? ""
+        : ` to ${elIndex}${arg.text || arg.tagName.toLowerCase()}`;
+    return [
+      {
+        step: `And ${FUNCTIONMAPPER.FILEUPLOAD.name}({po:"${loc.locKeyName}", fpt:"${arg.fileNames[0]}"})`,
+        aiStep: `And upload file "${arg.fileNames[0]}"${trailingString}`,
         locator: loc.result,
       },
       loc.newIdx,
@@ -301,9 +432,13 @@ export const ACTION_HANDLERS = {
 
   [FUNCTIONMAPPER.SELECT.key]: (arg, idx) => {
     const loc = constructLocators(arg, idx);
+    const elIndex = getOrdinalIndex(arg);
     return [
       {
         step: `And ${FUNCTIONMAPPER.SELECT.name}({po:"${loc.locKeyName}", txt:"${arg.value}"})`,
+        aiStep: `And select option "${
+          arg.value
+        }" from ${elIndex}${arg.tagName.toLowerCase()} type dropdown`,
         locator: loc.result,
       },
       loc.newIdx,
@@ -313,9 +448,14 @@ export const ACTION_HANDLERS = {
   [FUNCTIONMAPPER.ASSERTTEXTEQUALS.key]: (arg, idx) => {
     const loc = constructLocators(arg, idx);
     const soft = arg.isSoftAssert ? ", isSoftAssert: true" : "";
+    const elIndex = getOrdinalIndex(arg);
     return [
       {
         step: `And ${FUNCTIONMAPPER.ASSERTTEXTEQUALS.name}({po:"${loc.locKeyName}", et:"${arg.expected}"${soft}})`,
+        aiStep:
+          "And " +
+          (arg.isSoftAssert ? "soft assert " : "assert ") +
+          `text value of ${elIndex}${arg.tagName} equals "${arg.expected}"`,
         locator: loc.result,
       },
       loc.newIdx,
@@ -324,9 +464,15 @@ export const ACTION_HANDLERS = {
   [FUNCTIONMAPPER.ASSERTTEXTNOTEQUALS.key]: (arg, idx) => {
     const loc = constructLocators(arg, idx);
     const soft = arg.isSoftAssert ? ", isSoftAssert: true" : "";
+    const elIndex = getOrdinalIndex(arg);
     return [
       {
         step: `And ${FUNCTIONMAPPER.ASSERTTEXTNOTEQUALS.name}({po:"${loc.locKeyName}", et:"${arg.expected}"${soft}})`,
+        aiStep:
+          "And " +
+          (arg.isSoftAssert ? "soft assert " : "assert ") +
+          `text value of ${elIndex}${arg.tagName} not equals "${arg.expected}"`,
+        locator: loc.result,
         locator: loc.result,
       },
       loc.newIdx,
@@ -335,9 +481,14 @@ export const ACTION_HANDLERS = {
   [FUNCTIONMAPPER.ASSERTTEXTCONTAINS.key]: (arg, idx) => {
     const loc = constructLocators(arg, idx);
     const soft = arg.isSoftAssert ? ", isSoftAssert: true" : "";
+    const elIndex = getOrdinalIndex(arg);
     return [
       {
         step: `And ${FUNCTIONMAPPER.ASSERTTEXTCONTAINS.name}({po:"${loc.locKeyName}", et:"${arg.expected}"${soft}})`,
+        aiStep:
+          "And " +
+          (arg.isSoftAssert ? "soft assert " : "assert ") +
+          `text value of ${elIndex}${arg.tagName} contains "${arg.expected}"`,
         locator: loc.result,
       },
       loc.newIdx,
@@ -346,9 +497,14 @@ export const ACTION_HANDLERS = {
   [FUNCTIONMAPPER.ASSERTTEXTNOTCONTAINS.key]: (arg, idx) => {
     const loc = constructLocators(arg, idx);
     const soft = arg.isSoftAssert ? ", isSoftAssert: true" : "";
+    const elIndex = getOrdinalIndex(arg);
     return [
       {
         step: `And ${FUNCTIONMAPPER.ASSERTTEXTNOTCONTAINS.name}({po:"${loc.locKeyName}", et:"${arg.expected}"${soft}})`,
+        aiStep:
+          "And " +
+          (arg.isSoftAssert ? "soft assert " : "assert ") +
+          `text value of ${elIndex}${arg.tagName} not contains "${arg.expected}"`,
         locator: loc.result,
       },
       loc.newIdx,
@@ -358,9 +514,14 @@ export const ACTION_HANDLERS = {
   [FUNCTIONMAPPER.ASSERTVALUEEQUALS.key]: (arg, idx) => {
     const loc = constructLocators(arg, idx);
     const soft = arg.isSoftAssert ? ", isSoftAssert: true" : "";
+    const elIndex = getOrdinalIndex(arg);
     return [
       {
         step: `And ${FUNCTIONMAPPER.ASSERTVALUEEQUALS.name}({po:"${loc.locKeyName}", atr:"value", ea:"${arg.expected}"${soft}})`,
+        aiStep:
+          "And " +
+          (arg.isSoftAssert ? "soft assert " : "assert ") +
+          `attribute "value" of ${elIndex}${arg.tagName} equals "${arg.expected}"`,
         locator: loc.result,
       },
       loc.newIdx,
@@ -369,9 +530,14 @@ export const ACTION_HANDLERS = {
   [FUNCTIONMAPPER.ASSERTVALUENOTEQUALS.key]: (arg, idx) => {
     const loc = constructLocators(arg, idx);
     const soft = arg.isSoftAssert ? ", isSoftAssert: true" : "";
+    const elIndex = getOrdinalIndex(arg);
     return [
       {
         step: `And ${FUNCTIONMAPPER.ASSERTVALUENOTEQUALS.name}({po:"${loc.locKeyName}", atr:"value", ea:"${arg.expected}"${soft}})`,
+        aiStep:
+          "And " +
+          (arg.isSoftAssert ? "soft assert " : "assert ") +
+          `attribute "value" of ${elIndex}${arg.tagName} not equals "${arg.expected}"`,
         locator: loc.result,
       },
       loc.newIdx,
@@ -380,9 +546,14 @@ export const ACTION_HANDLERS = {
   [FUNCTIONMAPPER.ASSERTVALUECONTAINS.key]: (arg, idx) => {
     const loc = constructLocators(arg, idx);
     const soft = arg.isSoftAssert ? ", isSoftAssert: true" : "";
+    const elIndex = getOrdinalIndex(arg);
     return [
       {
         step: `And ${FUNCTIONMAPPER.ASSERTVALUECONTAINS.name}({po:"${loc.locKeyName}", atr:"value", ea:"${arg.expected}"${soft}})`,
+        aiStep:
+          "And " +
+          (arg.isSoftAssert ? "soft assert " : "assert ") +
+          `attribute "value" of ${elIndex}${arg.tagName} contains "${arg.expected}"`,
         locator: loc.result,
       },
       loc.newIdx,
@@ -391,9 +562,14 @@ export const ACTION_HANDLERS = {
   [FUNCTIONMAPPER.ASSERTVALUENOTCONTAINS.key]: (arg, idx) => {
     const loc = constructLocators(arg, idx);
     const soft = arg.isSoftAssert ? ", isSoftAssert: true" : "";
+    const elIndex = getOrdinalIndex(arg);
     return [
       {
         step: `And ${FUNCTIONMAPPER.ASSERTVALUENOTCONTAINS.name}({po:"${loc.locKeyName}", atr:"value", ea:"${arg.expected}"${soft}})`,
+        aiStep:
+          "And " +
+          (arg.isSoftAssert ? "soft assert " : "assert ") +
+          `attribute "value" of ${elIndex}${arg.tagName} not contains "${arg.expected}"`,
         locator: loc.result,
       },
       loc.newIdx,
@@ -405,6 +581,10 @@ export const ACTION_HANDLERS = {
     return [
       {
         step: `And ${FUNCTIONMAPPER.ASSERTTEXTINPAGESOURCEEQUALS.name}({et:"${arg.expected}"${soft}})`,
+        aiStep:
+          "And " +
+          (arg.isSoftAssert ? "soft assert " : "assert ") +
+          `page source has text "${arg.expected}"`,
       },
       idx,
     ];
@@ -414,6 +594,10 @@ export const ACTION_HANDLERS = {
     return [
       {
         step: `And ${FUNCTIONMAPPER.ASSERTTEXTINPAGESOURCENOTEQUALS.name}({et:"${arg.expected}"${soft}})`,
+        aiStep:
+          "And " +
+          (arg.isSoftAssert ? "soft assert " : "assert ") +
+          `page source does not have text "${arg.expected}"`,
       },
       idx,
     ];
@@ -423,6 +607,10 @@ export const ACTION_HANDLERS = {
     return [
       {
         step: `And ${FUNCTIONMAPPER.ASSERTTEXTINPAGESOURCECONTAINS.name}({et:"${arg.expected}"${soft}})`,
+        aiStep:
+          "And " +
+          (arg.isSoftAssert ? "soft assert " : "assert ") +
+          `page source contains partial text "${arg.expected}"`,
       },
       idx,
     ];
@@ -432,6 +620,10 @@ export const ACTION_HANDLERS = {
     return [
       {
         step: `And ${FUNCTIONMAPPER.ASSERTTEXTINPAGESOURCENOTCONTAINS.name}({et:"${arg.expected}"${soft}})`,
+        aiStep:
+          "And " +
+          (arg.isSoftAssert ? "soft assert " : "assert ") +
+          `page source does not contain partial text "${arg.expected}"`,
       },
       idx,
     ];
@@ -440,9 +632,17 @@ export const ACTION_HANDLERS = {
   [FUNCTIONMAPPER.ASSERTVISIBILITY.key]: (arg, idx) => {
     const loc = constructLocators(arg, idx);
     const soft = arg.isSoftAssert ? ", isSoftAssert: true" : "";
+    const elIndex = getOrdinalIndex(arg);
     return [
       {
         step: `And ${FUNCTIONMAPPER.ASSERTVISIBILITY.name}({po:"${loc.locKeyName}"${soft}})`,
+        aiStep:
+          "And " +
+            (arg.isSoftAssert ? "soft assert " : "assert ") +
+            `${elIndex}element of type ${arg.tagName}` +
+            arg.text && arg.text !== ""
+            ? ` and text ${arg.text}`
+            : "" + " is visible",
         locator: loc.result,
       },
       loc.newIdx,
@@ -452,9 +652,17 @@ export const ACTION_HANDLERS = {
   [FUNCTIONMAPPER.ASSERTINVISIBILITY.key]: (arg, idx) => {
     const loc = constructLocators(arg, idx);
     const soft = arg.isSoftAssert ? ", isSoftAssert: true" : "";
+    const elIndex = getOrdinalIndex(arg);
     return [
       {
         step: `And ${FUNCTIONMAPPER.ASSERTINVISIBILITY.name}({po:"${loc.locKeyName}"${soft}})`,
+        aiStep:
+          "And " +
+            (arg.isSoftAssert ? "soft assert " : "assert ") +
+            `${elIndex}element of type ${arg.tagName}` +
+            arg.text && arg.text !== ""
+            ? ` and text ${arg.text}`
+            : "" + " is not visible",
         locator: loc.result,
       },
       loc.newIdx,
@@ -464,9 +672,17 @@ export const ACTION_HANDLERS = {
   [FUNCTIONMAPPER.ASSERTENABLED.key]: (arg, idx) => {
     const loc = constructLocators(arg, idx);
     const soft = arg.isSoftAssert ? ", isSoftAssert: true" : "";
+    const elIndex = getOrdinalIndex(arg);
     return [
       {
         step: `And ${FUNCTIONMAPPER.ASSERTENABLED.name}({po:"${loc.locKeyName}"${soft}})`,
+        aiStep:
+          "And " +
+            (arg.isSoftAssert ? "soft assert " : "assert ") +
+            `${elIndex}element of type ${arg.tagName}` +
+            arg.text && arg.text !== ""
+            ? ` and text ${arg.text}`
+            : "" + " is enabled",
         locator: loc.result,
       },
       loc.newIdx,
@@ -476,9 +692,17 @@ export const ACTION_HANDLERS = {
   [FUNCTIONMAPPER.ASSERTDISABLED.key]: (arg, idx) => {
     const loc = constructLocators(arg, idx);
     const soft = arg.isSoftAssert ? ", isSoftAssert: true" : "";
+    const elIndex = getOrdinalIndex(arg);
     return [
       {
         step: `And ${FUNCTIONMAPPER.ASSERTDISABLED.name}({po:"${loc.locKeyName}"${soft}})`,
+        aiStep:
+          "And " +
+            (arg.isSoftAssert ? "soft assert " : "assert ") +
+            `${elIndex}element of type ${arg.tagName}` +
+            arg.text && arg.text !== ""
+            ? ` and text ${arg.text}`
+            : "" + " is disabled",
         locator: loc.result,
       },
       loc.newIdx,
@@ -488,9 +712,18 @@ export const ACTION_HANDLERS = {
   [FUNCTIONMAPPER.ASSERTATTRIBUTEVALUEEQUALS.key]: (arg, idx) => {
     const loc = constructLocators(arg, idx);
     const soft = arg.isSoftAssert ? ", isSoftAssert: true" : "";
+    const elIndex = getOrdinalIndex(arg);
     return [
       {
         step: `And ${FUNCTIONMAPPER.ASSERTATTRIBUTEVALUEEQUALS.name}({po:"${loc.locKeyName}", atr: "${arg.attributeAssertPropName}", ea: "${arg.expected}"${soft}})`,
+        aiStep:
+          "And " +
+            (arg.isSoftAssert ? "soft assert " : "assert ") +
+            `${elIndex}element of type ${arg.tagName}` +
+            arg.text && arg.text !== ""
+            ? ` and text ${arg.text}`
+            : "" +
+              ` has attribute "${arg.attributeAssertPropName}" with value "${arg.expected}"`,
         locator: loc.result,
       },
       loc.newIdx,
@@ -499,9 +732,18 @@ export const ACTION_HANDLERS = {
   [FUNCTIONMAPPER.ASSERTATTRIBUTEVALUENOTEQUALS.key]: (arg, idx) => {
     const loc = constructLocators(arg, idx);
     const soft = arg.isSoftAssert ? ", isSoftAssert: true" : "";
+    const elIndex = getOrdinalIndex(arg);
     return [
       {
         step: `And ${FUNCTIONMAPPER.ASSERTATTRIBUTEVALUENOTEQUALS.name}({po:"${loc.locKeyName}, atr: "${arg.attributeAssertPropName}", ea: "${arg.expected}"${soft}})`,
+        aiStep:
+          "And " +
+            (arg.isSoftAssert ? "soft assert " : "assert ") +
+            `${elIndex}element of type ${arg.tagName}` +
+            arg.text && arg.text !== ""
+            ? ` and text ${arg.text}`
+            : "" +
+              ` does not have attribute "${arg.attributeAssertPropName}" with value "${arg.expected}"`,
         locator: loc.result,
       },
       loc.newIdx,
@@ -510,9 +752,18 @@ export const ACTION_HANDLERS = {
   [FUNCTIONMAPPER.ASSERTATTRIBUTEVALUECONTAINS.key]: (arg, idx) => {
     const loc = constructLocators(arg, idx);
     const soft = arg.isSoftAssert ? ", isSoftAssert: true" : "";
+    const elIndex = getOrdinalIndex(arg);
     return [
       {
         step: `And ${FUNCTIONMAPPER.ASSERTATTRIBUTEVALUECONTAINS.name}({po:"${loc.locKeyName}, atr: "${arg.attributeAssertPropName}", ea: "${arg.expected}"${soft}})`,
+        aiStep:
+          "And " +
+            (arg.isSoftAssert ? "soft assert " : "assert ") +
+            `${elIndex}element of type ${arg.tagName}` +
+            arg.text && arg.text !== ""
+            ? ` and text ${arg.text}`
+            : "" +
+              ` has attribute "${arg.attributeAssertPropName}" containing value "${arg.expected}"`,
         locator: loc.result,
       },
       loc.newIdx,
@@ -522,9 +773,18 @@ export const ACTION_HANDLERS = {
   [FUNCTIONMAPPER.ASSERTATTRIBUTEVALUENOTCONTAINS.key]: (arg, idx) => {
     const loc = constructLocators(arg, idx);
     const soft = arg.isSoftAssert ? ", isSoftAssert: true" : "";
+    const elIndex = getOrdinalIndex(arg);
     return [
       {
         step: `And ${FUNCTIONMAPPER.ASSERTATTRIBUTEVALUENOTCONTAINS.name}({po:"${loc.locKeyName}, atr: "${arg.attributeAssertPropName}", ea: "${arg.expected}"${soft}})`,
+        aiStep:
+          "And " +
+            (arg.isSoftAssert ? "soft assert " : "assert ") +
+            `${elIndex}element of type ${arg.tagName}` +
+            arg.text && arg.text !== ""
+            ? ` and text ${arg.text}`
+            : "" +
+              ` does not have attribute "${arg.attributeAssertPropName}" containing value "${arg.expected}"`,
         locator: loc.result,
       },
       loc.newIdx,
@@ -534,9 +794,16 @@ export const ACTION_HANDLERS = {
   [FUNCTIONMAPPER.DROPDOWNSELECTED.key]: (arg, idx) => {
     const loc = constructLocators(arg, idx);
     const soft = arg.isSoftAssert ? ", isSoftAssert: true" : "";
+    const elIndex = getOrdinalIndex(arg);
     return [
       {
         step: `And ${FUNCTIONMAPPER.DROPDOWNSELECTED.name}({po:"${loc.locKeyName}", et: "${arg.expected}"${soft}})`,
+        aiStep:
+          "And " +
+          (arg.isSoftAssert ? "soft assert " : "assert ") +
+          `${elIndex}${arg.tagName.toLowerCase()} dropdown has option "${
+            arg.value
+          }" selected`,
         locator: loc.result,
       },
       loc.newIdx,
@@ -545,9 +812,16 @@ export const ACTION_HANDLERS = {
   [FUNCTIONMAPPER.DROPDOWNNOTSELECTED.key]: (arg, idx) => {
     const loc = constructLocators(arg, idx);
     const soft = arg.isSoftAssert ? ", isSoftAssert: true" : "";
+    const elIndex = getOrdinalIndex(arg);
     return [
       {
         step: `And ${FUNCTIONMAPPER.DROPDOWNNOTSELECTED.name}({po:"${loc.locKeyName}", et: "${arg.expected}"${soft}})`,
+        aiStep:
+          "And " +
+          (arg.isSoftAssert ? "soft assert " : "assert ") +
+          `${elIndex}${arg.tagName.toLowerCase()} dropdown does not have option "${
+            arg.value
+          }" selected`,
         locator: loc.result,
       },
       loc.newIdx,
@@ -557,9 +831,16 @@ export const ACTION_HANDLERS = {
   [FUNCTIONMAPPER.DROPDOWNCOUNTIS.key]: (arg, idx) => {
     const loc = constructLocators(arg, idx);
     const soft = arg.isSoftAssert ? ", isSoftAssert: true" : "";
+    const elIndex = getOrdinalIndex(arg);
     return [
       {
         step: `And ${FUNCTIONMAPPER.DROPDOWNCOUNTIS.name}({po:"${loc.locKeyName}", ect: ${arg.expected}${soft}})`,
+        aiStep:
+          "And " +
+          (arg.isSoftAssert ? "soft assert " : "assert ") +
+          `${elIndex}${arg.tagName.toLowerCase()} dropdown has options count of "${
+            arg.expected
+          }"`,
         locator: loc.result,
       },
       loc.newIdx,
@@ -568,9 +849,16 @@ export const ACTION_HANDLERS = {
   [FUNCTIONMAPPER.DROPDOWNCOUNTISNOT.key]: (arg, idx) => {
     const loc = constructLocators(arg, idx);
     const soft = arg.isSoftAssert ? ", isSoftAssert: true" : "";
+    const elIndex = getOrdinalIndex(arg);
     return [
       {
         step: `And ${FUNCTIONMAPPER.DROPDOWNCOUNTISNOT.name}({po:"${loc.locKeyName}", ect: ${arg.expected}${soft}})`,
+        aiStep:
+          "And " +
+          (arg.isSoftAssert ? "soft assert " : "assert ") +
+          `${elIndex}${arg.tagName.toLowerCase()} dropdown does not have options count of "${
+            arg.expected
+          }"`,
         locator: loc.result,
       },
       loc.newIdx,
@@ -579,9 +867,16 @@ export const ACTION_HANDLERS = {
   [FUNCTIONMAPPER.DROPDOWNVALUESARE.key]: (arg, idx) => {
     const loc = constructLocators(arg, idx);
     const soft = arg.isSoftAssert ? ", isSoftAssert: true" : "";
+    const elIndex = getOrdinalIndex(arg);
     return [
       {
         step: `And ${FUNCTIONMAPPER.DROPDOWNVALUESARE.name}({po:"${loc.locKeyName}", et: "${arg.expected}"${soft}})`,
+        aiStep:
+          "And " +
+          (arg.isSoftAssert ? "soft assert " : "assert ") +
+          `${elIndex}${arg.tagName.toLowerCase()} dropdown has options values "${
+            arg.expected
+          }"`,
         locator: loc.result,
       },
       loc.newIdx,
@@ -590,9 +885,16 @@ export const ACTION_HANDLERS = {
   [FUNCTIONMAPPER.DROPDOWNDUPLICATECOUNT.key]: (arg, idx) => {
     const loc = constructLocators(arg, idx);
     const soft = arg.isSoftAssert ? ", isSoftAssert: true" : "";
+    const elIndex = getOrdinalIndex(arg);
     return [
       {
         step: `And ${FUNCTIONMAPPER.DROPDOWNDUPLICATECOUNT.name}({po:"${loc.locKeyName}", ect: ${arg.expected}${soft}})`,
+        aiStep:
+          "And " +
+          (arg.isSoftAssert ? "soft assert " : "assert ") +
+          `${elIndex}${arg.tagName.toLowerCase()} dropdown has duplicate options count of "${
+            arg.expected
+          }"`,
         locator: loc.result,
       },
       loc.newIdx,
@@ -602,9 +904,20 @@ export const ACTION_HANDLERS = {
   [FUNCTIONMAPPER.DROPDOWNINALPHABETICORDER.key]: (arg, idx) => {
     const loc = constructLocators(arg, idx);
     const soft = arg.isSoftAssert ? ", isSoftAssert: true" : "";
+    const elIndex = getOrdinalIndex(arg);
     return [
       {
         step: `And ${FUNCTIONMAPPER.DROPDOWNINALPHABETICORDER.name}({po:"${loc.locKeyName}", sortOrder: "${arg.expected}"${soft}})`,
+        aiStep:
+          "And " +
+          (arg.isSoftAssert ? "soft assert " : "assert ") +
+          `${elIndex}${arg.tagName.toLowerCase()} dropdown options are sorted in "${
+            arg.expected === "asc"
+              ? "ascending"
+              : arg.expected === "desc"
+              ? "descending"
+              : arg.expected
+          }" order`,
         locator: loc.result,
       },
       loc.newIdx,
@@ -614,9 +927,16 @@ export const ACTION_HANDLERS = {
   [FUNCTIONMAPPER.DROPDOWNCONTAINS.key]: (arg, idx) => {
     const loc = constructLocators(arg, idx);
     const soft = arg.isSoftAssert ? ", isSoftAssert: true" : "";
+    const elIndex = getOrdinalIndex(arg);
     return [
       {
         step: `And ${FUNCTIONMAPPER.DROPDOWNCONTAINS.name}({po:"${loc.locKeyName}", txt: "${arg.expected}"${soft}})`,
+        aiStep:
+          "And " +
+          (arg.isSoftAssert ? "soft assert " : "assert ") +
+          `${elIndex}${arg.tagName.toLowerCase()} dropdown contains option "${
+            arg.expected
+          }"`,
         locator: loc.result,
       },
       loc.newIdx,
@@ -626,9 +946,16 @@ export const ACTION_HANDLERS = {
   [FUNCTIONMAPPER.DROPDOWNNOTCONTAINS.key]: (arg, idx) => {
     const loc = constructLocators(arg, idx);
     const soft = arg.isSoftAssert ? ", isSoftAssert: true" : "";
+    const elIndex = getOrdinalIndex(arg);
     return [
       {
         step: `And ${FUNCTIONMAPPER.DROPDOWNNOTCONTAINS.name}({po:"${loc.locKeyName}", txt: "${arg.expected}"${soft}})`,
+        aiStep:
+          "And " +
+          (arg.isSoftAssert ? "soft assert " : "assert ") +
+          `${elIndex}${arg.tagName.toLowerCase()} dropdown does not contain option "${
+            arg.expected
+          }"`,
         locator: loc.result,
       },
       loc.newIdx,
@@ -637,12 +964,73 @@ export const ACTION_HANDLERS = {
   [FUNCTIONMAPPER.DROPDOWNOPTIONSBYPARTIALTEXT.key]: (arg, idx) => {
     const loc = constructLocators(arg, idx);
     const soft = arg.isSoftAssert ? ", isSoftAssert: true" : "";
+    const elIndex = getOrdinalIndex(arg);
     return [
       {
         step: `And ${FUNCTIONMAPPER.DROPDOWNOPTIONSBYPARTIALTEXT.name}({po:"${loc.locKeyName}", txt: "${arg.expected}"${soft}})`,
+        aiStep:
+          "And " +
+          (arg.isSoftAssert ? "soft assert " : "assert ") +
+          `${elIndex}${arg.tagName.toLowerCase()} dropdown contains option with partial text "${
+            arg.expected
+          }"`,
         locator: loc.result,
       },
       loc.newIdx,
+    ];
+  },
+
+  //
+  [FUNCTIONMAPPER.ASSERTCURRENTURLEQUALS.key]: (arg, idx) => {
+    const soft = arg.isSoftAssert ? ", isSoftAssert: true" : "";
+    return [
+      {
+        step: `And ${FUNCTIONMAPPER.ASSERTCURRENTURLEQUALS.name}({et:"${arg.expected}"${soft}})`,
+        aiStep:
+          "And " +
+          (arg.isSoftAssert ? "soft assert " : "assert ") +
+          `current url equals "${arg.expected}"`,
+      },
+      idx,
+    ];
+  },
+  [FUNCTIONMAPPER.ASSERTCURRENTURLNOTEQUALS.key]: (arg, idx) => {
+    const soft = arg.isSoftAssert ? ", isSoftAssert: true" : "";
+    return [
+      {
+        step: `And ${FUNCTIONMAPPER.ASSERTCURRENTURLNOTEQUALS.name}({et:"${arg.expected}"${soft}})`,
+        aiStep:
+          "And " +
+          (arg.isSoftAssert ? "soft assert " : "assert ") +
+          `current url not equals "${arg.expected}"`,
+      },
+      idx,
+    ];
+  },
+  [FUNCTIONMAPPER.ASSERTCURRENTURLCONTAINS.key]: (arg, idx) => {
+    const soft = arg.isSoftAssert ? ", isSoftAssert: true" : "";
+    return [
+      {
+        step: `And ${FUNCTIONMAPPER.ASSERTCURRENTURLCONTAINS.name}({et:"${arg.expected}"${soft}})`,
+        aiStep:
+          "And " +
+          (arg.isSoftAssert ? "soft assert " : "assert ") +
+          `current url contains "${arg.expected}"`,
+      },
+      idx,
+    ];
+  },
+  [FUNCTIONMAPPER.ASSERTCURRENTURLNOTCONTAINS.key]: (arg, idx) => {
+    const soft = arg.isSoftAssert ? ", isSoftAssert: true" : "";
+    return [
+      {
+        step: `And ${FUNCTIONMAPPER.ASSERTCURRENTURLNOTCONTAINS.name}({et:"${arg.expected}"${soft}})`,
+        aiStep:
+          "And " +
+          (arg.isSoftAssert ? "soft assert " : "assert ") +
+          `current url not contains "${arg.expected}"`,
+      },
+      idx,
     ];
   },
 
@@ -691,93 +1079,19 @@ export const ACTION_HANDLERS = {
     ];
   },
 
-  //
-  [FUNCTIONMAPPER.ASSERTCURRENTURLEQUALS.key]: (arg, idx) => {
-    const soft = arg.isSoftAssert ? ", isSoftAssert: true" : "";
-    return [
-      {
-        step: `And ${FUNCTIONMAPPER.ASSERTCURRENTURLEQUALS.name}({et:"${arg.expected}"${soft}})`,
-      },
-      idx,
-    ];
-  },
-  [FUNCTIONMAPPER.ASSERTCURRENTURLNOTEQUALS.key]: (arg, idx) => {
-    const soft = arg.isSoftAssert ? ", isSoftAssert: true" : "";
-    return [
-      {
-        step: `And ${FUNCTIONMAPPER.ASSERTCURRENTURLNOTEQUALS.name}({et:"${arg.expected}"${soft}})`,
-      },
-      idx,
-    ];
-  },
-  [FUNCTIONMAPPER.ASSERTCURRENTURLCONTAINS.key]: (arg, idx) => {
-    const soft = arg.isSoftAssert ? ", isSoftAssert: true" : "";
-    return [
-      {
-        step: `And ${FUNCTIONMAPPER.ASSERTCURRENTURLCONTAINS.name}({et:"${arg.expected}"${soft}})`,
-      },
-      idx,
-    ];
-  },
-  [FUNCTIONMAPPER.ASSERTCURRENTURLNOTCONTAINS.key]: (arg, idx) => {
-    const soft = arg.isSoftAssert ? ", isSoftAssert: true" : "";
-    return [
-      {
-        step: `And ${FUNCTIONMAPPER.ASSERTCURRENTURLNOTCONTAINS.name}({et:"${arg.expected}"${soft}})`,
-      },
-      idx,
-    ];
-  },
   [FUNCTIONMAPPER.GETATTRIBUTE.key]: (arg, idx) => {
     const loc = constructLocators(arg, idx);
+    const elIndex = getOrdinalIndex(arg);
+    const textVerbiage =
+      arg.text && arg.text !== "" ? `with text "${arg.text}"` : "";
     return [
       {
         step: `* def ${arg.varName} = ${FUNCTIONMAPPER.GETATTRIBUTE.name}({po:"${loc.locKeyName}", atr:"${arg.expected}"})`,
-        locator: loc.result,
-      },
-      loc.newIdx,
-    ];
-  },
-
-  [FUNCTIONMAPPER.MATCHATTRIBUTEEQUALS.key]: (arg, idx) => {
-    const loc = constructLocators(arg, idx);
-    const matchType = arg.isSoftAssert ? "sMatch" : "match";
-    return [
-      {
-        step: `And ${matchType} ${FUNCTIONMAPPER.MATCHATTRIBUTEEQUALS.name}({po:"${loc.locKeyName}", atr:"${arg.attributeAssertPropName}"}) == "${arg.expectedAttribute}"`,
-        locator: loc.result,
-      },
-      loc.newIdx,
-    ];
-  },
-  [FUNCTIONMAPPER.MATCHATTRIBUTENOTEQUALS.key]: (arg, idx) => {
-    const loc = constructLocators(arg, idx);
-    const matchType = arg.isSoftAssert ? "sMatch" : "match";
-    return [
-      {
-        step: `And ${matchType} ${FUNCTIONMAPPER.MATCHATTRIBUTENOTEQUALS.name}({po:"${loc.locKeyName}", atr:"${arg.attributeAssertPropName}"}) != "${arg.expectedAttribute}"`,
-        locator: loc.result,
-      },
-      loc.newIdx,
-    ];
-  },
-  [FUNCTIONMAPPER.MATCHATTRIBUTECONTAINS.key]: (arg, idx) => {
-    const loc = constructLocators(arg, idx);
-    const matchType = arg.isSoftAssert ? "sMatch" : "match";
-    return [
-      {
-        step: `And ${matchType} ${FUNCTIONMAPPER.MATCHATTRIBUTECONTAINS.name}({po:"${loc.locKeyName}", atr:"${arg.attributeAssertPropName}"}) contains "${arg.expectedAttribute}"`,
-        locator: loc.result,
-      },
-      loc.newIdx,
-    ];
-  },
-  [FUNCTIONMAPPER.MATCHATTRIBUTENOTCONTAINS.key]: (arg, idx) => {
-    const loc = constructLocators(arg, idx);
-    const matchType = arg.isSoftAssert ? "sMatch" : "match";
-    return [
-      {
-        step: `And ${matchType} ${FUNCTIONMAPPER.MATCHATTRIBUTENOTCONTAINS.name}({po:"${loc.locKeyName}", atr:"${arg.attributeAssertPropName}"}) not contains "${arg.expectedAttribute}"`,
+        aiStep: `And get attribute "${
+          arg.expected
+        }" of ${elIndex}${arg.tagName.toLowerCase()}${textVerbiage} and assign to "${
+          arg.varName
+        }" for later use`,
         locator: loc.result,
       },
       loc.newIdx,
@@ -786,9 +1100,17 @@ export const ACTION_HANDLERS = {
 
   [FUNCTIONMAPPER.ISATTRIBUTEEQUALS.key]: (arg, idx) => {
     const loc = constructLocators(arg, idx);
+    const elIndex = getOrdinalIndex(arg);
+    const textVerbiage =
+      arg.text && arg.text !== "" ? `with text "${arg.text}"` : "";
     return [
       {
         step: `* def ${arg.varName} = ${FUNCTIONMAPPER.ISATTRIBUTEEQUALS.name}({po:"${loc.locKeyName}", atr:"${arg.expected}", ea: "${arg.expectedAttribute}"})`,
+        aiStep: `And check if attribute "${
+          arg.expected
+        }" of ${elIndex}${arg.tagName.toLowerCase()}${textVerbiage} equals "${
+          arg.expectedAttribute
+        }" and assign to "${arg.varName}" for later use`,
         locator: loc.result,
       },
       loc.newIdx,
@@ -796,9 +1118,17 @@ export const ACTION_HANDLERS = {
   },
   [FUNCTIONMAPPER.ISATTRIBUTENOTEQUALS.key]: (arg, idx) => {
     const loc = constructLocators(arg, idx);
+    const elIndex = getOrdinalIndex(arg);
+    const textVerbiage =
+      arg.text && arg.text !== "" ? `with text "${arg.text}"` : "";
     return [
       {
         step: `* def ${arg.varName} = ${FUNCTIONMAPPER.ISATTRIBUTENOTEQUALS.name}({po:"${loc.locKeyName}", atr:"${arg.expected}", ea: "${arg.expectedAttribute}"})`,
+        aiStep: `And check if attribute "${
+          arg.expected
+        }" of ${elIndex}${arg.tagName.toLowerCase()}${textVerbiage} not equals "${
+          arg.expectedAttribute
+        }" and assign to "${arg.varName}" for later use`,
         locator: loc.result,
       },
       loc.newIdx,
@@ -806,9 +1136,17 @@ export const ACTION_HANDLERS = {
   },
   [FUNCTIONMAPPER.ISATTRIBUTECONTAINS.key]: (arg, idx) => {
     const loc = constructLocators(arg, idx);
+    const elIndex = getOrdinalIndex(arg);
+    const textVerbiage =
+      arg.text && arg.text !== "" ? `with text "${arg.text}"` : "";
     return [
       {
         step: `* def ${arg.varName} = ${FUNCTIONMAPPER.ISATTRIBUTECONTAINS.name}({po:"${loc.locKeyName}", atr:"${arg.expected}", ea: "${arg.expectedAttribute}"})`,
+        aiStep: `And check if attribute "${
+          arg.expected
+        }" of ${elIndex}${arg.tagName.toLowerCase()}${textVerbiage} contains "${
+          arg.expectedAttribute
+        }" and assign to "${arg.varName}" for later use`,
         locator: loc.result,
       },
       loc.newIdx,
@@ -816,9 +1154,17 @@ export const ACTION_HANDLERS = {
   },
   [FUNCTIONMAPPER.ISATTRIBUTENOTCONTAINS.key]: (arg, idx) => {
     const loc = constructLocators(arg, idx);
+    const elIndex = getOrdinalIndex(arg);
+    const textVerbiage =
+      arg.text && arg.text !== "" ? `with text "${arg.text}"` : "";
     return [
       {
         step: `* def ${arg.varName} = ${FUNCTIONMAPPER.ISATTRIBUTENOTCONTAINS.name}({po:"${loc.locKeyName}", atr:"${arg.expected}", ea: "${arg.expectedAttribute}"})`,
+        aiStep: `And check if attribute "${
+          arg.expected
+        }" of ${elIndex}${arg.tagName.toLowerCase()}${textVerbiage} does not contain "${
+          arg.expectedAttribute
+        }" and assign to "${arg.varName}" for later use`,
         locator: loc.result,
       },
       loc.newIdx,
@@ -828,9 +1174,15 @@ export const ACTION_HANDLERS = {
   //
   [FUNCTIONMAPPER.ISENABLED.key]: (arg, idx) => {
     const loc = constructLocators(arg, idx);
+    const elIndex = getOrdinalIndex(arg);
+    const textVerbiage =
+      arg.text && arg.text !== "" ? `with text "${arg.text}"` : "";
     return [
       {
         step: `* def ${arg.varName} = ${FUNCTIONMAPPER.ISENABLED.name}({po:"${loc.locKeyName}"})`,
+        aiStep: `And check if ${elIndex}${arg.tagName.toLowerCase()}${textVerbiage} is enabled and assign to "${
+          arg.varName
+        }" for later use`,
         locator: loc.result,
       },
       loc.newIdx,
@@ -838,9 +1190,15 @@ export const ACTION_HANDLERS = {
   },
   [FUNCTIONMAPPER.ISNOTENABLED.key]: (arg, idx) => {
     const loc = constructLocators(arg, idx);
+    const elIndex = getOrdinalIndex(arg);
+    const textVerbiage =
+      arg.text && arg.text !== "" ? `with text "${arg.text}"` : "";
     return [
       {
         step: `* def ${arg.varName} = ${FUNCTIONMAPPER.ISNOTENABLED.name}({po:"${loc.locKeyName}"})`,
+        aiStep: `And check if ${elIndex}${arg.tagName.toLowerCase()}${textVerbiage} is not enabled and assign to "${
+          arg.varName
+        }" for later use`,
         locator: loc.result,
       },
       loc.newIdx,
@@ -848,9 +1206,15 @@ export const ACTION_HANDLERS = {
   },
   [FUNCTIONMAPPER.ISPRESENT.key]: (arg, idx) => {
     const loc = constructLocators(arg, idx);
+    const elIndex = getOrdinalIndex(arg);
+    const textVerbiage =
+      arg.text && arg.text !== "" ? `with text "${arg.text}"` : "";
     return [
       {
         step: `* def ${arg.varName} = ${FUNCTIONMAPPER.ISPRESENT.name}({po:"${loc.locKeyName}"})`,
+        aiStep: `And check if ${elIndex}${arg.tagName.toLowerCase()}${textVerbiage} is present and assign to "${
+          arg.varName
+        }" for later use`,
         locator: loc.result,
       },
       loc.newIdx,
@@ -858,9 +1222,15 @@ export const ACTION_HANDLERS = {
   },
   [FUNCTIONMAPPER.ISNOTPRESENT.key]: (arg, idx) => {
     const loc = constructLocators(arg, idx);
+    const elIndex = getOrdinalIndex(arg);
+    const textVerbiage =
+      arg.text && arg.text !== "" ? `with text "${arg.text}"` : "";
     return [
       {
         step: `* def ${arg.varName} = ${FUNCTIONMAPPER.ISNOTPRESENT.name}({po:"${loc.locKeyName}"})`,
+        aiStep: `And check if ${elIndex}${arg.tagName.toLowerCase()}${textVerbiage} is not present and assign to "${
+          arg.varName
+        }" for later use`,
         locator: loc.result,
       },
       loc.newIdx,
@@ -868,9 +1238,15 @@ export const ACTION_HANDLERS = {
   },
   [FUNCTIONMAPPER.ISELEMENTCLICKABLE.key]: (arg, idx) => {
     const loc = constructLocators(arg, idx);
+    const elIndex = getOrdinalIndex(arg);
+    const textVerbiage =
+      arg.text && arg.text !== "" ? `with text "${arg.text}"` : "";
     return [
       {
         step: `* def ${arg.varName} = ${FUNCTIONMAPPER.ISELEMENTCLICKABLE.name}({po:"${loc.locKeyName}"})`,
+        aiStep: `And check if ${elIndex}${arg.tagName.toLowerCase()}${textVerbiage} is clickable and assign to "${
+          arg.varName
+        }" for later use`,
         locator: loc.result,
       },
       loc.newIdx,
@@ -878,9 +1254,15 @@ export const ACTION_HANDLERS = {
   },
   [FUNCTIONMAPPER.ISELEMENTNOTCLICKABLE.key]: (arg, idx) => {
     const loc = constructLocators(arg, idx);
+    const elIndex = getOrdinalIndex(arg);
+    const textVerbiage =
+      arg.text && arg.text !== "" ? `with text "${arg.text}"` : "";
     return [
       {
         step: `* def ${arg.varName} = ${FUNCTIONMAPPER.ISELEMENTNOTCLICKABLE.name}({po:"${loc.locKeyName}"})`,
+        aiStep: `And check if ${elIndex}${arg.tagName.toLowerCase()}${textVerbiage} is not clickable and assign to "${
+          arg.varName
+        }" for later use`,
         locator: loc.result,
       },
       loc.newIdx,
@@ -888,9 +1270,15 @@ export const ACTION_HANDLERS = {
   },
   [FUNCTIONMAPPER.ISDISPLAYED.key]: (arg, idx) => {
     const loc = constructLocators(arg, idx);
+    const elIndex = getOrdinalIndex(arg);
+    const textVerbiage =
+      arg.text && arg.text !== "" ? `with text "${arg.text}"` : "";
     return [
       {
         step: `* def ${arg.varName} = ${FUNCTIONMAPPER.ISDISPLAYED.name}({po:"${loc.locKeyName}"})`,
+        aiStep: `And check if ${elIndex}${arg.tagName.toLowerCase()}${textVerbiage} is displayed and assign to "${
+          arg.varName
+        }" for later use`,
         locator: loc.result,
       },
       loc.newIdx,
@@ -898,9 +1286,15 @@ export const ACTION_HANDLERS = {
   },
   [FUNCTIONMAPPER.ISNOTDISPLAYED.key]: (arg, idx) => {
     const loc = constructLocators(arg, idx);
+    const elIndex = getOrdinalIndex(arg);
+    const textVerbiage =
+      arg.text && arg.text !== "" ? `with text "${arg.text}"` : "";
     return [
       {
         step: `* def ${arg.varName} = ${FUNCTIONMAPPER.ISNOTDISPLAYED.name}({po:"${loc.locKeyName}"})`,
+        aiStep: `And check if ${elIndex}${arg.tagName.toLowerCase()}${textVerbiage} is not displayed and assign to "${
+          arg.varName
+        }" for later use`,
         locator: loc.result,
       },
       loc.newIdx,
@@ -908,9 +1302,15 @@ export const ACTION_HANDLERS = {
   },
   [FUNCTIONMAPPER.GETTEXT.key]: (arg, idx) => {
     const loc = constructLocators(arg, idx);
+    const elIndex = getOrdinalIndex(arg);
+    const textVerbiage =
+      arg.text && arg.text !== "" ? `with text "${arg.text}"` : "";
     return [
       {
         step: `* def ${arg.varName} = ${FUNCTIONMAPPER.GETTEXT.name}({po:"${loc.locKeyName}"})`,
+        aiStep: `And get text value of ${elIndex}${arg.tagName.toLowerCase()}${textVerbiage} and assign to "${
+          arg.varName
+        }" for later use`,
         locator: loc.result,
       },
       loc.newIdx,
@@ -918,9 +1318,15 @@ export const ACTION_HANDLERS = {
   },
   [FUNCTIONMAPPER.GETVALUE.key]: (arg, idx) => {
     const loc = constructLocators(arg, idx);
+    const elIndex = getOrdinalIndex(arg);
+    const textVerbiage =
+      arg.text && arg.text !== "" ? `with text "${arg.text}"` : "";
     return [
       {
         step: `* def ${arg.varName} = ${FUNCTIONMAPPER.GETVALUE.name}({po:"${loc.locKeyName}", atr:"value"})`,
+        aiStep: `And get attribute "value" of ${elIndex}${arg.tagName.toLowerCase()}${textVerbiage} and assign to "${
+          arg.varName
+        }" for later use`,
         locator: loc.result,
       },
       loc.newIdx,
@@ -928,9 +1334,15 @@ export const ACTION_HANDLERS = {
   },
   [FUNCTIONMAPPER.GETINNERHTML.key]: (arg, idx) => {
     const loc = constructLocators(arg, idx);
+    const elIndex = getOrdinalIndex(arg);
+    const textVerbiage =
+      arg.text && arg.text !== "" ? `with text "${arg.text}"` : "";
     return [
       {
         step: `* def ${arg.varName} = ${FUNCTIONMAPPER.GETINNERHTML.name}({po:"${loc.locKeyName}"})`,
+        aiStep: `And get inner html of ${elIndex}${arg.tagName.toLowerCase()}${textVerbiage} and assign to "${
+          arg.varName
+        }" for later use`,
         locator: loc.result,
       },
       loc.newIdx,
@@ -940,6 +1352,7 @@ export const ACTION_HANDLERS = {
     return [
       {
         step: `* def ${arg.varName} = ${FUNCTIONMAPPER.GETTITLE.name}()`,
+        aiStep: `And get title of page and assign to "${arg.varName}" for later use`,
       },
       idx,
     ];
@@ -1192,6 +1605,51 @@ export const ACTION_HANDLERS = {
         step: `* def ${arg.varName} = ${FUNCTIONMAPPER.RUNDBQUERY.name}(${arg.expected[0]}, ${arg.expected[1]})`,
       },
       idx,
+    ];
+  },
+
+  [FUNCTIONMAPPER.MATCHATTRIBUTEEQUALS.key]: (arg, idx) => {
+    const loc = constructLocators(arg, idx);
+    const matchType = arg.isSoftAssert ? "sMatch" : "match";
+    return [
+      {
+        step: `And ${matchType} ${FUNCTIONMAPPER.MATCHATTRIBUTEEQUALS.name}({po:"${loc.locKeyName}", atr:"${arg.attributeAssertPropName}"}) == "${arg.expectedAttribute}"`,
+        locator: loc.result,
+      },
+      loc.newIdx,
+    ];
+  },
+  [FUNCTIONMAPPER.MATCHATTRIBUTENOTEQUALS.key]: (arg, idx) => {
+    const loc = constructLocators(arg, idx);
+    const matchType = arg.isSoftAssert ? "sMatch" : "match";
+    return [
+      {
+        step: `And ${matchType} ${FUNCTIONMAPPER.MATCHATTRIBUTENOTEQUALS.name}({po:"${loc.locKeyName}", atr:"${arg.attributeAssertPropName}"}) != "${arg.expectedAttribute}"`,
+        locator: loc.result,
+      },
+      loc.newIdx,
+    ];
+  },
+  [FUNCTIONMAPPER.MATCHATTRIBUTECONTAINS.key]: (arg, idx) => {
+    const loc = constructLocators(arg, idx);
+    const matchType = arg.isSoftAssert ? "sMatch" : "match";
+    return [
+      {
+        step: `And ${matchType} ${FUNCTIONMAPPER.MATCHATTRIBUTECONTAINS.name}({po:"${loc.locKeyName}", atr:"${arg.attributeAssertPropName}"}) contains "${arg.expectedAttribute}"`,
+        locator: loc.result,
+      },
+      loc.newIdx,
+    ];
+  },
+  [FUNCTIONMAPPER.MATCHATTRIBUTENOTCONTAINS.key]: (arg, idx) => {
+    const loc = constructLocators(arg, idx);
+    const matchType = arg.isSoftAssert ? "sMatch" : "match";
+    return [
+      {
+        step: `And ${matchType} ${FUNCTIONMAPPER.MATCHATTRIBUTENOTCONTAINS.name}({po:"${loc.locKeyName}", atr:"${arg.attributeAssertPropName}"}) not contains "${arg.expectedAttribute}"`,
+        locator: loc.result,
+      },
+      loc.newIdx,
     ];
   },
 
@@ -1613,6 +2071,45 @@ export const ACTION_HANDLERS = {
     return [
       {
         step: `And ${FUNCTIONMAPPER.TAKESCREENSHOT.name}`,
+      },
+      idx,
+    ];
+  },
+  [FUNCTIONMAPPER.ADDCOOKIES.key]: (arg, idx) => {
+    let cokkieValue = [];
+    if (arg.cookies && Array.isArray(arg.cookies) && arg.cookies.length) {
+      for (let cookie of arg.cookies) {
+        let cookieObj = {
+          nme: `${cookie.name}`,
+          vle: `${cookie.value}`,
+
+          ...(cookie.domain && cookie.domain.trim() !== ""
+            ? { dmn: `${cookie.domain}` }
+            : {}),
+          ...(cookie.path && cookie.path !== "/" && cookie.path.trim() !== ""
+            ? { pth: `${cookie.path}` }
+            : {}),
+          ...(cookie.expiry && cookie.expiry.trim() !== ""
+            ? { exp: cookie.expiry }
+            : {}),
+          ...(cookie.secure !== undefined && cookie.secure
+            ? { scr: cookie.secure }
+            : {}),
+          ...(cookie.httpOnly !== undefined && cookie.httpOnly
+            ? { htp: cookie.httpOnly }
+            : {}),
+        };
+        cokkieValue.push(cookieObj);
+      }
+    } else {
+      return null;
+    }
+
+    return [
+      {
+        step: `And ${FUNCTIONMAPPER.ADDCOOKIES.name}(${stringifyWithoutQuotes(
+          cokkieValue
+        )})`,
       },
       idx,
     ];

@@ -14,6 +14,7 @@ export default function RecorderPanel() {
     visibility: false,
   });
   const [isDrawerOpen, setDrawerOpen] = useState(false);
+  // const [isMobileRecording, setIsMobileRecording] = useState(false);
   const [expanded, setExpanded] = useState({
     assertions: false,
     elementAssertions: false,
@@ -151,6 +152,11 @@ export default function RecorderPanel() {
     const evt = new MouseEvent("mousemove", { bubbles: true });
     document.dispatchEvent(evt);
   };
+
+  // const toggleDeviceMode = () => {
+  //   setIsMobileRecording((prev) => !prev);
+  //   // Optionally store this in your recording metadata too
+  // };
 
   const resetExpanded = () => {
     setExpanded({
@@ -336,6 +342,12 @@ export default function RecorderPanel() {
         >
           ⋮
         </button>
+        {/* <button
+          onClick={toggleDeviceMode}
+          title={`Switch to ${isMobileRecording ? "desktop" : "mobile"} mode`}
+        >
+          {isMobileRecording ? "📱 Mobile" : "🖥️ Desktop"}
+        </button> */}
         {isDrawerOpen && (
           <div className="drawer-anchor">
             <MoreOptionsDrawer

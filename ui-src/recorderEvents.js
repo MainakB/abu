@@ -18,7 +18,7 @@
       // 🛑 Finalize any pending input before handling click
       if (currentInput && el !== currentInput) {
         const finalValue = currentInput.value;
-        shouldUpdateInput = finalValue !== initialValue;
+        shouldUpdateInput = finalValue !== initialValue && el.type !== "file";
         if (shouldUpdateInput) {
           window.__maybeRecordTabSwitch?.("recorder-click-input");
           const buildData = window.__buildData({
@@ -31,7 +31,7 @@
           const { elIndex, refinedAttributes } = window.__searchElIndex(
             e.target,
             "input",
-            buildData.attributes
+            buildData
           );
           buildData.elementIndex = elIndex;
           buildData.attributes = { ...refinedAttributes };
@@ -40,6 +40,13 @@
         currentInput = null;
         initialValue = null;
       }
+      if (
+        el.tagName &&
+        el.tagName.toLowerCase() === "input" &&
+        el.type === "file"
+      )
+        return;
+
       if (
         Object.values(assertionModes).includes(mode) &&
         mode !== assertionModes.AICHAT
@@ -63,7 +70,7 @@
       const { elIndex, refinedAttributes } = window.__searchElIndex(
         e.target,
         el.tagName.toLowerCase(),
-        buildData.attributes
+        buildData
       );
       buildData.elementIndex = elIndex;
       buildData.attributes = { ...refinedAttributes };
@@ -102,7 +109,7 @@
           const { elIndex, refinedAttributes } = window.__searchElIndex(
             e.target,
             "input",
-            buildData.attributes
+            buildData
           );
           buildData.elementIndex = elIndex;
           buildData.attributes = { ...refinedAttributes };
@@ -120,7 +127,7 @@
       const el = e.target;
       if (el === currentInput) {
         const finalValue = el.value;
-        if (finalValue !== initialValue) {
+        if (finalValue !== initialValue && el.type !== "file") {
           const buildData = window.__buildData({
             action: assertionModes.INPUT,
             el,
@@ -131,7 +138,7 @@
           const { elIndex, refinedAttributes } = window.__searchElIndex(
             e.target,
             "input",
-            buildData.attributes
+            buildData
           );
           buildData.elementIndex = elIndex;
           buildData.attributes = { ...refinedAttributes };
@@ -150,7 +157,8 @@
       let value = null;
       let selectOptionIndex = null;
       let selectedOption = null;
-
+      let isFileUpload = false;
+      let fileNames = [];
       if (el.type === "checkbox" || el.type === "radio") {
         value = el.checked;
       } else if (tag === "select") {
@@ -159,6 +167,13 @@
         const selectedText = selectedOption.textContent.trim();
         value = selectedText;
         selectOptionIndex = selectedValue;
+      } else if (tag === "input" && el.type === "file") {
+        const fileList = el.files;
+        const fileNamesList = Array.from(fileList).map((f) => f.name);
+        if (fileNamesList.length) {
+          isFileUpload = true;
+          fileNames = [...fileNamesList];
+        }
       } else {
         return;
       }
@@ -166,7 +181,9 @@
       window.__maybeRecordTabSwitch?.("recorder-change");
       window.__recordAction(
         window.__buildData({
-          action: assertionModes.SELECT,
+          action: isFileUpload
+            ? assertionModes.FILEUPLOAD
+            : assertionModes.SELECT,
           el,
           e,
           value,
@@ -174,6 +191,7 @@
           ...(selectedOption && selectedOption.tagName
             ? { selectOptionTag: selectedOption.tagName.toLowerCase() }
             : {}),
+          ...(isFileUpload ? { isFileUpload, fileNames } : {}),
         })
       );
     });

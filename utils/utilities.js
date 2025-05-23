@@ -79,6 +79,122 @@
     return { [name]: value };
   };
 
+  // Monitor viewport changes
+  function setupEmulationMonitoring() {
+    let lastDetection = detectEmulationMode();
+
+    const checkForChanges = () => {
+      const currentDetection = detectEmulationMode();
+
+      if (currentDetection.isEmulated !== lastDetection.isEmulated) {
+        // Adjust your test recorder behavior
+        handleEmulationChange(currentDetection);
+      }
+
+      lastDetection = currentDetection;
+    };
+
+    // Monitor resize events
+    window.addEventListener("resize", checkForChanges);
+
+    // Initial check
+    checkForChanges();
+  }
+
+  window.__detectEmulationMode = () => {
+    const detection = {
+      isEmulated: false,
+      method: null,
+      deviceType: null,
+      confidence: 0,
+    };
+
+    const width = window.innerWidth;
+    const height = window.innerHeight;
+    const ratio = window.devicePixelRatio;
+
+    // Check for mobile viewport sizes
+    const mobileIndicators = [];
+
+    // 1. Check viewport width
+    if (width <= 480) {
+      mobileIndicators.push("narrow-viewport");
+      detection.deviceType = "mobile";
+    }
+
+    // 2. Check for common mobile aspect ratios
+    const aspectRatio = height / width;
+    if (aspectRatio > 1.5) {
+      // Typical mobile portrait
+      mobileIndicators.push("mobile-aspect-ratio");
+    }
+
+    // 3. Check for exact iPhone dimensions
+    const exactMatches = checkExactDeviceDimensions(width, height);
+    if (exactMatches.length > 0) {
+      mobileIndicators.push("exact-device-match");
+      detection.deviceType = exactMatches[0];
+      detection.confidence += 0.5;
+    }
+
+    // 4. Check if it's an unusual desktop size (likely emulated)
+    if (width < 1024 && window.screen.width > width + 200) {
+      mobileIndicators.push("constrained-in-larger-screen");
+      detection.confidence += 0.3;
+    }
+
+    // 5. Check CSS media queries
+    if (window.matchMedia("(hover: none)").matches) {
+      mobileIndicators.push("hover-none");
+      detection.confidence += 0.1;
+    }
+
+    if (window.matchMedia("(pointer: coarse)").matches) {
+      mobileIndicators.push("coarse-pointer");
+      detection.confidence += 0.2;
+    }
+
+    detection.isEmulated =
+      mobileIndicators.length >= 2 || detection.confidence > 0.5;
+    detection.indicators = mobileIndicators;
+
+    return detection;
+  };
+
+  function checkExactDeviceDimensions(width, height) {
+    const devices = [
+      { name: "iPhone SE", width: 375, height: 667 },
+      { name: "iPhone XR", width: 414, height: 896 },
+      { name: "iPhone 12", width: 390, height: 844 },
+      { name: "iPhone 12 Pro Max", width: 428, height: 926 },
+      { name: "iPhone 14 Pro Max", width: 430, height: 932 },
+      { name: "Pixel 7", width: 412, height: 915 },
+      { name: "iPad Mini", width: 768, height: 1024 },
+      { name: "iPad Air", width: 820, height: 1180 },
+      { name: "iPad Pro", width: 1024, height: 1366 },
+      { name: "Galaxy S8+", width: 360, height: 740 },
+      { name: "Galaxy S20", width: 360, height: 800 },
+      { name: "Galaxy S20 Ultra", width: 412, height: 915 },
+      { name: "Galaxy A51/71", width: 412, height: 914 },
+      { name: "Surface Pro 7", width: 912, height: 1368 },
+      { name: "Surface Duo", width: 540, height: 720 },
+      { name: "Galaxy Z Fold 5", width: 344, height: 882 },
+      { name: "Asus Zenbook Fold", width: 853, height: 1280 },
+      { name: "Next Hub", width: 1024, height: 600 },
+      { name: "Next Hub Max", width: 1280, height: 800 },
+      { name: "BlackBerry Z30", width: 360, height: 640 },
+      { name: "BlackBerry Playbook", width: 600, height: 1024 },
+    ];
+
+    return devices
+      .filter(
+        (device) =>
+          Math.abs(width - device.width) <= 5 &&
+          Math.abs(height - device.height) <= 50
+      )
+      .map((device) => device.name);
+  }
+
   window.__buildData = ({
     action,
     assertion,
@@ -123,15 +239,33 @@
     emailSentTo,
     emailFilter,
     emailReceivedBefore,
+    isFileUpload,
+    fileNames,
   }) => {
+    const isEmulatedMeta = window.__detectEmulationMode();
+    const isMobileDevice = isEmulatedMeta.confidence > 0.5;
+
     let selectors = null;
     let attributes = null;
     if (el) {
       ({ selectors, attributes } = window.__getSelectors(el));
     }
 
+    let elIndexValue = -1;
+    if (e && el && el.tagName) {
+      // && el.tagName.toLowerCase() !== "input"
+      const { elIndex } = window.__searchElIndexByOccurence(
+        e.target,
+        el.tagName.toLowerCase()
+      );
+      elIndexValue = elIndex;
+    }
+    const browserUrl = window.location.href;
+
     const result = {
       action,
+      isMobileDevice,
+      ...buildOptionalField("browserUrl", browserUrl),
       ...buildOptionalField("cookies", cookies),
       ...buildOptionalField("locatorName", locatorName),
       ...buildOptionalField("assertion", assertion),
@@ -139,7 +273,10 @@
       ...buildOptionalField("selectors", preComputedSelectors || selectors),
       ...buildOptionalField("attributeAssertPropName", attributeAssertPropName),
       ...buildOptionalField("value", value),
-      ...buildOptionalField("text", text || el?.innerText?.trim() || ""),
+      ...buildOptionalField(
+        "text",
+        text || el?.innerText?.trim() || el?.getAttribute("value") || ""
+      ),
       ...buildOptionalField("keyPressed", keyPressed),
       ...buildOptionalField("cookieName", cookieName),
       ...buildOptionalField("basePdfFileName", basePdfFileName),
@@ -161,6 +298,8 @@
       ...buildOptionalField("httpHeader", httpHeader),
       ...buildOptionalField("httpPath", httpPath),
       ...buildOptionalField("httpUrl", httpUrl),
+      ...buildOptionalField("isFileUpload", isFileUpload),
+      ...buildOptionalField("fileNames", fileNames),
 
       ...buildOptionalField("emailServerId", emailServerId),
       ...buildOptionalField("emailSubject", emailSubject),
@@ -173,7 +312,7 @@
         "elementIndex",
         elementIndex !== undefined && elementIndex !== null
           ? elementIndex
-          : null
+          : elIndexValue
       ),
 
       ...buildOptionalField(
@@ -206,9 +345,13 @@
     return result;
   };
 
-  const getIframeLocators = (iframesAttr) => {
+  const getIframeLocators = (iframesAttr, depth) => {
     const tagName = iframesAttr.tagName || "*";
-    const selectors = { xpath: [] };
+    const selectors = {
+      xpath: [],
+      iframes: [iframesAttr],
+      iframeDepth: depth + 1,
+    };
 
     const attributes = ["id", "title", "className", "name", "src"];
 
@@ -236,7 +379,7 @@
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(data),
     });
-    console.log("✅ Step added:", data);
+    // console.log("✅ Step added:", data);
   };
 
   const recordSwitchToCurrentFrame = async (selectors) => {
@@ -252,7 +395,7 @@
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(data),
     });
-    console.log("✅ Step added:", data);
+    // console.log("✅ Step added:", data);
   };
 
   const updateWsActiveIframe = (value) => {
@@ -281,7 +424,7 @@
     }
 
     for (let i = 0; i < iframes.length; i++) {
-      const iframeLocs = getIframeLocators(iframes[i]);
+      const iframeLocs = getIframeLocators(iframes[i], i);
       await recordSwitchToCurrentFrame(iframeLocs);
 
       if (i === iframes.length - 1) {
@@ -312,7 +455,7 @@
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(data),
     });
-    console.log("✅ Step added:", data);
+    // console.log("✅ Step added:", data);
   };
 
   window.__isPaused = () => {
@@ -335,20 +478,20 @@
 
     const key = `${calledFrom}-${thisTabId}`;
 
-      fetch("http://localhost:3111/record", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          action: "switchToWindow",
-          tabId: thisTabId,
-          attributes: {
-            eventKey: key,
-            url: url || "",
-            title: title || "",
-          },
-          timestamp: Date.now(),
-        }),
-      });
+    fetch("http://localhost:3111/record", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        action: "switchToWindow",
+        tabId: thisTabId,
+        attributes: {
+          eventKey: key,
+          url: url || "",
+          title: title || "",
+        },
+        timestamp: Date.now(),
+      }),
+    });
   };
 
   window.__setupDomObserver = () => {
@@ -463,15 +606,46 @@
     return null;
   }
 
-  window.__searchElIndex = (target, tagType, attributes) => {
+  const isTextUniqueWithinSelector = (cssSelector, targetText) => {
+    const candidates = Array.from(document.querySelectorAll(cssSelector));
+    const normalized = (s) => s.replace(/\s+/g, " ").trim();
+
+    const matches = candidates.filter(
+      (el) => normalized(el.textContent) === normalized(targetText)
+    );
+    // return {
+    //   count: matches.length,
+    //   isUnique: matches.length === 1,
+    //   elements: matches,
+    // };
+    return matches.length === 1;
+  };
+
+  window.__searchElIndex = (target, tagType, buildData) => {
+    const attributes = buildData.attributes;
+    let isTextUnique = false;
+    if (buildData?.selectors?.css && buildData.text?.trim()) {
+      isTextUnique = isTextUniqueWithinSelector(
+        buildData.selectors.css,
+        buildData.text
+      );
+    }
+
     try {
       if (!target || !tagType || !attributes)
-        return { index: -1, refinedAttributes: {} };
+        return { elIndex: -1, refinedAttributes: {} };
 
       const refinedAttributes = getAllUniqueHumanReadableAttributes(
         attributes,
         tagType
       );
+
+      if (isTextUnique)
+        return {
+          elIndex: -1,
+          refinedAttributes,
+        };
+
       const labelMatch = getAssociatedLabelMatch(attributes, tagType);
 
       if (Object.keys(refinedAttributes).length || labelMatch) {
@@ -489,182 +663,24 @@
     } catch (err) {
       console.error("__searchElIndex failed:", err);
       return {
-        index: -1,
+        elIndex: -1,
         refinedAttributes: attributes,
       };
     }
   };
 
-  // function isVisible(el) {
-  //   if (!el) return false;
-
-  //   const style = getComputedStyle(el);
-
-  //   return (
-  //     style &&
-  //     style.display !== "none" &&
-  //     style.visibility !== "hidden" &&
-  //     style.opacity !== "0" &&
-  //     el.offsetWidth > 0 &&
-  //     el.offsetHeight > 0 &&
-  //     el.getClientRects().length > 0
-  //   );
-  // }
-
-  // function isAttributeUnique(attrName, attrValue, tagName = "*") {
-  //   if (!attrValue) return null;
-
-  //   const selector = `${tagName}[${CSS.escape(attrName)}="${attrValue}"]`;
-  //   const matches = Array.from(document.querySelectorAll(selector)).filter(
-  //     isVisible
-  //   );
-
-  //   return matches.length === 1 ? matches[0] : null;
-  // }
-
-  // function getFirstUniqueAttribute(attributes, tagName) {
-  //   const priorityAttrs = [
-  //     "aria-label",
-  //     "placeholder",
-  //     "title",
-  //     "aria-describedby",
-  //     "name",
-  //   ];
-
-  //   for (const attr of priorityAttrs) {
-  //     if (
-  //       attributes[attr] &&
-  //       isAttributeUnique(attr, attributes[attr], tagName)
-  //     ) {
-  //       return attr;
-  //     }
-  //   }
-
-  //   return null;
-  // }
-
-  // function getVisibleIndex(target, tagType = "input") {
-  //   const visibleElements = Array.from(
-  //     document.querySelectorAll(tagType)
-  //   ).filter(isVisible);
-  //   return visibleElements.indexOf(target);
-  // }
-
-  // function refineAttributes(attributes, uniqueAttrName, isByLabel = false) {
-  //   const refined = {};
-  //   const key = uniqueAttrName || (isByLabel ? "associatedLabel" : null);
-
-  //   if (key && isHumanReadable(attributes[key])) {
-  //     refined[key] = attributes[key];
-  //   }
-
-  //   return refined;
-  // }
-
-  // function isHumanReadable(value) {
-  //   if (!value || typeof value !== "string") return false;
-
-  //   const trimmed = value.trim();
-
-  //   // Reject if mostly kebab-case, snake_case, or camelCase-like
-  //   const classPattern = /^[-_a-z0-9]+$/i;
-  //   const wordCount = trimmed.split(/\s+/).length;
-  //   const uuidPattern =
-  //     /^[a-f0-9]{8}-?[a-f0-9]{4,}-?[a-f0-9]{4,}-?[a-f0-9]{4,}-?[a-f0-9]{12}$/i;
-
-  //   // return !classPattern.test(trimmed) || wordCount > 1;
-  //   return (
-  //     !classPattern.test(trimmed) &&
-  //     !uuidPattern.test(trimmed) &&
-  //     (wordCount > 1 || /^[A-Za-z]+$/.test(trimmed))
-  //   );
-  // }
-
-  // window.__searchElIndex = (target, tagType, attributes) => {
-  //   if (!target || !tagType || !attributes)
-  //     return { index: -1, refinedAttributes: {} };
-
-  //   const uniqueAttr = getFirstUniqueAttribute(attributes, tagType);
-
-  //   let isMatchByAssociatedLabel = false;
-  //   if (attributes.associatedLabel?.trim()) {
-  //     const targetText = attributes.associatedLabel.trim().toLowerCase();
-  //     const matches = Array.from(document.querySelectorAll(tagType)).filter(
-  //       (el) =>
-  //         isVisible(el) && el.innerText?.trim().toLowerCase() === targetText
-  //     );
-  //     isMatchByAssociatedLabel = matches.length === 1;
-  //   }
-
-  //   if (
-  //     (uniqueAttr && isHumanReadable(attributes[uniqueAttr])) ||
-  //     (isMatchByAssociatedLabel && isHumanReadable(attributes.associatedLabel))
-  //   ) {
-  //     return {
-  //       elIndex: -1,
-  //       refinedAttributes: refineAttributes(
-  //         attributes,
-  //         uniqueAttr,
-  //         isMatchByAssociatedLabel
-  //       ),
-  //     };
-  //   }
-
-  //   const index = getVisibleIndex(target, tagType);
-  //   return {
-  //     elIndex: index,
-  //     refinedAttributes: attributes,
-  //   };
-  // };
-  // window.__searchElIndex = (target, tagType, attributes) => {
-  //   console.log("selectors: ", selectors);
-  //   if (
-  //     attributes &&
-  //     (attributes?.placeholder ||
-  //       attributes?.associatedLabel ||
-  //       attributes?.title ||
-  //       attributes?.["aria-describedby"] ||
-  //       attributes?.["aria-label"] ||
-  //       attributes?.name)
-  //   ) {
-  //     const uniqueAttr =
-  //       (attributes?.["aria-label"] &&
-  //         isAttributeUnique("aria-label", attributes["aria-label"], tagType)) ||
-  //       (attributes?.placeholder &&
-  //         isAttributeUnique("placeholder", attributes.placeholder, tagType)) ||
-  //       (attributes?.title &&
-  //         isAttributeUnique("title", attributes.title, tagType)) ||
-  //       (attributes?.["aria-describedby"] &&
-  //         isAttributeUnique(
-  //           "aria-describedby",
-  //           attributes["aria-describedby"],
-  //           tagType
-  //         )) ||
-  //       (attributes?.name &&
-  //         isAttributeUnique("name", attributes.name, tagType)) ||
-  //       null;
-
-  //     let isMatchByAssociatedLabel = false;
-  //     if (
-  //       attributes?.associatedLabel &&
-  //       attributes?.associatedLabel.trim() !== ""
-  //     ) {
-  //       const targetText = attributes?.associatedLabel.trim().toLowerCase();
-  //       const matches = Array.from(document.querySelectorAll(tagType)).filter(
-  //         (el) =>
-  //           isVisible(el) && el.innerText?.trim().toLowerCase() === targetText
-  //       );
-  //       isMatchByAssociatedLabel = matches.length === 1;
-  //     }
-
-  //     if (uniqueAttr || isMatchByAssociatedLabel) return -1;
-  //   }
-
-  //   const visibleInputs = Array.from(document.querySelectorAll(tagType)).filter(
-  //     isVisible
-  //   );
-
-  //   const index = visibleInputs.indexOf(target);
-  //   return index;
-  // };
+  window.__searchElIndexByOccurence = (target, tagType) => {
+    try {
+      if (!target || !tagType) return { elIndex: -1 };
+      const index = getVisibleIndex(target, tagType);
+      return {
+        elIndex: index,
+      };
+    } catch (err) {
+      console.error("__searchElIndexByOccurence failed:", err);
+      return {
+        elIndex: -1,
+      };
+    }
+  };
 })();

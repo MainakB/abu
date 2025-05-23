@@ -503,7 +503,6 @@ const getAssert = (step, position, name, typeToUse) => {
 };
 
 export const generateAssistantMessage = (step, index) => {
-  console.log("Step is: ", step);
   const stepNumber = index + 1;
   const { intent, target, value, assertionType, variableName, compareTo } =
     step;
@@ -801,13 +800,6 @@ export const onConfirmAttrMatchValAssignment = async ({
       .replace(/[ -]/g, "_")
       .toLowerCase();
 
-    console.log(
-      locatorName && locatorName !== ""
-        ? { locatorName: `${locatorName}_${locSubstring}` }
-        : locatorName,
-      locSubstring,
-      locatorName
-    );
     await window.__recordAction(
       window.__buildData({
         action: "assert",
