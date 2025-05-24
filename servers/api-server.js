@@ -351,7 +351,7 @@ const writeLocatorObject = (locatorId, locatorBlock, fileName) => {
 
     if (match) {
       let code = match[1]
-        .replace(/__fileName/g, '"__fileName"')
+        .replace(/__filename/g, '"__filename"')
         .replace(
           /Types\.LocatorTypes\.(\w+)/g,
           '"__ENUM__Types.LocatorTypes.$1"'
@@ -370,7 +370,7 @@ const writeLocatorObject = (locatorId, locatorBlock, fileName) => {
 
   // Turn into formatted string
   let objectStr = JSON.stringify(locators, null, 2)
-    .replace(/"__fileName"/g, "__fileName")
+    .replace(/"__filename"/g, "__filename")
     .replace(/"__ENUM__(Types\.[\w.]+)"/g, "$1");
   // .replace(/"ENUM__(Types\.[\w.]+)"/g, "$1");
 

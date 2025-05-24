@@ -4,9 +4,12 @@ import { program } from "commander";
 import inquirer from "inquirer";
 import { spawn, execSync } from "child_process";
 import chalk from "chalk";
+import { fileURLToPath } from "url";
 
 import { RecorderConfig } from "../servers/RecorderConfig.js";
 
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 let apiServer = null;
 let wsServer = null;
 
@@ -192,14 +195,13 @@ export const initRecorderConfig = async (recorderConfig) => {
 };
 
 export const startServers = (debugMode) => {
-  apiServer = spawn(
-    "node",
-    ["servers/api-server.js", "--debugMode", debugMode],
-    {
-      stdio: "inherit",
-    }
-  );
-  wsServer = spawn("node", ["servers/ws-server.js", "--debugMode", debugMode], {
+  const apiPath = path.join(__dirname, "../servers", "api-server.js");
+  const wsPath = path.join(__dirname, "../servers", "ws-server.js");
+
+  apiServer = spawn("node", [apiPath, "--debugMode", debugMode], {
+    stdio: "inherit",
+  });
+  wsServer = spawn("node", [wsPath, "--debugMode", debugMode], {
     stdio: "inherit",
   });
 };
