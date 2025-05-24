@@ -247,7 +247,19 @@ firstPage.on("framenavigated", async (frame) => {
   if (frame === firstPage.mainFrame() && !firstUrlCaptured) {
     const url = frame.url();
     if (!url.includes("about:blank") && !firstUrlCaptured) {
+      await onPageLoadSetRecorderState(true);
       firstUrlCaptured = true;
+      fetch("http://localhost:3111/record", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "navigate",
+          url,
+          tabId: firstTabId,
+          attributes: {},
+          timestamp: Date.now(),
+        }),
+      });
       await firstPage.waitForLoadState("load");
       await updateInitialRecorderState(firstPage, globalRecorderMode, true);
       const title = await getPageTitleWithRetry(firstPage);
@@ -265,17 +277,18 @@ firstPage.on("framenavigated", async (frame) => {
           { key: "title", value: title },
         ]),
       ]);
-      await fetch("http://localhost:3111/record", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          action: "navigate",
-          url,
-          tabId: firstTabId,
-          attributes: { title },
-          timestamp: Date.now(),
-        }),
-      });
+      // await fetch("http://localhost:3111/record", {
+      //   method: "POST",
+      //   headers: { "Content-Type": "application/json" },
+      //   body: JSON.stringify({
+      //     action: "navigate",
+      //     url,
+      //     tabId: firstTabId,
+      //     attributes: { title },
+      //     timestamp: Date.now(),
+      //   }),
+      // });
+      await onPageLoadSetRecorderState(false);
     }
   }
 });

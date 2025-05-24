@@ -31,7 +31,11 @@
       el.tagName.toLowerCase() === "a" ? `${el.getAttribute("href")}` : null;
     selectors.css = getCssSelector(el);
     let xpathText = generateTextBasedXpath(el);
-    selectors.xpath = [generateXPath(el), ...(xpathText ? [xpathText] : [])]; // Last resort
+    selectors.xpath = [
+      getPathTo(el),
+      generateXPath(el),
+      ...(xpathText ? [xpathText] : []),
+    ]; // Last resort
     const iFramesPath = getIframePath(el);
     selectors.iframes = iFramesPath;
     selectors.iframeDepth =
@@ -72,6 +76,38 @@
       siblings.length > 1 ? `[${siblings.indexOf(el) + 1}]` : ""
     }`;
   };
+
+  function getPathTo(element) {
+    if (!element || element.nodeType !== 1) return "";
+
+    if (element.id) {
+      // Shortcut for unique ID
+      return `id("${element.id}")`;
+    }
+
+    if (element === document.body) {
+      return "/html/body";
+    }
+
+    let ix = 1; // XPath index starts at 1
+    let siblings = element.parentNode ? element.parentNode.children : [];
+
+    for (let i = 0; i < siblings.length; i++) {
+      if (siblings[i] === element) break;
+      if (siblings[i].nodeName === element.nodeName) {
+        ix++;
+      }
+    }
+
+    return (
+      getPathTo(element.parentNode) +
+      "/" +
+      element.tagName.toLowerCase() +
+      "[" +
+      ix +
+      "]"
+    );
+  }
 
   const generateTextBasedXpath = (el) => {
     let textValue = null;
