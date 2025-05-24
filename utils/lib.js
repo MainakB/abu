@@ -58,15 +58,19 @@ async function getCliOptions() {
     // process.exit(1);
   }
 
-  const srcSubfolders = fs
+  let srcSubfolders = fs
     .readdirSync(srcPath, { withFileTypes: true })
     .filter((f) => f.isDirectory())
     .map((f) => f.name);
 
   if (srcSubfolders.length === 0) {
     fs.mkdirSync(path.join(srcPath, "recordings"), { recursive: true });
-    srcSubfolders.push("recordings");
+    srcSubfolders = fs
+      .readdirSync(srcPath, { withFileTypes: true })
+      .filter((f) => f.isDirectory())
+      .map((f) => f.name);
   }
+
   let selectedFolder = srcSubfolders[0];
   if (srcSubfolders.length > 1) {
     const folderPrompt = await inquirer.prompt([
@@ -126,6 +130,7 @@ async function getCliOptions() {
 
   const result = {
     selectedSrcFolder: path.join(srcPath, selectedFolder),
+    customerName: selectedFolder,
     // selectedFolder,
     featureFile: ensureExtension(
       options.feature || answers.feature,
@@ -199,10 +204,14 @@ export const startServers = (debugMode) => {
   });
 };
 
-const stopServers = (debugMode) => {
+const stopServers = async (debugMode) => {
   if (debugMode) console.log("🛑 Shutting down servers...");
-  apiServer.kill();
-  wsServer.kill();
+  await fetch("http://localhost:3111/api/flushQueue", {
+    headers: { "Content-Type": "application/json" },
+  });
+
+  apiServer.kill(); // 3111
+  wsServer.kill(); // 8787
   process.exit(0);
 };
 
@@ -374,7 +383,7 @@ export const exposeRecorderControls = async (
   dirName,
   globalRecorderMode,
   browser,
-  debugMode
+  recorderConfig
 ) => {
   await page.exposeBinding("__toggleRecording", async () => {
     await updateInitialRecorderState(page, globalRecorderMode, false);
@@ -401,7 +410,7 @@ export const exposeRecorderControls = async (
   );
 
   await page.exposeBinding("__stopRecording", async () => {
-    if (debugMode)
+    if (recorderConfig.debug)
       console.log("🛑 Stopping recording. Fetching actions from store...");
 
     const steps = await fetch("http://localhost:3111/record").then((res) =>
@@ -419,30 +428,26 @@ export const exposeRecorderControls = async (
     if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
 
     await fs.promises.writeFile(filePath, JSON.stringify(sorted, null, 2));
-    if (debugMode) {
+    const testCommand = `"npx abc --customer=${recorderConfig.customerName} --tags=${recorderConfig.tagName} --platform=dev"`;
+
+    if (recorderConfig.debug) {
       console.log(
         `✅ ${
           steps.length
-        } steps saved to ${filePath}. Run recorded test with the coomand ${chalk.green(
-          chalk.blue.underline.bold(
-            "npx abc --customer=recordings --tags=@recordedTest --platform=dev"
-          )
+        } steps saved to ${filePath}. Run recorded test with the comand ${chalk.green(
+          chalk.blue.underline.bold(testCommand)
         )} ✅ ✅ ✅ ✅\n`
       );
     } else {
       console.log(
-        `\n✅ ✅ ✅ ✅ Run recorded test with the coomand ${chalk.green(
-          chalk.blue.underline.bold(
-            "npx abc --customer=recordings --tags=@recordedTest --platform=dev"
-          )
+        `\n✅ ✅ ✅ ✅ Run recorded test with the comand ${chalk.green(
+          chalk.blue.underline.bold(testCommand)
         )} ✅ ✅ ✅ ✅\n`
       );
     }
 
-    chalk;
-
     await browser.close();
-    stopServers(debugMode);
+    await stopServers(recorderConfig.debug);
     process.exit(0);
   });
 

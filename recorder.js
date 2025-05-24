@@ -3,6 +3,7 @@ import fs from "fs";
 import path from "path";
 import { chromium } from "playwright";
 import { fileURLToPath } from "url";
+import WebSocket from "ws";
 import { dirname } from "path";
 import { v4 as uuidv4 } from "uuid";
 
@@ -32,6 +33,11 @@ const globalRecorderMode = {
 };
 
 ensureChromiumInstalled(chromium, recorderConfig.debug);
+const socket = new WebSocket("ws://localhost:8787");
+await new Promise((resolve, reject) => {
+  socket.addEventListener("open", () => resolve());
+  socket.addEventListener("error", (err) => reject(err));
+});
 
 const browser = await chromium.launch({
   headless: false,
@@ -86,7 +92,7 @@ await exposeRecorderControls(
   __dirname,
   globalRecorderMode,
   browser,
-  recorderConfig.debug
+  recorderConfig
 );
 const firstTabId = uuidv4();
 await injectScripts(
@@ -105,7 +111,7 @@ context.on("page", async (newPage) => {
     __dirname,
     globalRecorderMode,
     browser,
-    recorderConfig.debug
+    recorderConfig
   );
   const tabId = uuidv4();
   if (recorderConfig.debug) console.log("🆕 New tab opened:", tabId);
@@ -117,6 +123,7 @@ context.on("page", async (newPage) => {
     scriptPaths,
     __dirname
   );
+  await onPageLoadSetRecorderState(true);
   const url = newPage.url();
   let isManualNewTab = false;
   if (!url.includes("about:blank") && firstUrlCaptured) {
@@ -205,6 +212,7 @@ context.on("page", async (newPage) => {
       }
     }
   });
+  await onPageLoadSetRecorderState(false);
 });
 
 firstPage.on("framenavigated", async (frame) => {
@@ -246,3 +254,15 @@ firstPage.on("framenavigated", async (frame) => {
 await firstPage.goto("about:blank");
 // await firstPage.goto("https://the-internet.herokuapp.com/");
 // await firstPage.goto("https://amazon.com/");
+
+const onPageLoadSetRecorderState = async (isPageLoadPending) => {
+  if (socket.readyState === WebSocket.OPEN) {
+    socket.send(
+      JSON.stringify({
+        type: "page-load-recorder-state",
+        state: isPageLoadPending,
+      })
+    );
+  }
+  await new Promise((r) => setTimeout(r, 500));
+};

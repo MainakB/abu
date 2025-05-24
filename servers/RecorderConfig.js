@@ -1,6 +1,7 @@
 export class RecorderConfig {
   constructor({
     selectedSrcFolder,
+    customerName,
     featureFile,
     locatorFile,
     featureName = "Recorded Test Feature",
@@ -17,6 +18,7 @@ export class RecorderConfig {
     this.tagName = tagName;
     this.basePath = basePath;
     this.debug = debug;
+    this.customerName = customerName;
   }
 
   get fullFeaturePath() {
@@ -37,6 +39,7 @@ export class RecorderConfig {
       tagName: this.tagName,
       basePath: this.basePath,
       debug: this.debug,
+      customerName: this.customerName,
     };
   }
 }

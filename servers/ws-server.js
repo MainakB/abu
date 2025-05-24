@@ -58,6 +58,23 @@ wss.on("connection", function connection(ws) {
           }
         }
       }
+
+      if (
+        data.type === "page-load-recorder-state" &&
+        data.state !== undefined
+      ) {
+        // Broadcast new active tab to all clients
+        for (const client of clients) {
+          if (client.readyState === WebSocket.OPEN) {
+            client.send(
+              JSON.stringify({
+                type: "page-load-recorder-state",
+                state: data.state,
+              })
+            );
+          }
+        }
+      }
     } catch (err) {
       console.error(err);
       console.warn("⚠️ Invalid WS message:", message);

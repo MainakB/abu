@@ -6,6 +6,7 @@ import "dotenv/config";
 import OpenAI from "openai";
 import { Ollama } from "ollama";
 import { json } from "stream/consumers";
+import { enqueue, flushQueue } from "./queue.js";
 import { parseLLMTestSteps } from "./llmTestStepParser.js";
 import { callLLM } from "./callOpenAI.js";
 import { mapData } from "./server-utils.js";
@@ -50,7 +51,24 @@ app.get("/api/recorder/config", (req, res) => {
   res.json(recorderConfig);
 });
 
+app.get("/api/flushQueue", async (req, res) => {
+  await flushQueue();
+  res.sendStatus(200);
+});
+
 app.post("/record", (req, res) => {
+  try {
+    const step = req.body;
+    enqueue(req.body, recorderConfig);
+    res.status(200).send("Step queued");
+  } catch (err) {
+    if (recorderConfig && recorderConfig.debug)
+      console.error("❌ Failed to queue step", err);
+    res.status(500).send("Queue failure");
+  }
+});
+
+app.post("/api/recordstep", (req, res) => {
   if (recorderConfig && recorderConfig.debug)
     console.log("📩 Received action:", req.body);
 
@@ -202,7 +220,7 @@ app.listen(PORT, () => {
 
 const getFilePath = (FILE_NAME, isLocatorFile) => {
   const basePath = recorderConfig.selectedSrcFolder
-    ? path.join(recorderConfig.selectedSrcFolder, "recordings")
+    ? recorderConfig.selectedSrcFolder
     : path.join(process.cwd(), "src", "recordings");
   const recordingsDir = path.join(
     basePath,

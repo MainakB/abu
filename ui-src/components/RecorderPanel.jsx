@@ -7,6 +7,7 @@ export default function RecorderPanel() {
   const panelRef = useRef(null);
   // const [recording, setRecording] = useState(true);
   const [steps, setSteps] = useState([]);
+  const [isRecorderDisabled, setIsRecorderDisabled] = useState(false);
   const [mode, setMode] = useState(window.__recorderStore.getMode());
   const [tickMap, setTickMap] = useState({
     text: false,
@@ -28,16 +29,37 @@ export default function RecorderPanel() {
     emailAssignments: false,
   });
 
-  const socket = new WebSocket("ws://localhost:8787");
+  useEffect(() => {
+    const socket = new WebSocket("ws://localhost:8787");
 
-  socket.addEventListener("message", (event) => {
-    try {
-      const data = JSON.parse(event.data);
-      if (data.type === "mode") {
-        setMode(data.mode);
+    socket.addEventListener("message", (event) => {
+      try {
+        const data = JSON.parse(event.data);
+        if (data.type === "mode") {
+          setMode(data.mode);
+        }
+
+        if (data.type === "page-load-recorder-state") {
+          console.log("✅ Received: page-load-recorder-state", data.state);
+          setIsRecorderDisabled(data.state);
+        }
+      } catch (err) {
+        console.error("Error parsing WebSocket message:", err);
       }
-    } catch {}
-  });
+    });
+
+    socket.addEventListener("error", (e) => {
+      console.error("WebSocket error:", e);
+    });
+
+    socket.addEventListener("close", () => {
+      console.warn("WebSocket connection closed");
+    });
+
+    return () => {
+      socket.close();
+    };
+  }, []);
 
   const previousMode = useRef(window.__recorderStore.getMode());
 
@@ -279,10 +301,14 @@ export default function RecorderPanel() {
         <div className="recorder-drag-handle" title="Drag toolbar">
           ⠿
         </div>
-        <button onClick={toggleRecording}>
+        <button onClick={toggleRecording} disabled={isRecorderDisabled}>
           {mode === "pause" ? "▶️" : "⏸"}
         </button>
-        <button onClick={stop} title="Stop Recording">
+        <button
+          onClick={stop}
+          title="Stop Recording"
+          disabled={isRecorderDisabled}
+        >
           ❌
         </button>
 
@@ -290,6 +316,7 @@ export default function RecorderPanel() {
           title="AI Chat"
           className={getClassNameForAssert(mode, ASSERTIONMODES.AICHAT)}
           onClick={() => toggleModeLaunchDock(ASSERTIONMODES.AICHAT)}
+          disabled={isRecorderDisabled || window.__isPaused()}
         >
           <Sparkles size={16} color="#007bff" /> {/* Blue */}
         </button>
@@ -302,7 +329,8 @@ export default function RecorderPanel() {
           onClick={async () =>
             await toggleMode(ASSERTIONMODES.ASSERTVISIBILITY)
           }
-          disabled={window.__isPaused()}
+          disabled={isRecorderDisabled || window.__isPaused()}
+          // disabled={window.__isPaused()}
         >
           {tickMap.visibility ? "✅" : <Eye size={16} color="#3b4850" />}
         </button>
@@ -315,7 +343,8 @@ export default function RecorderPanel() {
           onClick={async () =>
             await toggleMode(ASSERTIONMODES.ASSERTTEXTEQUALS)
           }
-          disabled={window.__isPaused()}
+          disabled={isRecorderDisabled || window.__isPaused()}
+          // disabled={window.__isPaused()}
         >
           {tickMap.text ? "✅" : <TypeOutline size={16} color="#3b4850" />}
           {/* {tickMap.text ? "✅" : "🆎"} */}
@@ -329,7 +358,8 @@ export default function RecorderPanel() {
           onClick={async () =>
             await toggleMode(ASSERTIONMODES.ASSERTVALUEEQUALS)
           }
-          disabled={window.__isPaused()}
+          disabled={isRecorderDisabled || window.__isPaused()}
+          // disabled={window.__isPaused()}
         >
           {tickMap.value ? "✅" : <CaseSensitive size={18} color="#3b4850" />}
           {/* {tickMap.value ? "✅" : "📝"} */}
@@ -338,10 +368,12 @@ export default function RecorderPanel() {
         <button
           title="More assertions"
           onClick={toggleDrawer}
-          disabled={window.__isPaused()}
+          disabled={isRecorderDisabled || window.__isPaused()}
+          // disabled={window.__isPaused()}
         >
           ⋮
         </button>
+
         {/* <button
           onClick={toggleDeviceMode}
           title={`Switch to ${isMobileRecording ? "desktop" : "mobile"} mode`}
@@ -364,6 +396,18 @@ export default function RecorderPanel() {
           </div>
         )}
       </div>
+
+      {isRecorderDisabled && (
+        <div
+          style={{
+            color: "red",
+            fontStyle: "italic !important",
+            fontSize: "10px !important",
+          }}
+        >
+          Recorder disabled till pages load...
+        </div>
+      )}
     </div>
   );
 }

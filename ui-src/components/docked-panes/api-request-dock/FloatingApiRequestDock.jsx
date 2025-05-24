@@ -23,6 +23,7 @@ export default function FloatingApiRequestDock({ onCancel }) {
   const [apiResponse, setApiResponse] = useState("");
   const [responseJson, setResponseJson] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [saveStepLoading, setSaveStepLoading] = useState(false);
 
   useModeSocket(onCancel);
 
@@ -68,6 +69,7 @@ export default function FloatingApiRequestDock({ onCancel }) {
     setApiResponse("");
     setResponseJson(null);
     setLoading(false);
+    setSaveStepLoading(false);
   };
 
   const handleCancel = () => {
@@ -75,9 +77,10 @@ export default function FloatingApiRequestDock({ onCancel }) {
     onCancel();
   };
 
-  const handleConfirm = () => {
+  const handleConfirm = async () => {
     const responseAsserts = responseJson.filter((v) => v.checked);
-    recordHttpRequest({
+    setSaveStepLoading(true);
+    await recordHttpRequest({
       host,
       path,
       method,
@@ -285,6 +288,12 @@ export default function FloatingApiRequestDock({ onCancel }) {
               <div className="assert-loading-label">Fetching response...</div>
             </div>
           )}
+          {saveStepLoading && (
+            <div className="assert-loading-container">
+              <div className="spinner" />
+              <div className="assert-loading-label">Saving steps...</div>
+            </div>
+          )}
           {addResponseAssertion &&
             apiResponse &&
             (responseJson ? (
@@ -426,7 +435,7 @@ export default function FloatingApiRequestDock({ onCancel }) {
         handleSetAddResponseAssertion={handleSetAddResponseAssertion}
         onCancel={handleCancel}
         onConfirm={handleConfirm}
-        disabled={!isValid}
+        disabled={!isValid || loading || saveStepLoading}
       />
     </div>
   );
