@@ -517,20 +517,101 @@
     observer.observe(target, { childList: true, subtree: true });
   };
 
+  // function isVisible(el) {
+  //   if (!el) return false;
+
+  //   const style = getComputedStyle(el);
+
+  //   return (
+  //     style &&
+  //     style.display !== "none" &&
+  //     style.visibility !== "hidden" &&
+  //     style.opacity !== "0" &&
+  //     el.offsetWidth > 0 &&
+  //     el.offsetHeight > 0 &&
+  //     el.getClientRects().length > 0
+  //   );
+  // }
+
   function isVisible(el) {
-    if (!el) return false;
+    if (!el || !(el instanceof Element)) return false;
 
-    const style = getComputedStyle(el);
+    // 🔒 Basic attribute-level checks
+    if (
+      el.hasAttribute("hidden") ||
+      el.getAttribute("aria-hidden") === "true" ||
+      el.getAttribute("tabindex") === "-1" ||
+      // el.className.includes("sr-only") || // common hiding class
+      el.style.display === "none"
+    ) {
+      return false;
+    }
 
-    return (
-      style &&
-      style.display !== "none" &&
-      style.visibility !== "hidden" &&
-      style.opacity !== "0" &&
-      el.offsetWidth > 0 &&
-      el.offsetHeight > 0 &&
-      el.getClientRects().length > 0
-    );
+    // 💡 Computed styles
+    const style = window.getComputedStyle(el);
+    if (
+      (style && style.display === "none") ||
+      style.visibility === "hidden" ||
+      style.opacity === "0"
+    ) {
+      return false;
+    }
+
+    // 📏 Geometric check
+    if (
+      el.offsetWidth <= 0 ||
+      el.offsetHeight <= 0 ||
+      el.getClientRects().length === 0
+    ) {
+      return false;
+    }
+
+    // 🧭 Check parent chain
+    let parent = el;
+    while ((parent = parent.parentElement)) {
+      // const ps = isVisible(parent);
+      // if (!ps) return false;
+      const ps = window.getComputedStyle(parent);
+
+      // if (
+      //   ps.display === "none" ||
+      //   ps.visibility === "hidden" ||
+      //   ps.opacity === "0"
+      // ) {
+      //   return false;
+      // }
+
+      if (
+        parent.hasAttribute("hidden") ||
+        parent.getAttribute("aria-hidden") === "true" ||
+        parent.getAttribute("tabindex") === "-1" ||
+        // el.className.includes("sr-only") || // common hiding class
+        parent.style.display === "none"
+      ) {
+        return false;
+      }
+
+      // 💡 Computed styles
+
+      if (
+        (ps && ps.display === "none") ||
+        ps.visibility === "hidden" ||
+        ps.opacity === "0"
+      ) {
+        return false;
+      }
+
+      // 📏 Geometric check
+      if (
+        parent.offsetWidth <= 0 ||
+        parent.offsetHeight <= 0 ||
+        parent.getClientRects().length === 0
+      ) {
+        return false;
+      }
+    }
+
+    return true;
   }
 
   function isAttributeUnique(attrName, attrValue, tagName = "*") {
