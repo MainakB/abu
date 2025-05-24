@@ -64,7 +64,7 @@
         action: assertionModes.CLICK,
         el,
         e,
-        text: el.innerText?.trim() || null,
+        text: window.__getTextValueOfEl(el) || el.innerText?.trim() || null,
         elementIndex: -1,
       });
       const { elIndex, refinedAttributes } = window.__searchElIndex(

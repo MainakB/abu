@@ -76,7 +76,7 @@ window.showFloatingAssert = (mode, el, e, type) => {
 
   let textValue = "";
   if (el) {
-    textValue = el.innerText?.trim() || "";
+    textValue = window.__getTextValueOfEl(el) || el.innerText?.trim() || "";
   }
 
   const closeDock = async () => {

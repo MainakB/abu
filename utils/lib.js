@@ -4,8 +4,12 @@ import { program } from "commander";
 import inquirer from "inquirer";
 import { spawn, execSync } from "child_process";
 import chalk from "chalk";
+import { fileURLToPath } from "url";
 
 import { RecorderConfig } from "../servers/RecorderConfig.js";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 let apiServer = null;
 let wsServer = null;
@@ -192,16 +196,25 @@ export const initRecorderConfig = async (recorderConfig) => {
 };
 
 export const startServers = (debugMode) => {
-  apiServer = spawn(
-    "node",
-    ["servers/api-server.js", "--debugMode", debugMode],
-    {
-      stdio: "inherit",
-    }
-  );
-  wsServer = spawn("node", ["servers/ws-server.js", "--debugMode", debugMode], {
+  const apiPath = path.join(__dirname, "../servers", "api-server.js");
+  const wsPath = path.join(__dirname, "../servers", "ws-server.js");
+
+  apiServer = spawn("node", [apiPath, "--debugMode", debugMode], {
     stdio: "inherit",
   });
+  wsServer = spawn("node", [wsPath, "--debugMode", debugMode], {
+    stdio: "inherit",
+  });
+  // apiServer = spawn(
+  //   "node",
+  //   ["servers/api-server.js", "--debugMode", debugMode],
+  //   {
+  //     stdio: "inherit",
+  //   }
+  // );
+  // wsServer = spawn("node", ["servers/ws-server.js", "--debugMode", debugMode], {
+  //   stdio: "inherit",
+  // });
 };
 
 const stopServers = async (debugMode) => {
@@ -630,5 +643,30 @@ export async function gracefulShutdown(exitCode = 0) {
     exitCode = 1;
   } finally {
     process.exit(exitCode);
+  }
+}
+
+export async function getPageTitleWithRetry(
+  page,
+  maxRetries = 3,
+  delayMs = 300
+) {
+  for (let attempt = 1; attempt <= maxRetries; attempt++) {
+    try {
+      const titleRetrieved = await page.title();
+      return titleRetrieved;
+    } catch (err) {
+      const isContextDestroyed = err.message.includes(
+        "Execution context was destroyed"
+      );
+
+      if (!isContextDestroyed || attempt === maxRetries) {
+        return "";
+        // throw err; // rethrow if not recoverable or max attempts reached
+      }
+
+      console.warn(`⚠️ Retry ${attempt}/${maxRetries}: page.title failed`);
+      await new Promise((r) => setTimeout(r, delayMs));
+    }
   }
 }
