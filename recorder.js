@@ -44,6 +44,7 @@ import {
   startAndSaveCliConfig,
   initRecorderConfig,
   gracefulShutdown,
+  getPageTitleWithRetry,
 } from "./utils/lib.js";
 import { ASSERTIONMODES } from "./ui-src/constants/index.js";
 
@@ -153,7 +154,8 @@ context.on("page", async (newPage) => {
   let isManualNewTab = false;
   if (!url.includes("about:blank") && firstUrlCaptured) {
     if (globalRecorderMode.value !== "pause") {
-      const title = await newPage.title();
+      const title = await getPageTitleWithRetry(newPage);
+      // await newPage.title();
       const eventKey = `newPage-${tabId}`;
       if (
         (url && url.includes("//newtab/")) ||
@@ -204,7 +206,8 @@ context.on("page", async (newPage) => {
         // Optional: small buffer
         await newPage.waitForTimeout(500);
 
-        const titleVal = await newPage.title();
+        const titleVal = await getPageTitleWithRetry(newPage);
+        // await newPage.title();
         if (!newPage.isClosed()) {
           await Promise.all([
             injectToLocalStorage(newPage, false),
@@ -247,7 +250,8 @@ firstPage.on("framenavigated", async (frame) => {
       firstUrlCaptured = true;
       await firstPage.waitForLoadState("load");
       await updateInitialRecorderState(firstPage, globalRecorderMode, true);
-      const title = await firstPage.title();
+      const title = await getPageTitleWithRetry(firstPage);
+      // await firstPage.title();
 
       if (recorderConfig.debug)
         console.log("🌐 First page navigation recorded:", url);

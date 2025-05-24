@@ -634,3 +634,28 @@ export async function gracefulShutdown(exitCode = 0) {
     process.exit(exitCode);
   }
 }
+
+export async function getPageTitleWithRetry(
+  page,
+  maxRetries = 3,
+  delayMs = 300
+) {
+  for (let attempt = 1; attempt <= maxRetries; attempt++) {
+    try {
+      const titleRetrieved = await page.title();
+      return titleRetrieved;
+    } catch (err) {
+      const isContextDestroyed = err.message.includes(
+        "Execution context was destroyed"
+      );
+
+      if (!isContextDestroyed || attempt === maxRetries) {
+        return "";
+        // throw err; // rethrow if not recoverable or max attempts reached
+      }
+
+      console.warn(`⚠️ Retry ${attempt}/${maxRetries}: page.title failed`);
+      await new Promise((r) => setTimeout(r, delayMs));
+    }
+  }
+}
