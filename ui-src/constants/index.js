@@ -213,6 +213,7 @@ export const ASSERTIONMODES = {
   CLOSETAB: "CLOSETAB",
   NEWTAB: "NEWTAB",
   FILEUPLOAD: "FILEUPLOAD",
+  DATADRIVEN: "DATADRIVEN",
 };
 
 export const FUNCTIONMAPPER = {
@@ -890,5 +891,9 @@ export const FUNCTIONMAPPER = {
   MATCHATTRIBUTENOTCONTAINS: {
     key: ASSERTIONMODES.MATCHATTRIBUTENOTCONTAINS,
     name: "attribute",
+  },
+  DATADRIVEN: {
+    key: ASSERTIONMODES.DATADRIVEN,
+    name: "placeholder",
   },
 };

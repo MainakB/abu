@@ -8,6 +8,7 @@ import VariableAssignmentList from "./VariableAssignmentList.jsx";
 import DBAssignmentList from "./DBAssignmentList.jsx";
 import { ASSERTIONMODES } from "../../constants/index.js";
 import EmailAssignmentList from "./EmailAssignmentList.jsx";
+import DataDrivenTests from "./DataDrivenTests.jsx";
 // import AIAssistedSearch from "./AIAssistedSearch.jsx";
 
 const ALL_OPTIONS = [
@@ -150,6 +151,7 @@ export default function MoreOptionsDrawer({
           )}
         </div>
         <VariableAssignmentList {...sharedProps} />
+        <DataDrivenTests {...sharedProps} />
         <DBAssignmentList {...sharedProps} />
         <EmailAssignmentList {...sharedProps} />
         <ElementAssertionsList {...sharedProps} />

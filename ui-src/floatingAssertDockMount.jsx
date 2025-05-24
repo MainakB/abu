@@ -33,6 +33,7 @@ import FloatingTitleMatchDock from "./components/docked-panes/title-match/Floati
 import FloatingElementAttrMatchDock from "./components/docked-panes/element-based-match/FloatingElementAttrMatchDock.jsx";
 import FloatingChatWithLLMDock from "./components/docked-panes/ai-chat/FloatingChatWithLLMDock.jsx";
 import FloatingMouseHoverDock from "./components/docked-panes/mouse-actions-dock/FloatingMouseHoverDock.jsx";
+import FloatingDataDrivenDock from "./components/docked-panes/data-driven-dock/FloatingDataDrivenDock.jsx";
 import { ASSERTIONMODES } from "./constants/index.js";
 
 let floatingAssertRoot = null;
@@ -438,6 +439,10 @@ window.showFloatingAssert = (mode, el, e, type) => {
     } else if (type === ASSERTIONMODES.AICHAT) {
       floatingAssertRoot.render(
         <FloatingChatWithLLMDock onCancel={closeDock} />
+      );
+    } else if (type === ASSERTIONMODES.DATADRIVEN) {
+      floatingAssertRoot.render(
+        <FloatingDataDrivenDock onCancel={closeDock} mode={mode} />
       );
     }
   } catch (err) {

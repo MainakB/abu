@@ -2467,4 +2467,17 @@ export const ACTION_HANDLERS = {
       idx,
     ];
   },
+
+  [FUNCTIONMAPPER.DATADRIVEN.key]: (arg, idx) => {
+    return [
+      {
+        step: {
+          dataDriven: true,
+          fileName: arg.fileName,
+          varName: arg.varName,
+        },
+      },
+      idx,
+    ];
+  },
 };

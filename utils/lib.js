@@ -621,3 +621,14 @@ export const exposeContextBindings = async (ctx) => {
 
   await ctx.exposeBinding("__getCookies", async () => ctx.cookies());
 };
+
+export async function gracefulShutdown(exitCode = 0) {
+  try {
+    await stopServers();
+  } catch (error) {
+    console.error("Error during shutdown:", error);
+    exitCode = 1;
+  } finally {
+    process.exit(exitCode);
+  }
+}

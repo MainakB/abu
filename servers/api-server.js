@@ -26,8 +26,8 @@ let locIndex = 1;
 let currentActiveTabId = null;
 let recorderConfig = null;
 
-const EXPORT_VAR_NAME = "abc";
-const IMPORT_LINE = `import {Types} from '../index';`;
+let export_var_name = "";
+const IMPORT_LINE = `import {Types} from '../replace';`;
 
 app.use(express.json());
 app.use((req, res, next) => {
@@ -76,6 +76,7 @@ app.post("/api/recordstep", (req, res) => {
   const data = mapData(req.body, locIndex);
   locIndex = data[1] === locIndex ? locIndex : data[1];
   const dateValue = Date.now();
+
   // writeLiveToFile(req.body.step, "steps.json");
   writeLiveToFile(
     data[0].step,
@@ -93,6 +94,10 @@ app.post("/api/recordstep", (req, res) => {
 
   if (data[0].locator) {
     const locKey = Object.keys(data[0].locator)[0];
+    const locFileName =
+      recorderConfig.locatorFile || `locators_${dateValue}.ts`;
+    const locKeyValue = locFileName.replace(".ts", "").trim();
+    export_var_name = locKeyValue;
     writeLocatorObject(
       locKey,
       Object.values(data[0].locator)[0],
@@ -106,7 +111,9 @@ app.post("/api/recordstep", (req, res) => {
     req.body.browserUrl.startsWith("http")
   ) {
     const urlValue = req.body.browserUrl;
-    const step = data[0].aiStep || data[0].step;
+    const step =
+      data[0].aiStep ||
+      (data[0].step?.dataDriven ? JSON.stringify(data[0].step) : data[0].step);
 
     const metadata = req.body;
     const key = `${urlValue}****${step}`;
@@ -233,28 +240,98 @@ const getFilePath = (FILE_NAME, isLocatorFile) => {
   return filePath;
 };
 
-const writeLiveToFile = (action, fileName, ai) => {
-  let output = "";
+// const writeLiveToFile = (action, fileName, ai) => {
+//   let output = "";
+//   const filePath = getFilePath(fileName, false);
+//   const tagName = recorderConfig.tagName || "@recordedTest";
+//   const featName = recorderConfig.featureName || "Recorded Test Feature";
+//   const scenarioName = recorderConfig.scenarioName || "Recorded Test Scenario";
 
+//   let existing = "";
+//   if (fs.existsSync(filePath)) {
+//     try {
+//       existing = fs.readFileSync(filePath, "utf-8");
+//       if (action?.dataDriven) {
+//         const scenarioReplacement = `@data\nScenario:\n* def ${action.varName} = read("${action.fileName}")\n\n\nScenario Outline:`;
+//         existing = existing.replace("Scenario:", scenarioReplacement);
+//       }
+//     } catch (err) {
+//       console.warn("⚠️ Failed to read existing file:", err);
+//     }
+//   } else {
+//     let scenarioType = "Scenario:";
+//     if (action?.dataDriven) {
+//       scenarioType = `@data\nScenario:\n* def ${action.varName} = read("${action.fileName}")\n\n\nScenario Outline:`;
+//     }
+//     output = `${tagName}\nFeature: ${featName}\n\n${scenarioType} ${scenarioName}\n`;
+//   }
+
+//   let updated =
+//     existing.trim() + "\n" + (action?.dataDriven ? "" : action) + "\n";
+
+//   if (action?.dataDriven) {
+//     updated =
+//       updated + "\n\n\n" + `Examples:\n| abc.data.${action.varName} |`;
+//   }
+
+//   fs.writeFileSync(filePath, output + updated);
+// };
+
+const writeLiveToFile = (action, fileName, ai) => {
   const filePath = getFilePath(fileName, false);
   const tagName = recorderConfig.tagName || "@recordedTest";
   const featName = recorderConfig.featureName || "Recorded Test Feature";
   const scenarioName = recorderConfig.scenarioName || "Recorded Test Scenario";
 
   let existing = "";
+  let isDataDriven = typeof action === "object" && action.dataDriven;
+  let newStep = typeof action === "string" ? action : "";
+
+  // 🔁 File already exists
   if (fs.existsSync(filePath)) {
     try {
       existing = fs.readFileSync(filePath, "utf-8");
+
+      // ✅ Handle data-driven replacement
+      if (isDataDriven) {
+        const scenarioReplacement = `@data\nScenario:\n* def ${action.varName} = read("${action.fileName}")\n\n\nScenario Outline:`;
+        existing = existing.replace("Scenario:", scenarioReplacement);
+
+        if (!existing.includes("Examples:")) {
+          existing += `\n\nExamples:\n| replace.${action.varName} |`;
+        }
+      }
+
+      // ✅ Insert step (only if it's not data-driven)
+      if (!isDataDriven && newStep) {
+        const examplesIndex = existing.indexOf("Examples:");
+        if (examplesIndex !== -1) {
+          const before = existing.slice(0, examplesIndex).trimEnd();
+          const after = existing.slice(examplesIndex);
+          existing = `${before}\n  ${newStep}\n\n${after}`;
+        } else {
+          // Fallback if Examples not found
+          existing = existing.trimEnd() + `\n  ${newStep}`;
+        }
+      }
+
+      fs.writeFileSync(filePath, existing);
     } catch (err) {
-      console.warn("⚠️ Failed to read existing file:", err);
+      console.warn("⚠️ Failed to read/write existing file:", err);
     }
   } else {
-    output = `${tagName}\nFeature: ${featName}\n\nScenario: ${scenarioName}\n`;
+    // 🆕 File doesn't exist
+    let output = `${tagName}\nFeature: ${featName}\n\n`;
+
+    if (isDataDriven) {
+      output += `@data\nScenario:\n* def ${action.varName} = read("${action.fileName}")\n\n\nScenario Outline: ${scenarioName}\n`;
+      output += `\nExamples:\n| somekey.${action.varName} |`;
+    } else {
+      output += `Scenario: ${scenarioName}\n  ${newStep}`;
+    }
+
+    fs.writeFileSync(filePath, output);
   }
-
-  const updated = existing.trim() + "\n" + action + "\n";
-
-  fs.writeFileSync(filePath, output + updated);
 };
 
 const writeLocatorObject = (locatorId, locatorBlock, fileName) => {
@@ -300,7 +377,7 @@ const writeLocatorObject = (locatorId, locatorBlock, fileName) => {
   // Output the final .ts content
   const output = `${IMPORT_LINE}
 
-export const ${EXPORT_VAR_NAME}: Types.ILocatorMetadataObject = ${objectStr};
+export const ${export_var_name}: Types.ILocatorMetadataObject = ${objectStr};
 `;
 
   fs.writeFileSync(filePath, output);

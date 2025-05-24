@@ -107,7 +107,8 @@
           mode === assertionModes.ASSERTPDFCOMPARISON ||
           mode === assertionModes.ASSERTTEXTIMAGESINPDF ||
           mode === assertionModes.ASSERTCPDPDF ||
-          mode === assertionModes.GETDBVALUE
+          mode === assertionModes.GETDBVALUE ||
+          mode === assertionModes.DATADRIVEN
         ) {
           assertBox.style.display = "none";
           hoverTarget = null;
@@ -193,7 +194,8 @@
           mode === assertionModes.ASSERTPDFCOMPARISON ||
           mode === assertionModes.ASSERTTEXTIMAGESINPDF ||
           mode === assertionModes.ASSERTCPDPDF ||
-          mode === assertionModes.GETDBVALUE
+          mode === assertionModes.GETDBVALUE ||
+          mode === assertionModes.DATADRIVEN
         ) {
           assertBox.style.display = "none";
           hoverTarget = null;

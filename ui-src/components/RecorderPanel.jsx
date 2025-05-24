@@ -27,6 +27,7 @@ export default function RecorderPanel() {
     varAssignments: false,
     dbAssignments: false,
     emailAssignments: false,
+    dataDriven: false,
   });
 
   useEffect(() => {
@@ -192,6 +193,7 @@ export default function RecorderPanel() {
       varAssignments: false,
       dbAssignments: false,
       emailAssignments: false,
+      dataDriven: false,
     });
   };
 
@@ -289,6 +291,7 @@ export default function RecorderPanel() {
         varAssignments: section === "varAssignments",
         dbAssignments: section === "dbAssignments",
         emailAssignments: section === "emailAssignments",
+        dataDriven: section === "dataDriven",
       };
     });
   };

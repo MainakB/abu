@@ -1620,3 +1620,15 @@ export const onConfirmPageTitleMatch = ({
   );
   onCancel();
 };
+
+export const recordDataDrivenStep = async ({ fileName, varName, onCancel }) => {
+  await window.__recordAction(
+    window.__buildData({
+      action: "assert",
+      assertion: ASSERTIONMODES.DATADRIVEN,
+      varName,
+      fileName,
+    })
+  );
+  onCancel();
+};

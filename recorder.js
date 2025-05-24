@@ -1,4 +1,29 @@
 #!/usr/bin/env node
+
+// Handle Ctrl+C (SIGINT)
+process.on("SIGINT", () => {
+  console.log("Received SIGINT. Shutting down gracefully...");
+  gracefulShutdown(0);
+});
+
+// Handle termination (SIGTERM)
+process.on("SIGTERM", () => {
+  console.log("Received SIGTERM. Shutting down gracefully...");
+  gracefulShutdown(0);
+});
+
+// Handle uncaught exceptions
+process.on("uncaughtException", (err) => {
+  console.error("Uncaught Exception:", err);
+  gracefulShutdown(1);
+});
+
+// Handle unhandled promise rejections
+process.on("unhandledRejection", (reason, promise) => {
+  console.error("Unhandled Rejection at:", promise, "reason:", reason);
+  gracefulShutdown(1);
+});
+
 import fs from "fs";
 import path from "path";
 import { chromium } from "playwright";
@@ -6,7 +31,6 @@ import { fileURLToPath } from "url";
 import WebSocket from "ws";
 import { dirname } from "path";
 import { v4 as uuidv4 } from "uuid";
-
 import {
   ensureChromiumInstalled,
   injectToLocalStorage,
@@ -19,6 +43,7 @@ import {
   startServers,
   startAndSaveCliConfig,
   initRecorderConfig,
+  gracefulShutdown,
 } from "./utils/lib.js";
 import { ASSERTIONMODES } from "./ui-src/constants/index.js";
 
