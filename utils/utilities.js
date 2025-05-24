@@ -22,13 +22,14 @@
     // 1. Look for <label for="...">
     if (el.id) {
       const label = document.querySelector(`label[for="${CSS.escape(el.id)}"]`);
-      if (label?.innerText?.trim()) return label.innerText.trim();
+      if (label?.innerText?.trim())
+        return window.__getTextValueOfEl(el) || label.innerText.trim();
     }
 
     // 2. Check if element is nested inside a <label>
     let parent = el.closest("label");
     if (parent?.innerText?.trim()) {
-      return parent.innerText.trim();
+      return window.__getTextValueOfEl(parent) || parent.innerText.trim();
     }
 
     // 3. Look for aria-labelledby reference
@@ -36,7 +37,10 @@
     if (ariaLabelledBy) {
       const ids = ariaLabelledBy.split(/\s+/);
       const labelTexts = ids
-        .map((id) => document.getElementById(id)?.innerText?.trim())
+        .map((id) => {
+          const elm = document.getElementById(id);
+          return window.__getTextValueOfEl(elm) || elm?.innerText?.trim();
+        })
         .filter(Boolean);
       if (labelTexts.length) return labelTexts.join(" ");
     }
@@ -195,6 +199,16 @@
       .map((device) => device.name);
   }
 
+  window.__getTextValueOfEl = (el) => {
+    if (el && el.childNodes)
+      return Array.from(el.childNodes)
+        .filter((n) => n.nodeType === Node.TEXT_NODE)
+        .map((n) => n.textContent.trim())
+        .join(" ")
+        .trim();
+    return null;
+  };
+
   window.__buildData = ({
     action,
     assertion,
@@ -248,9 +262,6 @@
 
     let selectors = null;
     let attributes = null;
-    if (el) {
-      ({ selectors, attributes } = window.__getSelectors(el));
-    }
 
     let elIndexValue = -1;
     if (e && el && el.tagName) {
@@ -260,6 +271,10 @@
         el.tagName.toLowerCase()
       );
       elIndexValue = elIndex;
+    }
+
+    if (el) {
+      ({ selectors, attributes } = window.__getSelectors(el, elIndexValue));
     }
     const browserUrl = window.location.href;
 
@@ -276,7 +291,11 @@
       ...buildOptionalField("value", value),
       ...buildOptionalField(
         "text",
-        text || el?.innerText?.trim() || el?.getAttribute("value") || ""
+        text ||
+          window.__getTextValueOfEl(el) ||
+          el?.innerText?.trim() ||
+          el?.getAttribute("value") ||
+          ""
       ),
       ...buildOptionalField("keyPressed", keyPressed),
       ...buildOptionalField("cookieName", cookieName),
@@ -518,19 +537,54 @@
   };
 
   function isVisible(el) {
-    if (!el) return false;
+    if (!el || !(el instanceof Element)) return false;
 
-    const style = getComputedStyle(el);
+    // 🔒 Basic attribute-level checks
+    if (
+      el.hasAttribute("hidden") ||
+      el.getAttribute("aria-hidden") === "true" ||
+      el.getAttribute("tabindex") === "-1" ||
+      // el.className.includes("sr-only") || // common hiding class
+      el.style.display === "none"
+    ) {
+      return false;
+    }
 
-    return (
-      style &&
-      style.display !== "none" &&
-      style.visibility !== "hidden" &&
-      style.opacity !== "0" &&
-      el.offsetWidth > 0 &&
-      el.offsetHeight > 0 &&
-      el.getClientRects().length > 0
-    );
+    // 💡 Computed styles
+    const style = window.getComputedStyle(el);
+    if (
+      (style && style.display === "none") ||
+      style.visibility === "hidden" ||
+      style.opacity === "0"
+    ) {
+      return false;
+    }
+
+    // 📏 Geometric check
+    if (
+      el.offsetWidth <= 0 ||
+      el.offsetHeight <= 0 ||
+      el.getClientRects().length === 0
+    ) {
+      return false;
+    }
+
+    // 🧭 Check parent chain
+    let parent = el;
+    while ((parent = parent.parentElement)) {
+      const ps = isVisible(parent);
+      if (!ps) return false;
+      // const ps = window.getComputedStyle(parent);
+      // if (
+      //   ps.display === "none" ||
+      //   ps.visibility === "hidden" ||
+      //   ps.opacity === "0"
+      // ) {
+      //   return false;
+      // }
+    }
+
+    return true;
   }
 
   function isAttributeUnique(attrName, attrValue, tagName = "*") {
@@ -598,7 +652,11 @@
 
     const targetText = attributes.associatedLabel.trim().toLowerCase();
     const matches = Array.from(document.querySelectorAll(tagName)).filter(
-      (el) => isVisible(el) && el.innerText?.trim().toLowerCase() === targetText
+      (el) =>
+        isVisible(el) &&
+        (
+          window.__getTextValueOfEl(el) || el.innerText?.trim()
+        ).toLowerCase() === targetText
     );
 
     if (matches.length === 1 && isHumanReadable(attributes.associatedLabel)) {

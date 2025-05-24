@@ -202,7 +202,7 @@ const constructLocators = (arg, locatorIndex) => {
 
   const result = {
     [locKeyName]: {
-      poParentObject: "__fileName",
+      poParentObject: "__filename",
       description: `${arg.tagName} tag${descText}`,
       locator,
     },

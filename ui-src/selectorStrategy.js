@@ -1,5 +1,5 @@
 (() => {
-  window.__getSelectors = (el) => {
+  window.__getSelectors = (el, elIndexValue) => {
     const selectors = {};
     const attributes = {};
 
@@ -30,8 +30,12 @@
     selectors.href =
       el.tagName.toLowerCase() === "a" ? `${el.getAttribute("href")}` : null;
     selectors.css = getCssSelector(el);
-    let xpathText = generateTextBasedXpath(el);
-    selectors.xpath = [generateXPath(el), ...(xpathText ? [xpathText] : [])]; // Last resort
+    let xpathText = generateTextBasedXpath(el, elIndexValue);
+    selectors.xpath = [
+      getPathTo(el),
+      generateXPath(el),
+      ...(xpathText ? [xpathText] : []),
+    ]; // Last resort
     const iFramesPath = getIframePath(el);
     selectors.iframes = iFramesPath;
     selectors.iframeDepth =
@@ -73,10 +77,13 @@
     }`;
   };
 
-  const generateTextBasedXpath = (el) => {
+  const generateTextBasedXpath = (el, elIndexValue) => {
     let textValue = null;
     try {
-      let elText = el.innerText?.trim() || el.textContent?.trim();
+      let elText =
+        window.__getTextValueOfEl(el) ||
+        el.innerText?.trim() ||
+        el.textContent?.trim();
       if (elText && elText !== "") {
         let className = getUniqueClass(el);
         let id = el.id;
@@ -89,7 +96,7 @@
         }
       }
     } catch (e) {}
-    return textValue;
+    return elIndexValue >= 0 ? `(${textValue})[${elIndexValue}]` : textValue;
   };
 
   const getShadowRoot = (el) => {
@@ -165,5 +172,37 @@
       console.warn("⚠️ Failed to get iframe path:", err.message);
       return [];
     }
+  }
+
+  function getPathTo(element) {
+    if (!element || element.nodeType !== 1) return "";
+
+    if (element.id) {
+      // Shortcut for unique ID
+      return `id("${element.id}")`;
+    }
+
+    if (element === document.body) {
+      return "/html/body";
+    }
+
+    let ix = 1; // XPath index starts at 1
+    let siblings = element.parentNode ? element.parentNode.children : [];
+
+    for (let i = 0; i < siblings.length; i++) {
+      if (siblings[i] === element) break;
+      if (siblings[i].nodeName === element.nodeName) {
+        ix++;
+      }
+    }
+
+    return (
+      getPathTo(element.parentNode) +
+      "/" +
+      element.tagName.toLowerCase() +
+      "[" +
+      ix +
+      "]"
+    );
   }
 })();
