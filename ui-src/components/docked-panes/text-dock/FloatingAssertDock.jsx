@@ -4,22 +4,22 @@ import ConfirmCancelFooter from "../confirm-cancel-footer/ConfirmCancelFooter.js
 import { useModeSocket } from "../../../hooks/useModeSocket.js";
 import { floatingAssertDockAssertTxtOnConfirm } from "../../../../utils/componentLibs.js";
 
-function getOwnText(el) {
-  try {
-    if (!el) return "";
+// function getOwnText(el) {
+//   try {
+//     if (!el) return "";
 
-    const textValue = [...el.childNodes]
-      .filter((n) => n.nodeType === Node.TEXT_NODE)
-      .map((n) => n.textContent.trim())
-      .join(" ")
-      .trim();
+//     const textValue = [...el.childNodes]
+//       .filter((n) => n.nodeType === Node.TEXT_NODE)
+//       .map((n) => n.textContent.trim())
+//       .join(" ")
+//       .trim();
 
-    return textValue || el.innerText?.trim() || "";
-  } catch (err) {
-    console.warn("getOwnText failed:", err);
-    return "";
-  }
-}
+//     return textValue || el.innerText?.trim() || "";
+//   } catch (err) {
+//     console.warn("getOwnText failed:", err);
+//     return "";
+//   }
+// }
 
 export default function FloatingAssertDock({
   el,
@@ -30,7 +30,7 @@ export default function FloatingAssertDock({
 }) {
   useModeSocket(onCancel);
   const [expected, setExpected] = useState(() => {
-    if (mode === ASSERTIONMODES.ASSERTTEXTEQUALS) return getOwnText(el);
+    if (mode === ASSERTIONMODES.ASSERTTEXTEQUALS) return textValue || "";
     if (mode === ASSERTIONMODES.ASSERTVALUEEQUALS)
       return el?.value || el?.getAttribute("value") || "";
     return "";

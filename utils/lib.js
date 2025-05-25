@@ -225,6 +225,17 @@ const stopServers = async (debugMode) => {
 
   apiServer.kill(); // 3111
   wsServer.kill(); // 8787
+  //delete .recording_metadata folder if exists
+  const metadataDir = path.join(process.cwd(), ".recording_metadata");
+  if (fs.existsSync(metadataDir)) {
+    try {
+      fs.rmSync(metadataDir, { recursive: true, force: true });
+      if (debugMode) console.log("🧹 Deleted .recording_metadata folder.");
+    } catch (err) {
+      console.error("❌ Failed to delete .recording_metadata:", err);
+    }
+  }
+
   process.exit(0);
 };
 
@@ -441,7 +452,8 @@ export const exposeRecorderControls = async (
     if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
 
     await fs.promises.writeFile(filePath, JSON.stringify(sorted, null, 2));
-    const testCommand = `"npx abc --customer=${recorderConfig.customerName} --tags=${recorderConfig.tagName} --platform=dev"`;
+    const tagNameValue = recorderConfig.tagName || "@recordedTest";
+    const testCommand = `"npx abc --customer=${recorderConfig.customerName} --tags=${tagNameValue} --platform=dev"`;
 
     if (recorderConfig.debug) {
       console.log(

@@ -16,6 +16,8 @@
   //   return labelEl?.innerText?.trim() || null;
   // };
 
+  const normalized = (s) => s.replace(/\s+/g, " ").trim();
+
   function getAssociatedLabel(el) {
     if (!el) return null;
 
@@ -572,9 +574,10 @@
     // 🧭 Check parent chain
     let parent = el;
     while ((parent = parent.parentElement)) {
-      const ps = isVisible(parent);
-      if (!ps) return false;
-      // const ps = window.getComputedStyle(parent);
+      // const ps = isVisible(parent);
+      // if (!ps) return false;
+      const ps = window.getComputedStyle(parent);
+
       // if (
       //   ps.display === "none" ||
       //   ps.visibility === "hidden" ||
@@ -582,27 +585,67 @@
       // ) {
       //   return false;
       // }
+
+      if (
+        parent.hasAttribute("hidden") ||
+        parent.getAttribute("aria-hidden") === "true" ||
+        parent.getAttribute("tabindex") === "-1" ||
+        // el.className.includes("sr-only") || // common hiding class
+        parent.style.display === "none"
+      ) {
+        return false;
+      }
+
+      // 💡 Computed styles
+
+      if (
+        (ps && ps.display === "none") ||
+        ps.visibility === "hidden" ||
+        ps.opacity === "0"
+      ) {
+        return false;
+      }
+
+      // 📏 Geometric check
+      if (
+        parent.offsetWidth <= 0 ||
+        parent.offsetHeight <= 0 ||
+        parent.getClientRects().length === 0
+      ) {
+        return false;
+      }
     }
 
     return true;
   }
 
-  function isAttributeUnique(attrName, attrValue, tagName = "*") {
+  function isAttributeUnique(attrName, attrValue, textValue, tagName = "*") {
     if (!attrValue) return null;
 
     const selector = `${tagName}[${CSS.escape(attrName)}="${attrValue}"]`;
-    const matches = Array.from(document.querySelectorAll(selector)).filter(
-      isVisible
-    );
+    let matches = Array.from(document.querySelectorAll(selector));
+    if (textValue && typeof textValue === "string") {
+      matches = matches.filter(
+        (el) =>
+          normalized(window.__getTextValueOfEl(el)) === normalized(textValue)
+      );
+    }
+
+    matches = matches.filter(isVisible);
 
     return matches.length === 1 ? matches[0] : null;
   }
 
-  function getVisibleIndex(target, tagType = "input") {
-    const visibleElements = Array.from(
-      document.querySelectorAll(tagType)
-    ).filter(isVisible);
-    return visibleElements.indexOf(target);
+  function getVisibleIndex(target, textValue, tagType = "input") {
+    let visibleElements = Array.from(document.querySelectorAll(tagType));
+    if (textValue && typeof textValue === "string") {
+      visibleElements = visibleElements.filter(
+        (el) =>
+          normalized(window.__getTextValueOfEl(el)) === normalized(textValue)
+      );
+    }
+    visibleElements = visibleElements.filter(isVisible);
+    return visibleElements.length > 1 ? visibleElements.indexOf(target) : -1;
   }
 
   function isHumanReadable(value) {
@@ -622,7 +665,7 @@
     );
   }
 
-  function getAllUniqueHumanReadableAttributes(attributes, tagName) {
+  function getAllUniqueHumanReadableAttributes(attributes, tagName, textValue) {
     const refined = {};
 
     const priorityAttrs = [
@@ -637,7 +680,7 @@
       const value = attributes[attr];
       if (
         value &&
-        isAttributeUnique(attr, value, tagName) &&
+        isAttributeUnique(attr, value, textValue, tagName) &&
         isHumanReadable(value)
       ) {
         refined[attr] = value;
@@ -668,10 +711,12 @@
 
   const isTextUniqueWithinSelector = (cssSelector, targetText) => {
     const candidates = Array.from(document.querySelectorAll(cssSelector));
-    const normalized = (s) => s.replace(/\s+/g, " ").trim();
+    // const normalized = (s) => s.replace(/\s+/g, " ").trim();
 
     const matches = candidates.filter(
-      (el) => normalized(el.textContent) === normalized(targetText)
+      // (el) => normalized(el.textContent) === normalized(targetText)
+      (el) =>
+        normalized(window.__getTextValueOfEl(el)) === normalized(targetText)
     );
     // return {
     //   count: matches.length,
@@ -697,7 +742,8 @@
 
       const refinedAttributes = getAllUniqueHumanReadableAttributes(
         attributes,
-        tagType
+        tagType,
+        buildData.text
       );
 
       if (isTextUnique)
@@ -715,7 +761,7 @@
         };
       }
 
-      const index = getVisibleIndex(target, tagType);
+      const index = getVisibleIndex(target, buildData.text, tagType);
       return {
         elIndex: index,
         refinedAttributes: attributes,
@@ -732,7 +778,8 @@
   window.__searchElIndexByOccurence = (target, tagType) => {
     try {
       if (!target || !tagType) return { elIndex: -1 };
-      const index = getVisibleIndex(target, tagType);
+      const textValue = window.__getTextValueOfEl(target);
+      const index = getVisibleIndex(target, textValue, tagType);
       return {
         elIndex: index,
       };

@@ -248,7 +248,6 @@ firstPage.on("framenavigated", async (frame) => {
     const url = frame.url();
     if (!url.includes("about:blank") && !firstUrlCaptured) {
       await onPageLoadSetRecorderState(true);
-      console.log("onPageLoadSetRecorderState true");
       firstUrlCaptured = true;
       fetch("http://localhost:3111/record", {
         method: "POST",
@@ -289,7 +288,6 @@ firstPage.on("framenavigated", async (frame) => {
       //     timestamp: Date.now(),
       //   }),
       // });
-      console.log("onPageLoadSetRecorderState false");
       await onPageLoadSetRecorderState(false);
     }
   }

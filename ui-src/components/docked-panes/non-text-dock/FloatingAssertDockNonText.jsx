@@ -4,14 +4,6 @@ import ConfirmCancelFooter from "../confirm-cancel-footer/ConfirmCancelFooter.js
 import { useModeSocket } from "../../../hooks/useModeSocket.js";
 import { floatingAssertDockNonTextConfirm } from "../../../../utils/componentLibs.js";
 
-function getOwnText(el) {
-  return [...el.childNodes]
-    .filter((n) => n.nodeType === Node.TEXT_NODE)
-    .map((n) => n.textContent.trim())
-    .join(" ")
-    .trim();
-}
-
 function getHeader(type) {
   const base = "Assert Element Is";
   if (type === ASSERTIONMODES.ASSERTVISIBILITY) return `${base} Visible`;

@@ -1,5 +1,68 @@
 import converter from "number-to-words";
+import fs from "fs";
+import path from "path";
+import crypto from "crypto";
 import { FUNCTIONMAPPER } from "../ui-src/constants/index.js";
+
+const metadataDir = path.join(process.cwd(), ".recording_metadata");
+const hashFile = path.join(metadataDir, "locator-hash.json");
+
+function stableStringify(obj) {
+  if (Array.isArray(obj)) {
+    return `[${obj.map(stableStringify).join(",")}]`;
+  } else if (obj && typeof obj === "object") {
+    return `{${Object.keys(obj)
+      .sort()
+      .map((key) => `"${key}":${stableStringify(obj[key])}`)
+      .join(",")}}`;
+  } else {
+    return JSON.stringify(obj);
+  }
+}
+
+function hashValueObject(valueObject) {
+  const str = stableStringify(valueObject); // stable hash
+  return crypto.createHash("sha256").update(str).digest("hex");
+}
+
+function writeLocatorHash(key, valueObject) {
+  const hash = hashValueObject(valueObject);
+
+  // Ensure folder exists
+  if (!fs.existsSync(metadataDir)) {
+    fs.mkdirSync(metadataDir, { recursive: true });
+  }
+
+  // Read existing content if any
+  let existing = {};
+  if (fs.existsSync(hashFile)) {
+    try {
+      existing = JSON.parse(fs.readFileSync(hashFile, "utf-8"));
+    } catch (err) {
+      console.warn(
+        "⚠️ Could not parse existing locator-hash.json. Starting fresh."
+      );
+    }
+  }
+
+  // Write or update
+  existing[hash] = key;
+  fs.writeFileSync(hashFile, JSON.stringify(existing, null, 2), "utf-8");
+}
+
+function lookupLocatorHash(valueObject) {
+  const hash = hashValueObject(valueObject);
+
+  if (!fs.existsSync(hashFile)) return null;
+
+  try {
+    const content = JSON.parse(fs.readFileSync(hashFile, "utf-8"));
+    return content[hash] || null;
+  } catch (err) {
+    console.warn("⚠️ Could not read locator-hash.json:", err);
+    return null;
+  }
+}
 
 const getLocObject = (keyName, value) => {
   if (Array.isArray(value)) {
@@ -30,7 +93,7 @@ const getCamelCasedLocName = (input) => {
     .map((word, index) =>
       index === 0
         ? word.toLowerCase()
-        : word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
+        : word.charAt(0).toLowerCase() + word.slice(1).toLowerCase()
     )
     .join("");
 
@@ -125,6 +188,9 @@ function isPossiblyHidden(attributes = {}) {
   );
 }
 
+const textBasedLocNames = [];
+const checkIfLocNameUsed = (locName) => textBasedLocNames.includes(locName);
+
 const constructLocators = (arg, locatorIndex) => {
   const argSelectors = arg.selectors;
   const attr = arg.attributes;
@@ -136,8 +202,8 @@ const constructLocators = (arg, locatorIndex) => {
   for (let key of keys) {
     if (
       (key === "id" ||
-        key === "name" ||
         key === "xpath" ||
+        key === "name" ||
         key === "css" ||
         key === "className") &&
       argSelectors[key] &&
@@ -192,7 +258,13 @@ const constructLocators = (arg, locatorIndex) => {
       locNameCamelCased.length < 34
     ) {
       locKeyName = `loc_${locNameCamelCased}`;
-      locNameUpdated = true;
+      const isLocPresent = checkIfLocNameUsed(locKeyName);
+      if (isLocPresent) {
+        locKeyName = `${locKeyName}_${locatorIndex}`;
+      } else {
+        textBasedLocNames.push(locKeyName);
+        locNameUpdated = true;
+      }
     }
   }
   let descText =
@@ -200,12 +272,26 @@ const constructLocators = (arg, locatorIndex) => {
       ? ` for ${arg.text}`
       : "";
 
+  const locObjectCreated = {
+    poParentObject: "__filename",
+    description: `${arg.tagName} tag${descText}`,
+    locator,
+  };
+
+  const locPresent = lookupLocatorHash(locObjectCreated);
+  if (locPresent) {
+    locKeyName = locPresent;
+    locNameUpdated = true;
+  } else {
+    writeLocatorHash(locKeyName, locObjectCreated);
+  }
   const result = {
-    [locKeyName]: {
-      poParentObject: "__filename",
-      description: `${arg.tagName} tag${descText}`,
-      locator,
-    },
+    [locKeyName]: { ...locObjectCreated },
+    // {
+    //   poParentObject: "__filename",
+    //   description: `${arg.tagName} tag${descText}`,
+    //   locator,
+    // },
   };
   let newIdx = locatorIndex + (locNameUpdated ? 0 : 1);
   return { result, newIdx, locKeyName };
