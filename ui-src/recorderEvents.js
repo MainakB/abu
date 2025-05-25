@@ -32,6 +32,8 @@
             e,
             value: finalValue,
             elementIndex: -1,
+            clearInput:
+              typeof initialValue === "string" && initialValue.trim() !== "",
           });
           const { elIndex, refinedAttributes } = window.__searchElIndex(
             e.target,
@@ -110,6 +112,8 @@
             value: finalValue,
             keyPressed: "Enter",
             elementIndex: -1,
+            clearInput:
+              typeof initialValue === "string" && initialValue.trim() !== "",
           });
           const { elIndex, refinedAttributes } = window.__searchElIndex(
             e.target,
@@ -140,6 +144,8 @@
             e,
             value: finalValue,
             elementIndex: -1,
+            clearInput:
+              typeof initialValue === "string" && initialValue.trim() !== "",
           });
           const { elIndex, refinedAttributes } = window.__searchElIndex(
             e.target,

@@ -230,7 +230,7 @@ export const FUNCTIONMAPPER = {
   CLICK: { key: ASSERTIONMODES.CLICK, name: "click" },
   JSCLICK: { key: ASSERTIONMODES.JSCLICK, name: "jsClick" },
   HOVER: { key: ASSERTIONMODES.HOVER, name: "mouseHover" },
-  INPUT: { key: ASSERTIONMODES.INPUT, name: "input" },
+  INPUT: { key: ASSERTIONMODES.INPUT, name: "input", altName: "clearInput" },
   SELECT: {
     key: ASSERTIONMODES.SELECT,
     name: "dropdown",

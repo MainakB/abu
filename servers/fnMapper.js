@@ -483,15 +483,20 @@ export const ACTION_HANDLERS = {
     const inputLabelToUse = inputLabel ? `"${inputLabel}" ` : "";
 
     const ordinalPrefix = getOrdinalIndex(arg);
+    const inputFnName = arg.clearInput
+      ? FUNCTIONMAPPER.INPUT.altName
+      : FUNCTIONMAPPER.INPUT.name;
+
+    const aiInputClearIndicator = arg.clearInput ? "clear and " : "";
 
     return [
       {
-        step: `And ${FUNCTIONMAPPER.INPUT.name}({po:"${loc.locKeyName}", txt:"${arg.value}"${doEnterAfterInput}})`,
+        step: `And ${inputFnName}({po:"${loc.locKeyName}", txt:"${arg.value}"${doEnterAfterInput}})`,
         aiStep:
           arg.value && arg.keyPressed && arg.keyPressed === "Enter"
-            ? `And type "${arg.value}" to the ${ordinalPrefix}${inputLabelToUse}input field and hit enter`
+            ? `And ${aiInputClearIndicator}type "${arg.value}" to the ${ordinalPrefix}${inputLabelToUse}input field and hit enter`
             : arg.value
-            ? `And type "${arg.value}" to the ${ordinalPrefix}${inputLabelToUse}input field`
+            ? `And ${aiInputClearIndicator}type "${arg.value}" to the ${ordinalPrefix}${inputLabelToUse}input field`
             : null,
         locator: loc.result,
       },

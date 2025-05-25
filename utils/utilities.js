@@ -249,7 +249,7 @@
     httpPath,
     httpUrl,
     isReassignVar,
-
+    clearInput,
     emailServerId,
     emailSubject,
     emailSentFrom,
@@ -323,7 +323,7 @@
       ...buildOptionalField("httpUrl", httpUrl),
       ...buildOptionalField("isFileUpload", isFileUpload),
       ...buildOptionalField("fileNames", fileNames),
-
+      ...buildOptionalField("clearInput", clearInput),
       ...buildOptionalField("emailServerId", emailServerId),
       ...buildOptionalField("emailSubject", emailSubject),
       ...buildOptionalField("emailSentFrom", emailSentFrom),
