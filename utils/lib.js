@@ -217,7 +217,7 @@ export const startServers = (debugMode) => {
   // });
 };
 
-const stopServers = async (debugMode) => {
+const postRecordingCleanup = async (debugMode) => {
   if (debugMode) console.log("🛑 Shutting down servers...");
   await fetch("http://localhost:3111/api/flushQueue", {
     headers: { "Content-Type": "application/json" },
@@ -235,7 +235,27 @@ const stopServers = async (debugMode) => {
       console.error("❌ Failed to delete .recording_metadata:", err);
     }
   }
+};
 
+const stopServers = async (debugMode) => {
+  // if (debugMode) console.log("🛑 Shutting down servers...");
+  // await fetch("http://localhost:3111/api/flushQueue", {
+  //   headers: { "Content-Type": "application/json" },
+  // });
+
+  // apiServer.kill(); // 3111
+  // wsServer.kill(); // 8787
+  // //delete .recording_metadata folder if exists
+  // const metadataDir = path.join(process.cwd(), ".recording_metadata");
+  // if (fs.existsSync(metadataDir)) {
+  //   try {
+  //     fs.rmSync(metadataDir, { recursive: true, force: true });
+  //     if (debugMode) console.log("🧹 Deleted .recording_metadata folder.");
+  //   } catch (err) {
+  //     console.error("❌ Failed to delete .recording_metadata:", err);
+  //   }
+  // }
+  await postRecordingCleanup(debugMode);
   process.exit(0);
 };
 
@@ -649,9 +669,8 @@ export const exposeContextBindings = async (ctx) => {
 
 export async function gracefulShutdown(exitCode = 0) {
   try {
-    await stopServers();
+    await postRecordingCleanup(true);
   } catch (error) {
-    console.error("Error during shutdown:", error);
     exitCode = 1;
   } finally {
     process.exit(exitCode);

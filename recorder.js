@@ -1,29 +1,4 @@
 #!/usr/bin/env node
-
-// Handle Ctrl+C (SIGINT)
-process.on("SIGINT", () => {
-  console.log("Received SIGINT. Shutting down gracefully...");
-  gracefulShutdown(0);
-});
-
-// Handle termination (SIGTERM)
-process.on("SIGTERM", () => {
-  console.log("Received SIGTERM. Shutting down gracefully...");
-  gracefulShutdown(0);
-});
-
-// Handle uncaught exceptions
-process.on("uncaughtException", (err) => {
-  console.error("Uncaught Exception:", err);
-  gracefulShutdown(1);
-});
-
-// Handle unhandled promise rejections
-process.on("unhandledRejection", (reason, promise) => {
-  console.error("Unhandled Rejection at:", promise, "reason:", reason);
-  gracefulShutdown(1);
-});
-
 import fs from "fs";
 import path from "path";
 import { chromium } from "playwright";
@@ -47,6 +22,30 @@ import {
   getPageTitleWithRetry,
 } from "./utils/lib.js";
 import { ASSERTIONMODES } from "./ui-src/constants/index.js";
+
+// Handle Ctrl+C (SIGINT)
+process.on("SIGINT", async () => {
+  console.log("Received SIGINT. Shutting down gracefully...");
+  await gracefulShutdown(0);
+});
+
+// Handle termination (SIGTERM)
+process.on("SIGTERM", async () => {
+  console.log("Received SIGTERM. Shutting down gracefully...");
+  await gracefulShutdown(0);
+});
+
+// Handle uncaught exceptions
+process.on("uncaughtException", async (err) => {
+  console.error("Uncaught Exception:", err);
+  await gracefulShutdown(1);
+});
+
+// Handle unhandled promise rejections
+process.on("unhandledRejection", async (reason, promise) => {
+  console.error("Unhandled Rejection at:", promise, "reason:", reason);
+  await gracefulShutdown(1);
+});
 
 const recorderConfig = await startAndSaveCliConfig();
 await startServers(recorderConfig.debug);

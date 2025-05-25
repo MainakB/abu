@@ -8,9 +8,14 @@
   let currentInput = null;
   let initialValue = null;
   const assertionModes = window.__ASSERTIONMODES;
+  let suppressNextClick = false;
 
   const addListeners = () => {
     document.addEventListener("click", (e) => {
+      if (suppressNextClick) {
+        suppressNextClick = false;
+        return;
+      }
       const el = e.target;
       const mode = window.__recorderStore?.getMode?.() || "record";
       let shouldUpdateInput = false;
@@ -117,6 +122,7 @@
         }
 
         currentInput.removeEventListener("keydown", handleKeydown);
+        suppressNextClick = true;
         currentInput = null;
         initialValue = null;
       }
