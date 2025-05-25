@@ -158,6 +158,54 @@ const getExportTypes = (key) => {
   }
 };
 
+const isTextAndTextValueSoft = (arg) => {
+  const isTextAvailable =
+    (arg.attributes.placeholder && arg.attributes.placeholder !== "") ||
+    (arg.text && arg.text !== "");
+  const textValue = arg.text || arg.attributes.placeholder;
+  const assertTypeText = arg.isSoftAssert ? "soft assert " : "assert ";
+  return [isTextAvailable, textValue, assertTypeText];
+};
+
+const commonAssertVerbiageForDisplayedTypes = (arg, label) => {
+  const elIndex = getOrdinalIndex(arg);
+  const [isTextAvailable, textValue, softAssertText] =
+    isTextAndTextValueSoft(arg);
+
+  const text =
+    "And " +
+    softAssertText +
+    `${elIndex}` +
+    (textValue ? `"${textValue}" ${arg.tagName}` : "") +
+    ` ${label}`;
+  return text;
+};
+
+const commonAssertVerbiageForTextTypes = (arg, label) => {
+  const elIndex = getOrdinalIndex(arg);
+  const [isTextAvailable, textValue, softAssertText] =
+    isTextAndTextValueSoft(arg);
+  const textValueConstructed = isTextAvailable ? `"${textValue}" ` : "";
+  const text =
+    `And ${softAssertText}text value of ${elIndex} ` +
+    textValueConstructed +
+    `${arg.tagName} ${label} "${arg.expected}"`;
+  return text;
+};
+
+const commonAssertVerbiageForAttributeTypes = (arg, label, attrType) => {
+  const elIndex = getOrdinalIndex(arg);
+  const [isTextAvailable, textValue, softAssertText] =
+    isTextAndTextValueSoft(arg);
+  const textValueConstructed = isTextAvailable ? `"${textValue}" ` : "";
+  const text =
+    `And ${softAssertText}attribute "${attrType}" of ${elIndex} ` +
+    textValueConstructed +
+    `${arg.tagName} ${label} "${arg.expected}"`;
+
+  return text;
+};
+
 function isPossiblyHidden(attributes = {}) {
   const attrEntries = Object.entries(attributes);
   if (attrEntries.length === 0) return false;
@@ -437,11 +485,14 @@ export const ACTION_HANDLERS = {
     return [
       {
         step: `And ${fnName}({po:"${loc.locKeyName}"})`,
-        aiStep: arg.text
-          ? `And ${fnName} on "${arg.text}"${clickOnTypes(arg.tagName)}`
-          : arg.tagName && elIndex !== ""
-          ? `And ${fnName} ${elIndex}${arg.tagName} tag`
-          : `And ${fnName}({po:"${loc.locKeyName}"})`,
+        aiStep:
+          arg.text || arg.attributes.placeholder
+            ? `And ${fnName} on "${
+                arg.text || arg.attributes.placeholder
+              }"${clickOnTypes(arg.tagName)}`
+            : arg.tagName && elIndex !== ""
+            ? `And ${fnName} ${elIndex}${arg.tagName} tag`
+            : `And ${fnName}({po:"${loc.locKeyName}"})`,
         locator: loc.result,
       },
       loc.newIdx,
@@ -539,14 +590,11 @@ export const ACTION_HANDLERS = {
   [FUNCTIONMAPPER.ASSERTTEXTEQUALS.key]: (arg, idx) => {
     const loc = constructLocators(arg, idx);
     const soft = arg.isSoftAssert ? ", isSoftAssert: true" : "";
-    const elIndex = getOrdinalIndex(arg);
+    const aiStepText = commonAssertVerbiageForTextTypes(arg, "equals");
     return [
       {
         step: `And ${FUNCTIONMAPPER.ASSERTTEXTEQUALS.name}({po:"${loc.locKeyName}", et:"${arg.expected}"${soft}})`,
-        aiStep:
-          "And " +
-          (arg.isSoftAssert ? "soft assert " : "assert ") +
-          `text value of ${elIndex}${arg.tagName} equals "${arg.expected}"`,
+        aiStep: aiStepText,
         locator: loc.result,
       },
       loc.newIdx,
@@ -555,15 +603,11 @@ export const ACTION_HANDLERS = {
   [FUNCTIONMAPPER.ASSERTTEXTNOTEQUALS.key]: (arg, idx) => {
     const loc = constructLocators(arg, idx);
     const soft = arg.isSoftAssert ? ", isSoftAssert: true" : "";
-    const elIndex = getOrdinalIndex(arg);
+    const aiStepText = commonAssertVerbiageForTextTypes(arg, "not equals");
     return [
       {
         step: `And ${FUNCTIONMAPPER.ASSERTTEXTNOTEQUALS.name}({po:"${loc.locKeyName}", et:"${arg.expected}"${soft}})`,
-        aiStep:
-          "And " +
-          (arg.isSoftAssert ? "soft assert " : "assert ") +
-          `text value of ${elIndex}${arg.tagName} not equals "${arg.expected}"`,
-        locator: loc.result,
+        aiStep: aiStepText,
         locator: loc.result,
       },
       loc.newIdx,
@@ -572,14 +616,11 @@ export const ACTION_HANDLERS = {
   [FUNCTIONMAPPER.ASSERTTEXTCONTAINS.key]: (arg, idx) => {
     const loc = constructLocators(arg, idx);
     const soft = arg.isSoftAssert ? ", isSoftAssert: true" : "";
-    const elIndex = getOrdinalIndex(arg);
+    const aiStepText = commonAssertVerbiageForTextTypes(arg, "contains");
     return [
       {
         step: `And ${FUNCTIONMAPPER.ASSERTTEXTCONTAINS.name}({po:"${loc.locKeyName}", et:"${arg.expected}"${soft}})`,
-        aiStep:
-          "And " +
-          (arg.isSoftAssert ? "soft assert " : "assert ") +
-          `text value of ${elIndex}${arg.tagName} contains "${arg.expected}"`,
+        aiStep: aiStepText,
         locator: loc.result,
       },
       loc.newIdx,
@@ -588,14 +629,11 @@ export const ACTION_HANDLERS = {
   [FUNCTIONMAPPER.ASSERTTEXTNOTCONTAINS.key]: (arg, idx) => {
     const loc = constructLocators(arg, idx);
     const soft = arg.isSoftAssert ? ", isSoftAssert: true" : "";
-    const elIndex = getOrdinalIndex(arg);
+    const aiStepText = commonAssertVerbiageForTextTypes(arg, "not contains");
     return [
       {
         step: `And ${FUNCTIONMAPPER.ASSERTTEXTNOTCONTAINS.name}({po:"${loc.locKeyName}", et:"${arg.expected}"${soft}})`,
-        aiStep:
-          "And " +
-          (arg.isSoftAssert ? "soft assert " : "assert ") +
-          `text value of ${elIndex}${arg.tagName} not contains "${arg.expected}"`,
+        aiStep: aiStepText,
         locator: loc.result,
       },
       loc.newIdx,
@@ -605,14 +643,15 @@ export const ACTION_HANDLERS = {
   [FUNCTIONMAPPER.ASSERTVALUEEQUALS.key]: (arg, idx) => {
     const loc = constructLocators(arg, idx);
     const soft = arg.isSoftAssert ? ", isSoftAssert: true" : "";
-    const elIndex = getOrdinalIndex(arg);
+    const aiStepText = commonAssertVerbiageForAttributeTypes(
+      arg,
+      "equals",
+      "value"
+    );
     return [
       {
         step: `And ${FUNCTIONMAPPER.ASSERTVALUEEQUALS.name}({po:"${loc.locKeyName}", atr:"value", ea:"${arg.expected}"${soft}})`,
-        aiStep:
-          "And " +
-          (arg.isSoftAssert ? "soft assert " : "assert ") +
-          `attribute "value" of ${elIndex}${arg.tagName} equals "${arg.expected}"`,
+        aiStep: aiStepText,
         locator: loc.result,
       },
       loc.newIdx,
@@ -621,14 +660,15 @@ export const ACTION_HANDLERS = {
   [FUNCTIONMAPPER.ASSERTVALUENOTEQUALS.key]: (arg, idx) => {
     const loc = constructLocators(arg, idx);
     const soft = arg.isSoftAssert ? ", isSoftAssert: true" : "";
-    const elIndex = getOrdinalIndex(arg);
+    const aiStepText = commonAssertVerbiageForAttributeTypes(
+      arg,
+      "not equals",
+      "value"
+    );
     return [
       {
         step: `And ${FUNCTIONMAPPER.ASSERTVALUENOTEQUALS.name}({po:"${loc.locKeyName}", atr:"value", ea:"${arg.expected}"${soft}})`,
-        aiStep:
-          "And " +
-          (arg.isSoftAssert ? "soft assert " : "assert ") +
-          `attribute "value" of ${elIndex}${arg.tagName} not equals "${arg.expected}"`,
+        aiStep: aiStepText,
         locator: loc.result,
       },
       loc.newIdx,
@@ -637,14 +677,15 @@ export const ACTION_HANDLERS = {
   [FUNCTIONMAPPER.ASSERTVALUECONTAINS.key]: (arg, idx) => {
     const loc = constructLocators(arg, idx);
     const soft = arg.isSoftAssert ? ", isSoftAssert: true" : "";
-    const elIndex = getOrdinalIndex(arg);
+    const aiStepText = commonAssertVerbiageForAttributeTypes(
+      arg,
+      "contains",
+      "value"
+    );
     return [
       {
         step: `And ${FUNCTIONMAPPER.ASSERTVALUECONTAINS.name}({po:"${loc.locKeyName}", atr:"value", ea:"${arg.expected}"${soft}})`,
-        aiStep:
-          "And " +
-          (arg.isSoftAssert ? "soft assert " : "assert ") +
-          `attribute "value" of ${elIndex}${arg.tagName} contains "${arg.expected}"`,
+        aiStep: aiStepText,
         locator: loc.result,
       },
       loc.newIdx,
@@ -653,14 +694,85 @@ export const ACTION_HANDLERS = {
   [FUNCTIONMAPPER.ASSERTVALUENOTCONTAINS.key]: (arg, idx) => {
     const loc = constructLocators(arg, idx);
     const soft = arg.isSoftAssert ? ", isSoftAssert: true" : "";
-    const elIndex = getOrdinalIndex(arg);
+    const aiStepText = commonAssertVerbiageForAttributeTypes(
+      arg,
+      "not contains",
+      "value"
+    );
     return [
       {
         step: `And ${FUNCTIONMAPPER.ASSERTVALUENOTCONTAINS.name}({po:"${loc.locKeyName}", atr:"value", ea:"${arg.expected}"${soft}})`,
-        aiStep:
-          "And " +
-          (arg.isSoftAssert ? "soft assert " : "assert ") +
-          `attribute "value" of ${elIndex}${arg.tagName} not contains "${arg.expected}"`,
+        aiStep: aiStepText,
+        locator: loc.result,
+      },
+      loc.newIdx,
+    ];
+  },
+
+  [FUNCTIONMAPPER.ASSERTATTRIBUTEVALUEEQUALS.key]: (arg, idx) => {
+    const loc = constructLocators(arg, idx);
+    const soft = arg.isSoftAssert ? ", isSoftAssert: true" : "";
+    const aiStepText = commonAssertVerbiageForAttributeTypes(
+      arg,
+      "equals",
+      arg.attributeAssertPropName
+    );
+    return [
+      {
+        step: `And ${FUNCTIONMAPPER.ASSERTATTRIBUTEVALUEEQUALS.name}({po:"${loc.locKeyName}", atr: "${arg.attributeAssertPropName}", ea: "${arg.expected}"${soft}})`,
+        aiStep: aiStepText,
+        locator: loc.result,
+      },
+      loc.newIdx,
+    ];
+  },
+  [FUNCTIONMAPPER.ASSERTATTRIBUTEVALUENOTEQUALS.key]: (arg, idx) => {
+    const loc = constructLocators(arg, idx);
+    const soft = arg.isSoftAssert ? ", isSoftAssert: true" : "";
+    const aiStepText = commonAssertVerbiageForAttributeTypes(
+      arg,
+      "not equals",
+      arg.attributeAssertPropName
+    );
+    return [
+      {
+        step: `And ${FUNCTIONMAPPER.ASSERTATTRIBUTEVALUENOTEQUALS.name}({po:"${loc.locKeyName}", atr: "${arg.attributeAssertPropName}", ea: "${arg.expected}"${soft}})`,
+        aiStep: aiStepText,
+        locator: loc.result,
+      },
+      loc.newIdx,
+    ];
+  },
+  [FUNCTIONMAPPER.ASSERTATTRIBUTEVALUECONTAINS.key]: (arg, idx) => {
+    const loc = constructLocators(arg, idx);
+    const soft = arg.isSoftAssert ? ", isSoftAssert: true" : "";
+    const aiStepText = commonAssertVerbiageForAttributeTypes(
+      arg,
+      "contains",
+      arg.attributeAssertPropName
+    );
+    return [
+      {
+        step: `And ${FUNCTIONMAPPER.ASSERTATTRIBUTEVALUECONTAINS.name}({po:"${loc.locKeyName}", atr: "${arg.attributeAssertPropName}", ea: "${arg.expected}"${soft}})`,
+        aiStep: aiStepText,
+        locator: loc.result,
+      },
+      loc.newIdx,
+    ];
+  },
+
+  [FUNCTIONMAPPER.ASSERTATTRIBUTEVALUENOTCONTAINS.key]: (arg, idx) => {
+    const loc = constructLocators(arg, idx);
+    const soft = arg.isSoftAssert ? ", isSoftAssert: true" : "";
+    const aiStepText = commonAssertVerbiageForAttributeTypes(
+      arg,
+      "not contains",
+      arg.attributeAssertPropName
+    );
+    return [
+      {
+        step: `And ${FUNCTIONMAPPER.ASSERTATTRIBUTEVALUENOTCONTAINS.name}({po:"${loc.locKeyName}", atr: "${arg.attributeAssertPropName}", ea: "${arg.expected}"${soft}})`,
+        aiStep: aiStepText,
         locator: loc.result,
       },
       loc.newIdx,
@@ -719,21 +831,45 @@ export const ACTION_HANDLERS = {
       idx,
     ];
   },
+  [FUNCTIONMAPPER.ASSERTPRESENCE.key]: (arg, idx) => {
+    const loc = constructLocators(arg, idx);
+    const soft = arg.isSoftAssert ? ", isSoftAssert: true" : "";
+    const aiText = commonAssertVerbiageForDisplayedTypes(arg, "is present");
+    return [
+      {
+        step: `And ${FUNCTIONMAPPER.ASSERTPRESENCE.name}({po:"${loc.locKeyName}"${soft}})`,
+        aiStep: aiText,
+        locator: loc.result,
+      },
+      loc.newIdx,
+    ];
+  },
+  [FUNCTIONMAPPER.ASSERTABSENCE.key]: (arg, idx) => {
+    const loc = constructLocators(arg, idx);
+    const soft = arg.isSoftAssert ? ", isSoftAssert: true" : "";
+    const aiText = commonAssertVerbiageForDisplayedTypes(arg, "is not present");
+    return [
+      {
+        step: `And ${FUNCTIONMAPPER.ASSERTABSENCE.name}({po:"${loc.locKeyName}"${soft}})`,
+        aiStep: aiText,
+        locator: loc.result,
+      },
+      loc.newIdx,
+    ];
+  },
 
   [FUNCTIONMAPPER.ASSERTVISIBILITY.key]: (arg, idx) => {
     const loc = constructLocators(arg, idx);
     const soft = arg.isSoftAssert ? ", isSoftAssert: true" : "";
-    const elIndex = getOrdinalIndex(arg);
+    // const elIndex = getOrdinalIndex(arg);
+    // const [isTextAvailable, textValue, softAssertText] =
+    //   isTextAndTextValueSoft(arg);
+    const aiText = commonAssertVerbiageForDisplayedTypes(arg, "is visible");
+
     return [
       {
         step: `And ${FUNCTIONMAPPER.ASSERTVISIBILITY.name}({po:"${loc.locKeyName}"${soft}})`,
-        aiStep:
-          "And " +
-            (arg.isSoftAssert ? "soft assert " : "assert ") +
-            `${elIndex}element of type ${arg.tagName}` +
-            arg.text && arg.text !== ""
-            ? ` and text ${arg.text}`
-            : "" + " is visible",
+        aiStep: aiText,
         locator: loc.result,
       },
       loc.newIdx,
@@ -743,17 +879,14 @@ export const ACTION_HANDLERS = {
   [FUNCTIONMAPPER.ASSERTINVISIBILITY.key]: (arg, idx) => {
     const loc = constructLocators(arg, idx);
     const soft = arg.isSoftAssert ? ", isSoftAssert: true" : "";
-    const elIndex = getOrdinalIndex(arg);
+    // const elIndex = getOrdinalIndex(arg);
+    // const [isTextAvailable, textValue, softAssertText] =
+    //   isTextAndTextValueSoft(arg);
+    const aiText = commonAssertVerbiageForDisplayedTypes(arg, "is not visible");
     return [
       {
         step: `And ${FUNCTIONMAPPER.ASSERTINVISIBILITY.name}({po:"${loc.locKeyName}"${soft}})`,
-        aiStep:
-          "And " +
-            (arg.isSoftAssert ? "soft assert " : "assert ") +
-            `${elIndex}element of type ${arg.tagName}` +
-            arg.text && arg.text !== ""
-            ? ` and text ${arg.text}`
-            : "" + " is not visible",
+        aiStep: aiText,
         locator: loc.result,
       },
       loc.newIdx,
@@ -763,17 +896,11 @@ export const ACTION_HANDLERS = {
   [FUNCTIONMAPPER.ASSERTENABLED.key]: (arg, idx) => {
     const loc = constructLocators(arg, idx);
     const soft = arg.isSoftAssert ? ", isSoftAssert: true" : "";
-    const elIndex = getOrdinalIndex(arg);
+    const aiText = commonAssertVerbiageForDisplayedTypes(arg, "is enabled");
     return [
       {
         step: `And ${FUNCTIONMAPPER.ASSERTENABLED.name}({po:"${loc.locKeyName}"${soft}})`,
-        aiStep:
-          "And " +
-            (arg.isSoftAssert ? "soft assert " : "assert ") +
-            `${elIndex}element of type ${arg.tagName}` +
-            arg.text && arg.text !== ""
-            ? ` and text ${arg.text}`
-            : "" + " is enabled",
+        aiStep: aiText,
         locator: loc.result,
       },
       loc.newIdx,
@@ -783,99 +910,11 @@ export const ACTION_HANDLERS = {
   [FUNCTIONMAPPER.ASSERTDISABLED.key]: (arg, idx) => {
     const loc = constructLocators(arg, idx);
     const soft = arg.isSoftAssert ? ", isSoftAssert: true" : "";
-    const elIndex = getOrdinalIndex(arg);
+    const aiText = commonAssertVerbiageForDisplayedTypes(arg, "is not enabled");
     return [
       {
         step: `And ${FUNCTIONMAPPER.ASSERTDISABLED.name}({po:"${loc.locKeyName}"${soft}})`,
-        aiStep:
-          "And " +
-            (arg.isSoftAssert ? "soft assert " : "assert ") +
-            `${elIndex}element of type ${arg.tagName}` +
-            arg.text && arg.text !== ""
-            ? ` and text ${arg.text}`
-            : "" + " is disabled",
-        locator: loc.result,
-      },
-      loc.newIdx,
-    ];
-  },
-
-  [FUNCTIONMAPPER.ASSERTATTRIBUTEVALUEEQUALS.key]: (arg, idx) => {
-    const loc = constructLocators(arg, idx);
-    const soft = arg.isSoftAssert ? ", isSoftAssert: true" : "";
-    const elIndex = getOrdinalIndex(arg);
-    return [
-      {
-        step: `And ${FUNCTIONMAPPER.ASSERTATTRIBUTEVALUEEQUALS.name}({po:"${loc.locKeyName}", atr: "${arg.attributeAssertPropName}", ea: "${arg.expected}"${soft}})`,
-        aiStep:
-          "And " +
-            (arg.isSoftAssert ? "soft assert " : "assert ") +
-            `${elIndex}element of type ${arg.tagName}` +
-            arg.text && arg.text !== ""
-            ? ` and text ${arg.text}`
-            : "" +
-              ` has attribute "${arg.attributeAssertPropName}" with value "${arg.expected}"`,
-        locator: loc.result,
-      },
-      loc.newIdx,
-    ];
-  },
-  [FUNCTIONMAPPER.ASSERTATTRIBUTEVALUENOTEQUALS.key]: (arg, idx) => {
-    const loc = constructLocators(arg, idx);
-    const soft = arg.isSoftAssert ? ", isSoftAssert: true" : "";
-    const elIndex = getOrdinalIndex(arg);
-    return [
-      {
-        step: `And ${FUNCTIONMAPPER.ASSERTATTRIBUTEVALUENOTEQUALS.name}({po:"${loc.locKeyName}, atr: "${arg.attributeAssertPropName}", ea: "${arg.expected}"${soft}})`,
-        aiStep:
-          "And " +
-            (arg.isSoftAssert ? "soft assert " : "assert ") +
-            `${elIndex}element of type ${arg.tagName}` +
-            arg.text && arg.text !== ""
-            ? ` and text ${arg.text}`
-            : "" +
-              ` does not have attribute "${arg.attributeAssertPropName}" with value "${arg.expected}"`,
-        locator: loc.result,
-      },
-      loc.newIdx,
-    ];
-  },
-  [FUNCTIONMAPPER.ASSERTATTRIBUTEVALUECONTAINS.key]: (arg, idx) => {
-    const loc = constructLocators(arg, idx);
-    const soft = arg.isSoftAssert ? ", isSoftAssert: true" : "";
-    const elIndex = getOrdinalIndex(arg);
-    return [
-      {
-        step: `And ${FUNCTIONMAPPER.ASSERTATTRIBUTEVALUECONTAINS.name}({po:"${loc.locKeyName}, atr: "${arg.attributeAssertPropName}", ea: "${arg.expected}"${soft}})`,
-        aiStep:
-          "And " +
-            (arg.isSoftAssert ? "soft assert " : "assert ") +
-            `${elIndex}element of type ${arg.tagName}` +
-            arg.text && arg.text !== ""
-            ? ` and text ${arg.text}`
-            : "" +
-              ` has attribute "${arg.attributeAssertPropName}" containing value "${arg.expected}"`,
-        locator: loc.result,
-      },
-      loc.newIdx,
-    ];
-  },
-
-  [FUNCTIONMAPPER.ASSERTATTRIBUTEVALUENOTCONTAINS.key]: (arg, idx) => {
-    const loc = constructLocators(arg, idx);
-    const soft = arg.isSoftAssert ? ", isSoftAssert: true" : "";
-    const elIndex = getOrdinalIndex(arg);
-    return [
-      {
-        step: `And ${FUNCTIONMAPPER.ASSERTATTRIBUTEVALUENOTCONTAINS.name}({po:"${loc.locKeyName}, atr: "${arg.attributeAssertPropName}", ea: "${arg.expected}"${soft}})`,
-        aiStep:
-          "And " +
-            (arg.isSoftAssert ? "soft assert " : "assert ") +
-            `${elIndex}element of type ${arg.tagName}` +
-            arg.text && arg.text !== ""
-            ? ` and text ${arg.text}`
-            : "" +
-              ` does not have attribute "${arg.attributeAssertPropName}" containing value "${arg.expected}"`,
+        aiStep: aiText,
         locator: loc.result,
       },
       loc.newIdx,
@@ -2219,29 +2258,6 @@ export const ACTION_HANDLERS = {
         step: `And ${FUNCTIONMAPPER.DELETECOOKIE.name}("${arg.cookieName}")`,
       },
       idx,
-    ];
-  },
-
-  [FUNCTIONMAPPER.ASSERTPRESENCE.key]: (arg, idx) => {
-    const loc = constructLocators(arg, idx);
-    const soft = arg.isSoftAssert ? ", isSoftAssert: true" : "";
-    return [
-      {
-        step: `And ${FUNCTIONMAPPER.ASSERTPRESENCE.name}({po:"${loc.locKeyName}"${soft}})`,
-        locator: loc.result,
-      },
-      loc.newIdx,
-    ];
-  },
-  [FUNCTIONMAPPER.ASSERTABSENCE.key]: (arg, idx) => {
-    const loc = constructLocators(arg, idx);
-    const soft = arg.isSoftAssert ? ", isSoftAssert: true" : "";
-    return [
-      {
-        step: `And ${FUNCTIONMAPPER.ASSERTABSENCE.name}({po:"${loc.locKeyName}"${soft}})`,
-        locator: loc.result,
-      },
-      loc.newIdx,
     ];
   },
   [FUNCTIONMAPPER.ASSERTCOOKIEVALUEEQUALS.key]: (arg, idx) => {

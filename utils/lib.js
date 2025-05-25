@@ -279,32 +279,36 @@ export const ensureChromiumInstalled = (chromium, debugMode) => {
 
 export const injectToLocalStorage = async (p, isInitialPage) => {
   // ✅ Set flag in localStorage for this window
-  await p.evaluate(
-    (arg) => {
-      try {
-        localStorage.setItem("isInitialPage", arg.isInitialPage);
-      } catch (err) {
-        console.warn("⚠️ Could not write to localStorage:", err);
-      }
-    },
-    { isInitialPage }
-  );
+  const fnToCall = () =>
+    p.evaluate(
+      (arg) => {
+        try {
+          localStorage.setItem("isInitialPage", arg.isInitialPage);
+        } catch (err) {
+          console.warn("⚠️ Could not write to localStorage:", err);
+        }
+      },
+      { isInitialPage }
+    );
+  await evaluateRetry(fnToCall);
 };
 
 export const injectToSessionStorage = async (p, sessionArgs) => {
   for (let i = 0; i < sessionArgs.length; i++) {
     const args = sessionArgs[i];
     // ✅ Set flag in localStorage for this window
-    await p.evaluate((arg) => {
-      try {
-        if (arg.key === "tabId") {
-          window.__recorderStore.setActiveTabId(arg.value);
+    const fnToCall = () =>
+      p.evaluate((arg) => {
+        try {
+          if (arg.key === "tabId") {
+            window.__recorderStore.setActiveTabId(arg.value);
+          }
+          sessionStorage.setItem(arg.key, arg.value);
+        } catch (err) {
+          console.warn("⚠️ Could not write to sessionStorage:", err);
         }
-        sessionStorage.setItem(arg.key, arg.value);
-      } catch (err) {
-        console.warn("⚠️ Could not write to sessionStorage:", err);
-      }
-    }, args);
+      }, args);
+    await evaluateRetry(fnToCall);
   }
 };
 
@@ -320,13 +324,15 @@ export const updateInitialRecorderState = async (
     : "pause";
 
   globalRecorderMode.value = recorderState;
-  await page.evaluate((value) => {
-    try {
-      localStorage.setItem("recorderMode", value);
-    } catch (err) {
-      console.warn("⚠️ Could not write to localStorage:", err);
-    }
-  }, globalRecorderMode.value);
+  const fnToCall = () =>
+    page.evaluate((value) => {
+      try {
+        localStorage.setItem("recorderMode", value);
+      } catch (err) {
+        console.warn("⚠️ Could not write to localStorage:", err);
+      }
+    }, globalRecorderMode.value);
+  await evaluateRetry(fnToCall);
 };
 
 export const allowPopups = (page) => {
@@ -347,13 +353,15 @@ export const injectScripts = async (
 ) => {
   await page.waitForLoadState("domcontentloaded");
   if (!initialPage) {
-    await page.evaluate((value) => {
-      try {
-        localStorage.setItem("recorderMode", value);
-      } catch (err) {
-        console.warn("⚠️ Could not write to localStorage:", err);
-      }
-    }, recoderModeValue);
+    const fnToCall = () =>
+      page.evaluate((value) => {
+        try {
+          localStorage.setItem("recorderMode", value);
+        } catch (err) {
+          console.warn("⚠️ Could not write to localStorage:", err);
+        }
+      }, recoderModeValue);
+    await evaluateRetry(fnToCall);
   }
   const cssValue = `
       (() => {
@@ -412,11 +420,13 @@ export const injectScripts = async (
 
   // ✅ Boot UI manually for non-initial pages
   if (!initialPage) {
-    await page.evaluate(() => {
-      requestIdleCallback(() => {
-        window.__bootRecorderUI?.();
+    const fnToCall = () =>
+      page.evaluate(() => {
+        requestIdleCallback(() => {
+          window.__bootRecorderUI?.();
+        });
       });
-    });
+    await evaluateRetry(fnToCall);
   }
 
   await allowPopups(page);
@@ -443,13 +453,15 @@ export const exposeRecorderControls = async (
   await page.exposeBinding(
     "__syncRecorderStatusOnInternalSwitchTab",
     async () => {
-      await page.evaluate((value) => {
-        try {
-          localStorage.setItem("recorderMode", value);
-        } catch (err) {
-          console.warn("⚠️ Could not write to localStorage:", err);
-        }
-      }, globalRecorderMode.value);
+      const fnToCall = () =>
+        page.evaluate((value) => {
+          try {
+            localStorage.setItem("recorderMode", value);
+          } catch (err) {
+            console.warn("⚠️ Could not write to localStorage:", err);
+          }
+        }, globalRecorderMode.value);
+      await evaluateRetry(fnToCall);
     }
   );
 
@@ -696,7 +708,28 @@ export async function getPageTitleWithRetry(
         // throw err; // rethrow if not recoverable or max attempts reached
       }
 
-      console.warn(`⚠️ Retry ${attempt}/${maxRetries}: page.title failed`);
+      console.warn(`⚠️ Retry ${attempt}/${maxRetries}: Title call failed`);
+      await new Promise((r) => setTimeout(r, delayMs));
+    }
+  }
+}
+
+export async function evaluateRetry(fn, maxRetries = 3, delayMs = 300) {
+  for (let attempt = 1; attempt <= maxRetries; attempt++) {
+    try {
+      await fn();
+      return;
+    } catch (err) {
+      const isContextDestroyed = err.message.includes(
+        "Execution context was destroyed"
+      );
+
+      if (!isContextDestroyed || attempt === maxRetries) {
+        console.error("❌ Evaluate failed:", err);
+        throw err;
+      }
+
+      console.warn(`⚠️ Retry ${attempt}/${maxRetries}: Evaluate call failed`);
       await new Promise((r) => setTimeout(r, delayMs));
     }
   }
