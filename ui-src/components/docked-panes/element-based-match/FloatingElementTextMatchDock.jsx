@@ -17,13 +17,22 @@ const getLabel = (mode) => {
   return "";
 };
 
+const getAtrValue = (el, textVal) => {
+  const valAtr = el.getAttribute("value");
+  if (valAtr && typeof valAtr === "string" && valAtr.trim() !== "") {
+    return valAtr;
+  }
+
+  return textVal;
+};
+
 const getTextAreaData = (el, mode, textvalue) => {
   if (mode === ASSERTIONMODES.ISENABLED) return el.enabled || "";
   if (mode === ASSERTIONMODES.ISPRESENT) return true;
   if (mode === ASSERTIONMODES.ISELEMENTCLICKABLE) return true;
   if (mode === ASSERTIONMODES.ISDISPLAYED) return true;
   if (mode === ASSERTIONMODES.GETTEXT) return textvalue;
-  if (mode === ASSERTIONMODES.GETVALUE) return textvalue;
+  if (mode === ASSERTIONMODES.GETVALUE) return getAtrValue(el, textvalue);
   if (mode === ASSERTIONMODES.GETINNERHTML) return el.innerHTML?.trim() || "";
   return "";
 };
@@ -91,6 +100,19 @@ export default function FloatingElementTextMatchDock({
   };
 
   const handleCancel = () => {
+    setIsNegative(false);
+    setSoftAssert(false);
+    setExactMatch(true);
+    setStartsWith(false);
+    setEndsWith(false);
+    setLocatorName("");
+    setMatchByType({
+      byText: true,
+      byVar: false,
+    });
+    setSelectedVarIndex(0);
+    setExistingVarNames([]);
+
     onCancel();
   };
 

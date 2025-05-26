@@ -28,10 +28,15 @@ const getLabel = (mode) => {
   return "";
 };
 
-const getTextAreaData = (el, mode, textvalue) => {
-  if (shouldDisplayTextArea(mode) || mode === ASSERTIONMODES.GETINNERHTML)
-    return el.innerHTML?.trim() || el.outerHTML?.trim() || "";
-  return textvalue;
+const getTextValue = (mode, el, textVal) => {
+  if (mode === ASSERTIONMODES.GETVALUE) {
+    const valAtr = el.getAttribute("value");
+    if (valAtr && typeof valAtr === "string" && valAtr.trim() !== "") {
+      return valAtr;
+    }
+  }
+
+  return textVal;
 };
 
 export default function FloatingElementTextAssignmentDock({
@@ -47,6 +52,7 @@ export default function FloatingElementTextAssignmentDock({
   const [varName, setVarName] = useState("");
   const [varNameError, setVarNameError] = useState("");
   const [isNegative, setIsNegative] = useState(false);
+  const textAreaValue = getTextValue(mode, el, textValue);
 
   useModeSocket(onCancel);
 
@@ -62,13 +68,11 @@ export default function FloatingElementTextAssignmentDock({
       onCancel,
       el,
       e,
-      textValue,
+      textAreaValue,
       mode,
       isNegative,
     });
   };
-
-  const textAreaContent = getTextAreaData(el, mode, textValue).trim();
 
   let wrapperClassName = "floating-cookie-list-dock";
   if (tabbed) {
@@ -106,12 +110,12 @@ export default function FloatingElementTextAssignmentDock({
           varNameError={varNameError}
           setVarNameError={setVarNameError}
         />
-        {textAreaContent !== "" && (
+        {textAreaValue !== "" && (
           <div className="locator-name-container">
             <label>Text Value Retrieved (Read Only)</label>
             <textarea
               className="assert-pdf-text-textarea"
-              value={textAreaContent}
+              value={textAreaValue}
               readOnly={true}
               disabled={true}
             />

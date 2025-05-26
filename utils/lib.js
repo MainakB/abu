@@ -237,6 +237,16 @@ const postRecordingCleanup = async (debugMode) => {
       console.error("❌ Failed to delete .recording_metadata:", err);
     }
   }
+
+  const disDir = path.join(process.cwd(), "dist");
+  if (fs.existsSync(disDir)) {
+    try {
+      fs.rmSync(disDir, { recursive: true, force: true });
+      if (debugMode) console.log("🧹 Deleted dist folder.");
+    } catch (err) {
+      console.error("❌ Failed to delete dist :", err);
+    }
+  }
 };
 
 const stopServers = async (debugMode) => {

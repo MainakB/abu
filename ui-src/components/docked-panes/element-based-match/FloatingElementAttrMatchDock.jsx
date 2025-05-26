@@ -153,7 +153,7 @@ export default function FloatingElementAttrMatchDock({
     >
       <div className="assert-dock-content">
         <div className="assert-dock-header">
-          <strong>Is Element Attribute Equals/Contains</strong>
+          <strong>Match is Element Attribute Equals/Contains</strong>
         </div>
       </div>
       {loading && <div className="assert-loading">Loading attributes...</div>}

@@ -20,6 +20,21 @@ function stableStringify(obj) {
   }
 }
 
+function getKeysFromHash() {
+  if (!fs.existsSync(hashFile)) return [];
+
+  try {
+    const content = JSON.parse(fs.readFileSync(hashFile, "utf-8"));
+    if (content && typeof content === "object") {
+      return Object.values(content);
+    }
+    return [];
+  } catch (err) {
+    console.warn("⚠️ Could not read locator-hash.json:", err);
+    return [];
+  }
+}
+
 function hashValueObject(valueObject) {
   const str = stableStringify(valueObject); // stable hash
   return crypto.createHash("sha256").update(str).digest("hex");
@@ -236,7 +251,7 @@ function isPossiblyHidden(attributes = {}) {
   );
 }
 
-const textBasedLocNames = [];
+const textBasedLocNames = getKeysFromHash();
 const checkIfLocNameUsed = (locName) => textBasedLocNames.includes(locName);
 
 const constructLocators = (arg, locatorIndex) => {

@@ -15,28 +15,49 @@
     });
 
     // Preferred stable selectors
-    selectors.id = el.id ? `${el.id}` : null;
+
     let xpathText = generateTextBasedXpath(el, elIndexValue);
     let classNameBasedXpath = getUniqueClassBasedXpath(el, elIndexValue);
+    let attrBasedXpaths = getAttributeBasedXpaths(el, elIndexValue);
     selectors.xpath = [
       getPathTo(el),
+      ...(attrBasedXpaths ? attrBasedXpaths : []),
       generateXPath(el),
       ...(xpathText ? [xpathText] : []),
       ...(classNameBasedXpath ? [classNameBasedXpath] : []),
     ];
     selectors.css = getCssSelector(el);
-    selectors.name = el.name ? `${el.name}` : null;
-    selectors["data-testid"] = el.dataset.testid
-      ? `${el.dataset.testid}`
-      : null;
-    selectors["aria-label"] = el.getAttribute("aria-label")
-      ? `${el.getAttribute("aria-label")}`
-      : null;
-    selectors.role = el.getAttribute("role")
-      ? `${el.getAttribute("role")}`
-      : null;
-    selectors.href =
-      el.tagName.toLowerCase() === "a" ? `${el.getAttribute("href")}` : null;
+
+    const testIdValue = el.getAttribute("data-testid");
+    if (testIdValue) {
+      selectors["data-testid"] = `${testIdValue}`;
+    }
+
+    const ariaLabelValue = el.getAttribute("aria-label");
+    if (ariaLabelValue) {
+      selectors["aria-label"] = `${ariaLabelValue}`;
+    }
+
+    const roleValue = el.getAttribute("role");
+    if (roleValue) {
+      selectors.role = `${roleValue}`;
+    }
+    const hrefValue =
+      el.tagName.toLowerCase() === "a"
+        ? el.getAttribute("href") || el.getAttribute("src")
+        : null;
+
+    if (hrefValue) {
+      selectors.href = hrefValue;
+    }
+    if (el.id && window.__isHumanReadable(el.id)) {
+      selectors.id = `${el.id}`;
+    }
+
+    if (el.name && window.__isHumanReadable(el.name)) {
+      selectors.name = `${el.name}`;
+    }
+
     const iFramesPath = getIframePath(el);
     selectors.iframes = iFramesPath;
     selectors.iframeDepth =
@@ -51,7 +72,12 @@
     const classes = el.className
       .split(" ")
       .filter((c) => c && !c.includes(" "));
-    return classes.length === 1 ? `${classes[0]}` : null;
+
+    return classes.length === 1
+      ? window.__isHumanReadable(`${classes[0]}`)
+        ? `${classes[0]}`
+        : null
+      : null;
   };
 
   const getUniqueClassBasedXpath = (el, idx) => {
@@ -66,6 +92,52 @@
     const locator = `.//${elTag}[@class=${classNameValue}]`;
 
     return idx > 0 ? `(${locator})[${idx + 1}]` : locator;
+  };
+
+  const getAttributeBasedXpaths = (el, idx) => {
+    const ariaLabel = el.getAttribute("aria-label");
+    const name = el.getAttribute("name");
+    const title = el.getAttribute("title");
+    const ariaDescBy = el.getAttribute("aria-describedby");
+    const placeHolder = el.getAttribute("placeholder");
+    const role = el.getAttribute("role");
+    const id = el.id;
+    const className = getUniqueClass(el);
+
+    const atrValues = [];
+
+    id &&
+      id !== "" &&
+      window.__isHumanReadable(id) &&
+      atrValues.push(`@id='${id}'`);
+    className && className !== "" && atrValues.push(`@class='${className}'`);
+    ariaLabel &&
+      ariaLabel !== "" &&
+      atrValues.push(`@aria-label='${ariaLabel}'`);
+    name && name !== "" && atrValues.push(`@name='${name}'`);
+    title && title !== "" && atrValues.push(`@title='${title}'`);
+    ariaDescBy &&
+      ariaDescBy !== "" &&
+      atrValues.push(`@aria-describedby='${ariaDescBy}'`);
+    placeHolder &&
+      placeHolder !== "" &&
+      atrValues.push(`@placeHolder='${placeHolder}'`);
+    role && role !== "" && atrValues.push(`@role='${role}'`);
+
+    const tagName = el.tagName.toLowerCase() || "*";
+
+    let attrDesc = "";
+    for (let i = 0; i < atrValues.length; i++) {
+      if (i === 0) {
+        attrDesc = attrDesc + atrValues[i];
+      } else {
+        attrDesc = attrDesc + ` and ${atrValues[i]}`;
+      }
+    }
+    const finalizedXapath = `.//${tagName}[${attrDesc}]`;
+    return idx > 0
+      ? [`(.//${tagName}[${attrDesc}])[${idx + 1}]`, finalizedXapath]
+      : [finalizedXapath];
   };
 
   function getElementIdx(elt) {
@@ -109,9 +181,7 @@
         }
       }
     } catch (e) {}
-    return elIndexValue >= 0
-      ? `(${textValue})[${elIndexValue + 1}]`
-      : textValue;
+    return elIndexValue > 0 ? `(${textValue})[${elIndexValue + 1}]` : textValue;
   };
 
   const getShadowRoot = (el) => {

@@ -650,22 +650,35 @@
     return visibleElements.length > 1 ? visibleElements.indexOf(target) : -1;
   }
 
-  function isHumanReadable(value) {
+  window.__isHumanReadable = (value) => {
     if (!value || typeof value !== "string") return false;
 
     const trimmed = value.trim();
 
-    const classPattern = /^[-_a-z0-9]+$/;
-    const wordCount = trimmed.split(/\s+/).length;
-    const uuidPattern =
-      /^[a-f0-9]{8}-?[a-f0-9]{4,}-?[a-f0-9]{4,}-?[a-f0-9]{4,}-?[a-f0-9]{12}$/i;
+    // Rule 1: reject if contains underscore
+    if (trimmed.includes("_")) return false;
 
-    return (
-      !classPattern.test(trimmed) &&
-      !uuidPattern.test(trimmed) &&
-      (wordCount > 1 || /^[A-Za-z]+$/.test(trimmed))
-    );
-  }
+    // Rule 2: reject UUIDs
+    const uuidPattern =
+      /^[a-f0-9]{8}-?[a-f0-9]{4}-?[a-f0-9]{4}-?[a-f0-9]{4}-?[a-f0-9]{12}$/i;
+    if (uuidPattern.test(trimmed)) return false;
+
+    // Rule 3: reject if contains numbers
+    if (/\d/.test(trimmed)) return false;
+
+    // Rule 4: recursively validate each space-separated word
+    if (trimmed.includes(" ")) {
+      return trimmed.split(/\s+/).every(isHumanReadable);
+    }
+
+    // Rule 5: recursively validate each dash-separated part
+    if (trimmed.includes("-")) {
+      return trimmed.split("-").every(isHumanReadable);
+    }
+
+    // Final fallback: allow only if it's pure alphabetic
+    return /^[A-Za-z]{2,}$/.test(trimmed);
+  };
 
   function getAllUniqueHumanReadableAttributes(attributes, tagName, textValue) {
     const refined = {};
@@ -683,7 +696,7 @@
       if (
         value &&
         isAttributeUnique(attr, value, textValue, tagName) &&
-        isHumanReadable(value)
+        window.__isHumanReadable(value)
       ) {
         refined[attr] = value;
       }
@@ -704,7 +717,10 @@
         ).toLowerCase() === targetText
     );
 
-    if (matches.length === 1 && isHumanReadable(attributes.associatedLabel)) {
+    if (
+      matches.length === 1 &&
+      window.__isHumanReadable(attributes.associatedLabel)
+    ) {
       return { associatedLabel: attributes.associatedLabel };
     }
 
