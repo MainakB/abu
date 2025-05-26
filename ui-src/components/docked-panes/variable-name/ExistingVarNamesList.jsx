@@ -93,7 +93,7 @@ export default function ExistingVarNamesList({
       {loading ? (
         <div>Loading...</div>
       ) : existingVarNames.length === 0 ? (
-        <div>No Data</div>
+        <div>No exisisting variable found.</div>
       ) : (
         <SearchableDropdown
           options={existingVarNames}

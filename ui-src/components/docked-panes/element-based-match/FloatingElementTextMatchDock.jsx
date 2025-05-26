@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { ASSERTIONMODES } from "../../../constants/index.js";
 import { onConfirmElemMatch } from "../../../../utils/componentLibs.js";
 import ConfirmCancelFooter from "../confirm-cancel-footer/ConfirmCancelFooter.jsx";
+import ExistingVarNamesList from "../variable-name/ExistingVarNamesList.jsx";
 import { useModeSocket } from "../../../hooks/useModeSocket.js";
 
 const getLabel = (mode) => {
@@ -49,7 +50,6 @@ const getAltMode = (mode, startsWith, endsWith) => {
   if (mode === ASSERTIONMODES.GETINNERHTML) {
     if (startsWith) return ASSERTIONMODES.MATCHGETINNERHTMLSTARTSWITH;
     else if (endsWith) return ASSERTIONMODES.MATCHGETINNERHTMLENDSWITH;
-    else if (endsWith) return ASSERTIONMODES.MATCHGETINNERHTMLEQUALS;
   }
   return mode;
 };
@@ -72,6 +72,12 @@ export default function FloatingElementTextMatchDock({
   const [startsWith, setStartsWith] = useState(false);
   const [endsWith, setEndsWith] = useState(false);
   const [locatorName, setLocatorName] = useState("");
+  const [matchByType, setMatchByType] = useState({
+    byText: true,
+    byVar: false,
+  });
+  const [selectedVarIndex, setSelectedVarIndex] = useState(0);
+  const [existingVarNames, setExistingVarNames] = useState([]);
 
   useModeSocket(onCancel);
 
@@ -89,9 +95,18 @@ export default function FloatingElementTextMatchDock({
   };
 
   const handleConfirm = () => {
-    if (!expected.trim()) return;
+    if (matchByType.byText && !expected.trim()) return;
+    if (
+      matchByType.byVar &&
+      (existingVarNames.length === 0 ||
+        existingVarNames[selectedVarIndex] === undefined)
+    )
+      return;
+
     onConfirmElemMatch({
-      expected,
+      expected: matchByType.byText
+        ? expected
+        : existingVarNames[selectedVarIndex],
       softAssert,
       locatorName,
       onCancel,
@@ -101,10 +116,16 @@ export default function FloatingElementTextMatchDock({
       mode: getAltMode(mode, startsWith, endsWith),
       isNegative,
       exactMatch,
+      typeMatch: matchByType.byText ? "byText" : "byVar",
     });
   };
 
-
+  const onRadioSelection = (type) => {
+    setMatchByType({
+      byText: type === "byText",
+      byVar: type === "byVar",
+    });
+  };
 
   return (
     <div
@@ -118,15 +139,44 @@ export default function FloatingElementTextMatchDock({
         </div>
       </div>
       <div className="pdf-text-container">
-        <div className="locator-name-container">
-          <label>Expected Value (Required)</label>
-          <textarea
-            ref={expectedInputRef}
-            className="assert-pdf-text-textarea"
-            value={expected}
-            onChange={handleVarNameChange}
-          />
+        <div className="assert-attribute-row">
+          <label className="assert-checkbox-container" style={{ flex: 1 }}>
+            <input
+              type="radio"
+              name="by-text"
+              checked={matchByType.byText === true}
+              onChange={() => onRadioSelection("byText")}
+            />
+            <span style={{ marginLeft: "6px" }}>By Text</span>
+          </label>
+          <label className="assert-checkbox-container" style={{ flex: 1 }}>
+            <input
+              type="radio"
+              name="by-text"
+              checked={matchByType.byVar === true}
+              onChange={() => onRadioSelection("byVar")}
+            />
+            <span style={{ marginLeft: "6px" }}>By Variable</span>
+          </label>
         </div>
+        {matchByType.byText ? (
+          <div className="locator-name-container">
+            <label>Expected Value (Required)</label>
+            <textarea
+              ref={expectedInputRef}
+              className="assert-pdf-text-textarea"
+              value={expected}
+              onChange={handleVarNameChange}
+            />
+          </div>
+        ) : (
+          <ExistingVarNamesList
+            selectedVarIndex={selectedVarIndex}
+            setSelectedVarIndex={setSelectedVarIndex}
+            existingVarNames={existingVarNames}
+            setExistingVarNames={setExistingVarNames}
+          />
+        )}
       </div>
       <ConfirmCancelFooter
         locatorName={locatorName}
@@ -136,7 +186,10 @@ export default function FloatingElementTextMatchDock({
         onCancel={handleCancel}
         onConfirm={handleConfirm}
         disableAutoFocus={true}
-        disabled={expected === ""}
+        disabled={
+          (matchByType.byText && expected.trim() === "") ||
+          (matchByType.byVar && !existingVarNames[selectedVarIndex])
+        }
         isNegative={isNegative}
         setIsNegative={setIsNegative}
         {...(mode === ASSERTIONMODES.GETTEXT ||

@@ -258,6 +258,7 @@
     emailReceivedBefore,
     isFileUpload,
     fileNames,
+    matchType,
   }) => {
     const isEmulatedMeta = window.__detectEmulationMode();
     const isMobileDevice = isEmulatedMeta.confidence > 0.5;
@@ -330,6 +331,7 @@
       ...buildOptionalField("emailSentTo", emailSentTo),
       ...buildOptionalField("emailFilter", emailFilter),
       ...buildOptionalField("emailReceivedBefore", emailReceivedBefore),
+      ...buildOptionalField("matchType", matchType),
 
       ...buildOptionalField(
         "elementIndex",

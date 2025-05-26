@@ -1004,6 +1004,7 @@ export const onConfirmElemMatch = ({
   mode,
   isNegative,
   exactMatch,
+  typeMatch,
 }) => {
   const assertionMapping = ASSERTION_NAME_LOOKUP[mode];
   const category = exactMatch ? "exact" : "contains";
@@ -1020,6 +1021,7 @@ export const onConfirmElemMatch = ({
       text: textValue,
       expected,
       isSoftAssert: softAssert,
+      matchType: typeMatch,
     })
   );
   onCancel();

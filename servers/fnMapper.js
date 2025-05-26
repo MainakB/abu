@@ -1801,6 +1801,7 @@ export const ACTION_HANDLERS = {
   [FUNCTIONMAPPER.MATCHISENABLEDEQUALS.key]: (arg, idx) => {
     const loc = constructLocators(arg, idx);
     const matchType = arg.isSoftAssert ? "sMatch" : "match";
+
     return [
       {
         step: `And ${matchType} ${FUNCTIONMAPPER.MATCHISENABLEDEQUALS.name}({po:"${loc.locKeyName}"}) == ${arg.expected}`,
@@ -1893,9 +1894,12 @@ export const ACTION_HANDLERS = {
   [FUNCTIONMAPPER.MATCHGETTEXTEQUALS.key]: (arg, idx) => {
     const loc = constructLocators(arg, idx);
     const matchType = arg.isSoftAssert ? "sMatch" : "match";
+    const isByVarMatch = arg.matchType === "byText" ? false : true;
+    const expectedText = isByVarMatch ? arg.expected : `"${arg.expected}"`;
+
     return [
       {
-        step: `And ${matchType} ${FUNCTIONMAPPER.MATCHGETTEXTEQUALS.name}({po:"${loc.locKeyName}"}) == "${arg.expected}"`,
+        step: `And ${matchType} ${FUNCTIONMAPPER.MATCHGETTEXTEQUALS.name}({po:"${loc.locKeyName}"}) == ${expectedText}`,
         locator: loc.result,
       },
       loc.newIdx,
@@ -1904,9 +1908,12 @@ export const ACTION_HANDLERS = {
   [FUNCTIONMAPPER.MATCHGETTEXTNOTEQUALS.key]: (arg, idx) => {
     const loc = constructLocators(arg, idx);
     const matchType = arg.isSoftAssert ? "sMatch" : "match";
+    const isByVarMatch = arg.matchType === "byText" ? false : true;
+    const expectedText = isByVarMatch ? arg.expected : `"${arg.expected}"`;
+
     return [
       {
-        step: `And ${matchType} ${FUNCTIONMAPPER.MATCHGETTEXTNOTEQUALS.name}({po:"${loc.locKeyName}"}) != "${arg.expected}"`,
+        step: `And ${matchType} ${FUNCTIONMAPPER.MATCHGETTEXTNOTEQUALS.name}({po:"${loc.locKeyName}"}) != ${expectedText}`,
         locator: loc.result,
       },
       loc.newIdx,
@@ -1940,9 +1947,12 @@ export const ACTION_HANDLERS = {
   [FUNCTIONMAPPER.MATCHGETVALUEEQUALS.key]: (arg, idx) => {
     const loc = constructLocators(arg, idx);
     const matchType = arg.isSoftAssert ? "sMatch" : "match";
+    const isByVarMatch = arg.matchType === "byText" ? false : true;
+    const expectedText = isByVarMatch ? arg.expected : `"${arg.expected}"`;
+
     return [
       {
-        step: `And ${matchType} ${FUNCTIONMAPPER.MATCHGETVALUEEQUALS.name}({po:"${loc.locKeyName}", atr: "value"}) == "${arg.expected}"`,
+        step: `And ${matchType} ${FUNCTIONMAPPER.MATCHGETVALUEEQUALS.name}({po:"${loc.locKeyName}", atr: "value"}) == ${expectedText}`,
         locator: loc.result,
       },
       loc.newIdx,
@@ -1952,9 +1962,11 @@ export const ACTION_HANDLERS = {
   [FUNCTIONMAPPER.MATCHGETVALUENOTEQUALS.key]: (arg, idx) => {
     const loc = constructLocators(arg, idx);
     const matchType = arg.isSoftAssert ? "sMatch" : "match";
+    const isByVarMatch = arg.matchType === "byText" ? false : true;
+    const expectedText = isByVarMatch ? arg.expected : `"${arg.expected}"`;
     return [
       {
-        step: `And ${matchType} ${FUNCTIONMAPPER.MATCHGETVALUENOTEQUALS.name}({po:"${loc.locKeyName}", atr: "value"}) != "${arg.expected}"`,
+        step: `And ${matchType} ${FUNCTIONMAPPER.MATCHGETVALUENOTEQUALS.name}({po:"${loc.locKeyName}", atr: "value"}) != ${expectedText}`,
         locator: loc.result,
       },
       loc.newIdx,
@@ -2032,9 +2044,11 @@ export const ACTION_HANDLERS = {
   [FUNCTIONMAPPER.MATCHGETTEXTSTARTSWITH.key]: (arg, idx) => {
     const loc = constructLocators(arg, idx);
     const matchType = arg.isSoftAssert ? "sMatch" : "match";
+    const isByVarMatch = arg.matchType === "byText" ? false : true;
+    const expectedText = isByVarMatch ? arg.expected : `"${arg.expected}"`;
     return [
       {
-        step: `And ${matchType} ${FUNCTIONMAPPER.MATCHGETTEXTSTARTSWITH.name}({po:"${loc.locKeyName}"}) starts with "${arg.expected}"`,
+        step: `And ${matchType} ${FUNCTIONMAPPER.MATCHGETTEXTSTARTSWITH.name}({po:"${loc.locKeyName}"}) starts with ${expectedText}`,
         locator: loc.result,
       },
       loc.newIdx,
@@ -2043,9 +2057,11 @@ export const ACTION_HANDLERS = {
   [FUNCTIONMAPPER.MATCHGETTEXTNOTSTARTSWITH.key]: (arg, idx) => {
     const loc = constructLocators(arg, idx);
     const matchType = arg.isSoftAssert ? "sMatch" : "match";
+    const isByVarMatch = arg.matchType === "byText" ? false : true;
+    const expectedText = isByVarMatch ? arg.expected : `"${arg.expected}"`;
     return [
       {
-        step: `And ${matchType} ${FUNCTIONMAPPER.MATCHGETTEXTNOTSTARTSWITH.name}({po:"${loc.locKeyName}"}) not starts with "${arg.expected}"`,
+        step: `And ${matchType} ${FUNCTIONMAPPER.MATCHGETTEXTNOTSTARTSWITH.name}({po:"${loc.locKeyName}"}) not starts with ${expectedText}`,
         locator: loc.result,
       },
       loc.newIdx,
@@ -2054,9 +2070,12 @@ export const ACTION_HANDLERS = {
   [FUNCTIONMAPPER.MATCHGETTEXTENDSWITH.key]: (arg, idx) => {
     const loc = constructLocators(arg, idx);
     const matchType = arg.isSoftAssert ? "sMatch" : "match";
+    const isByVarMatch = arg.matchType === "byText" ? false : true;
+    const expectedText = isByVarMatch ? arg.expected : `"${arg.expected}"`;
+
     return [
       {
-        step: `And ${matchType} ${FUNCTIONMAPPER.MATCHGETTEXTENDSWITH.name}({po:"${loc.locKeyName}"}) ends with "${arg.expected}"`,
+        step: `And ${matchType} ${FUNCTIONMAPPER.MATCHGETTEXTENDSWITH.name}({po:"${loc.locKeyName}"}) ends with ${expectedText}`,
         locator: loc.result,
       },
       loc.newIdx,
@@ -2066,9 +2085,12 @@ export const ACTION_HANDLERS = {
   [FUNCTIONMAPPER.MATCHGETTEXTNOTENDSWITH.key]: (arg, idx) => {
     const loc = constructLocators(arg, idx);
     const matchType = arg.isSoftAssert ? "sMatch" : "match";
+    const isByVarMatch = arg.matchType === "byText" ? false : true;
+    const expectedText = isByVarMatch ? arg.expected : `"${arg.expected}"`;
+
     return [
       {
-        step: `And ${matchType} ${FUNCTIONMAPPER.MATCHGETTEXTNOTENDSWITH.name}({po:"${loc.locKeyName}"}) not ends with "${arg.expected}"`,
+        step: `And ${matchType} ${FUNCTIONMAPPER.MATCHGETTEXTNOTENDSWITH.name}({po:"${loc.locKeyName}"}) not ends with ${expectedText}`,
         locator: loc.result,
       },
       loc.newIdx,
@@ -2078,9 +2100,11 @@ export const ACTION_HANDLERS = {
   [FUNCTIONMAPPER.MATCHGETVALUESTARTSWITH.key]: (arg, idx) => {
     const loc = constructLocators(arg, idx);
     const matchType = arg.isSoftAssert ? "sMatch" : "match";
+    const isByVarMatch = arg.matchType === "byText" ? false : true;
+    const expectedText = isByVarMatch ? arg.expected : `"${arg.expected}"`;
     return [
       {
-        step: `And ${matchType} ${FUNCTIONMAPPER.MATCHGETVALUESTARTSWITH.name}({po:"${loc.locKeyName}", atr: "value"}) starts with "${arg.expected}"`,
+        step: `And ${matchType} ${FUNCTIONMAPPER.MATCHGETVALUESTARTSWITH.name}({po:"${loc.locKeyName}", atr: "value"}) starts with ${expectedText}`,
         locator: loc.result,
       },
       loc.newIdx,
@@ -2090,9 +2114,11 @@ export const ACTION_HANDLERS = {
   [FUNCTIONMAPPER.MATCHGETVALUENOTSTARTSWITH.key]: (arg, idx) => {
     const loc = constructLocators(arg, idx);
     const matchType = arg.isSoftAssert ? "sMatch" : "match";
+    const isByVarMatch = arg.matchType === "byText" ? false : true;
+    const expectedText = isByVarMatch ? arg.expected : `"${arg.expected}"`;
     return [
       {
-        step: `And ${matchType} ${FUNCTIONMAPPER.MATCHGETVALUENOTSTARTSWITH.name}({po:"${loc.locKeyName}", atr: "value"}) not starts with "${arg.expected}"`,
+        step: `And ${matchType} ${FUNCTIONMAPPER.MATCHGETVALUENOTSTARTSWITH.name}({po:"${loc.locKeyName}", atr: "value"}) not starts with ${expectedText}`,
         locator: loc.result,
       },
       loc.newIdx,
@@ -2102,9 +2128,12 @@ export const ACTION_HANDLERS = {
   [FUNCTIONMAPPER.MATCHGETVALUEENDSWITH.key]: (arg, idx) => {
     const loc = constructLocators(arg, idx);
     const matchType = arg.isSoftAssert ? "sMatch" : "match";
+    const isByVarMatch = arg.matchType === "byText" ? false : true;
+    const expectedText = isByVarMatch ? arg.expected : `"${arg.expected}"`;
+
     return [
       {
-        step: `And ${matchType} ${FUNCTIONMAPPER.MATCHGETVALUEENDSWITH.name}({po:"${loc.locKeyName}", atr: "value"}) ends with "${arg.expected}"`,
+        step: `And ${matchType} ${FUNCTIONMAPPER.MATCHGETVALUEENDSWITH.name}({po:"${loc.locKeyName}", atr: "value"}) ends with ${expectedText}`,
         locator: loc.result,
       },
       loc.newIdx,
@@ -2114,9 +2143,11 @@ export const ACTION_HANDLERS = {
   [FUNCTIONMAPPER.MATCHGETVALUENOTENDSWITH.key]: (arg, idx) => {
     const loc = constructLocators(arg, idx);
     const matchType = arg.isSoftAssert ? "sMatch" : "match";
+    const isByVarMatch = arg.matchType === "byText" ? false : true;
+    const expectedText = isByVarMatch ? arg.expected : `"${arg.expected}"`;
     return [
       {
-        step: `And ${matchType} ${FUNCTIONMAPPER.MATCHGETVALUENOTENDSWITH.name}({po:"${loc.locKeyName}", atr: "value"}) not ends with "${arg.expected}"`,
+        step: `And ${matchType} ${FUNCTIONMAPPER.MATCHGETVALUENOTENDSWITH.name}({po:"${loc.locKeyName}", atr: "value"}) not ends with ${expectedText}`,
         locator: loc.result,
       },
       loc.newIdx,
@@ -2126,9 +2157,12 @@ export const ACTION_HANDLERS = {
   [FUNCTIONMAPPER.MATCHGETINNERHTMLSTARTSWITH.key]: (arg, idx) => {
     const loc = constructLocators(arg, idx);
     const matchType = arg.isSoftAssert ? "sMatch" : "match";
+    const isByVarMatch = arg.matchType === "byText" ? false : true;
+    const expectedText = isByVarMatch ? arg.expected : `"${arg.expected}"`;
+
     return [
       {
-        step: `And ${matchType} ${FUNCTIONMAPPER.MATCHGETINNERHTMLSTARTSWITH.name}({po:"${loc.locKeyName}"}) starts with "${arg.expected}"`,
+        step: `And ${matchType} ${FUNCTIONMAPPER.MATCHGETINNERHTMLSTARTSWITH.name}({po:"${loc.locKeyName}"}) starts with ${expectedText}`,
         locator: loc.result,
       },
       loc.newIdx,
@@ -2137,9 +2171,11 @@ export const ACTION_HANDLERS = {
   [FUNCTIONMAPPER.MATCHGETINNERHTMLNOTSTARTSWITH.key]: (arg, idx) => {
     const loc = constructLocators(arg, idx);
     const matchType = arg.isSoftAssert ? "sMatch" : "match";
+    const isByVarMatch = arg.matchType === "byText" ? false : true;
+    const expectedText = isByVarMatch ? arg.expected : `"${arg.expected}"`;
     return [
       {
-        step: `And ${matchType} ${FUNCTIONMAPPER.MATCHGETINNERHTMLNOTSTARTSWITH.name}({po:"${loc.locKeyName}"}) not starts with "${arg.expected}"`,
+        step: `And ${matchType} ${FUNCTIONMAPPER.MATCHGETINNERHTMLNOTSTARTSWITH.name}({po:"${loc.locKeyName}"}) not starts with ${expectedText}`,
         locator: loc.result,
       },
       loc.newIdx,
@@ -2148,9 +2184,12 @@ export const ACTION_HANDLERS = {
   [FUNCTIONMAPPER.MATCHGETINNERHTMLENDSWITH.key]: (arg, idx) => {
     const loc = constructLocators(arg, idx);
     const matchType = arg.isSoftAssert ? "sMatch" : "match";
+    const isByVarMatch = arg.matchType === "byText" ? false : true;
+    const expectedText = isByVarMatch ? arg.expected : `"${arg.expected}"`;
+
     return [
       {
-        step: `And ${matchType} ${FUNCTIONMAPPER.MATCHGETINNERHTMLENDSWITH.name}({po:"${loc.locKeyName}"}) ends with "${arg.expected}"`,
+        step: `And ${matchType} ${FUNCTIONMAPPER.MATCHGETINNERHTMLENDSWITH.name}({po:"${loc.locKeyName}"}) ends with ${expectedText}`,
         locator: loc.result,
       },
       loc.newIdx,
@@ -2159,9 +2198,12 @@ export const ACTION_HANDLERS = {
   [FUNCTIONMAPPER.MATCHGETINNERHTMLNOTENDSWITH.key]: (arg, idx) => {
     const loc = constructLocators(arg, idx);
     const matchType = arg.isSoftAssert ? "sMatch" : "match";
+    const isByVarMatch = arg.matchType === "byText" ? false : true;
+    const expectedText = isByVarMatch ? arg.expected : `"${arg.expected}"`;
+
     return [
       {
-        step: `And ${matchType} ${FUNCTIONMAPPER.MATCHGETINNERHTMLNOTENDSWITH.name}({po:"${loc.locKeyName}"}) not ends with "${arg.expected}"`,
+        step: `And ${matchType} ${FUNCTIONMAPPER.MATCHGETINNERHTMLNOTENDSWITH.name}({po:"${loc.locKeyName}"}) not ends with ${expectedText}`,
         locator: loc.result,
       },
       loc.newIdx,
