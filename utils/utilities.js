@@ -650,7 +650,7 @@
     return visibleElements.length > 1 ? visibleElements.indexOf(target) : -1;
   }
 
-  window.__isHumanReadable = (value) => {
+  function isHumanReadable(value) {
     if (!value || typeof value !== "string") return false;
 
     const trimmed = value.trim();
@@ -678,7 +678,7 @@
 
     // Final fallback: allow only if it's pure alphabetic
     return /^[A-Za-z]{2,}$/.test(trimmed);
-  };
+  }
 
   function getAllUniqueHumanReadableAttributes(attributes, tagName, textValue) {
     const refined = {};
@@ -696,7 +696,7 @@
       if (
         value &&
         isAttributeUnique(attr, value, textValue, tagName) &&
-        window.__isHumanReadable(value)
+        isHumanReadable(value)
       ) {
         refined[attr] = value;
       }
@@ -717,10 +717,7 @@
         ).toLowerCase() === targetText
     );
 
-    if (
-      matches.length === 1 &&
-      window.__isHumanReadable(attributes.associatedLabel)
-    ) {
+    if (matches.length === 1 && isHumanReadable(attributes.associatedLabel)) {
       return { associatedLabel: attributes.associatedLabel };
     }
 

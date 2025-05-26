@@ -813,6 +813,7 @@ export const onConfirmAttrMatchValAssignment = async ({
         el,
         e,
         textValue,
+        matchType: attrObj.method,
       })
     );
   }

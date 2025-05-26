@@ -64,6 +64,7 @@ export default function ExistingVarNamesList({
   setSelectedVarIndex,
   existingVarNames,
   setExistingVarNames,
+  hideLabel,
 }) {
   const [loading, setLoading] = useState(false);
 
@@ -100,6 +101,7 @@ export default function ExistingVarNamesList({
           selectedIndex={selectedVarIndex}
           setSelectedIndex={setSelectedVarIndex}
           label="Variable Name (Required)"
+          hideLabel={hideLabel}
         />
       )}
     </div>

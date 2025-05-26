@@ -1,16 +1,128 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { ASSERTIONMODES } from "../../../constants/index.js";
 import {
   onConfirmAttrMatchValAssignment,
   getElementAttributes,
 } from "../../../../utils/componentLibs.js";
 import ConfirmCancelFooter from "../confirm-cancel-footer/ConfirmCancelFooter.jsx";
-
-import { useModeSocket } from "../../../hooks/useModeSocket.js";
+import ExistingVarNamesList from "../variable-name/ExistingVarNamesList.jsx";
+import {
+  useModeSocket,
+  useAttributeUpdater,
+} from "../../../hooks/useModeSocket.js";
 
 const getAltMode = () => {
   return ASSERTIONMODES.MATCHATTRIBUTEEQUALS;
 };
+
+const byTextStyle = {
+  overflowX: "auto",
+  overflowY: "auto",
+  whiteSpace: "nowrap",
+};
+
+const byVarStyle = {
+  overflowY: "visible",
+  zIndex: 0,
+  whiteSpace: "nowrap",
+};
+
+const AttributeRow = React.memo(function AttributeRow({
+  attr,
+  index,
+  updateAttribute,
+}) {
+  const dynamicStyle = attr.method === "byText" ? byTextStyle : byVarStyle;
+
+  return (
+    <div
+      key={index}
+      className="assert-attribute-row"
+      style={dynamicStyle}
+      // {{
+      //   overflowX: "auto !important",
+      //   overflowY: "auto",
+      //   overflowY: "visible !important",
+      //   zIndex: 0,
+      //   whiteSpace: "nowrap",
+      // }}
+    >
+      <label className="assert-checkbox-container">
+        <input
+          type="checkbox"
+          name="attributeSelect"
+          className="assert-checkbox"
+          checked={attr.checked}
+          onChange={(e) => updateAttribute(index, "checked", e.target.checked)}
+        />
+      </label>
+      <select
+        value={attr.method}
+        className="hdr-verb-select"
+        onChange={(e) => updateAttribute(index, "method", e.target.value)}
+      >
+        <option value="byText">BY TEXT</option>
+        <option value="byVar">BY VARIABLE</option>
+      </select>
+
+      <input
+        type="text"
+        className="assert-input assert-attribute-name"
+        value={attr.name}
+        readOnly
+        disabled
+        title={attr.name}
+      />
+
+      <button
+        className="assert-toggle-button-neg-pos"
+        title={attr.isNegative ? "Assert not equals" : "Assert equals"}
+        onClick={() => updateAttribute(index, "isNegative", !attr.isNegative)}
+      >
+        {attr.isNegative ? "≠" : "="}
+      </button>
+      {attr.method === "byText" ? (
+        <input
+          type="text"
+          className="assert-input assert-attribute-value"
+          value={attr.value}
+          readOnly
+          disabled
+        />
+      ) : (
+        <ExistingVarNamesList
+          selectedVarIndex={attr.selectedVarIndex}
+          setSelectedVarIndex={(newIndex) =>
+            updateAttribute(index, "selectedVarIndex", newIndex)
+          }
+          existingVarNames={attr.existingVarNames}
+          setExistingVarNames={(newNames) =>
+            updateAttribute(index, "existingVarNames", newNames)
+          }
+          hideLabel={true}
+        />
+      )}
+      <button
+        className="assert-toggle-button-neg-pos"
+        title={attr.isSubstringMatch ? "Substring match" : "Exact match"}
+        onClick={() =>
+          updateAttribute(index, "isSubstringMatch", !attr.isSubstringMatch)
+        }
+      >
+        {attr.isSubstringMatch ? "contains" : "exact"}
+      </button>
+      <button
+        className="assert-toggle-button-neg-pos"
+        title={attr.isSoftAssert ? "Soft Match" : "Match"}
+        onClick={() =>
+          updateAttribute(index, "isSoftAssert", !attr.isSoftAssert)
+        }
+      >
+        {attr.isSoftAssert ? "sMatch" : "match"}
+      </button>
+    </div>
+  );
+});
 
 export default function FloatingElementAttrMatchDock({
   el,
@@ -26,6 +138,9 @@ export default function FloatingElementAttrMatchDock({
   const [attributes, setAttributes] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  // const [method, setMethod] = useState("byText");
+  //   const [selectedVarIndex, setSelectedVarIndex] = useState(0);
+  //   const [existingVarNames, setExistingVarNames] = useState([]);
 
   useModeSocket(onCancel);
 
@@ -42,11 +157,13 @@ export default function FloatingElementAttrMatchDock({
             return {
               name,
               value,
-              // checked: shouldCheck,
               isNegative: false,
               isSubstringMatch: false,
               isSoftAssert: false,
               checked: false,
+              method: "byText",
+              selectedVarIndex: 0,
+              existingVarNames: [],
             };
           });
         } else {
@@ -60,6 +177,9 @@ export default function FloatingElementAttrMatchDock({
                 isSubstringMatch: false,
                 isSoftAssert: false,
                 checked: false,
+                method: "byText",
+                selectedVarIndex: 0,
+                existingVarNames: [],
               };
             }
           );
@@ -76,13 +196,15 @@ export default function FloatingElementAttrMatchDock({
     fetchAttributes();
   }, [el]);
 
-  const updateAttribute = (index, field, value) => {
-    setAttributes((prevAttributes) =>
-      prevAttributes.map((attr, i) =>
-        i === index ? { ...attr, [field]: value } : attr
-      )
-    );
-  };
+  // const updateAttribute = (index, field, value) => {
+  //   setAttributes((prevAttributes) =>
+  //     prevAttributes.map((attr, i) =>
+  //       i === index ? { ...attr, [field]: value } : attr
+  //     )
+  //   );
+  // };
+
+  const updateAttribute = useAttributeUpdater(setAttributes);
 
   const handleCancel = () => {
     setLocatorName("");
@@ -105,11 +227,15 @@ export default function FloatingElementAttrMatchDock({
       .filter((attr) => attr.checked)
       .map((attr) => ({
         attributeName: attr.name,
-        value: attr.value,
+        value:
+          attr.method === "byText"
+            ? attr.value
+            : attr.existingVarNames[attr.selectedVarIndex],
         isNegative: attr.isNegative,
         isSubstringMatch: attr.isSubstringMatch,
         isSoftAssert: attr.isSoftAssert,
         locatorName,
+        method: attr.method,
       }));
 
     onConfirmAttrMatchValAssignment({
@@ -177,70 +303,106 @@ export default function FloatingElementAttrMatchDock({
             </button>
           </div>
           {attributes.map((attr, index) => (
-            <div key={index} className="assert-attribute-row">
-              <label className="assert-checkbox-container">
-                <input
-                  type="checkbox"
-                  name="attributeSelect"
-                  className="assert-checkbox"
-                  checked={attr.checked}
-                  onChange={(e) =>
-                    updateAttribute(index, "checked", e.target.checked)
-                  }
-                />
-              </label>
+            <AttributeRow
+              key={index}
+              attr={attr}
+              index={index}
+              updateAttribute={updateAttribute}
+            />
+            // <div
+            //   key={index}
+            //   className="assert-attribute-row"
+            //   style={{
+            //     overflowX: "auto !important",
+            //     overflowY: "auto",
+            //     whiteSpace: "nowrap",
+            //   }}
+            // >
+            //   <label className="assert-checkbox-container">
+            //     <input
+            //       type="checkbox"
+            //       name="attributeSelect"
+            //       className="assert-checkbox"
+            //       checked={attr.checked}
+            //       onChange={(e) =>
+            //         updateAttribute(index, "checked", e.target.checked)
+            //       }
+            //     />
+            //   </label>
+            //   <select
+            //     value={attr.method}
+            //     className="hdr-verb-select"
+            //     onChange={(e) =>
+            //       updateAttribute(index, "method", e.target.value)
+            //     }
+            //   >
+            //     <option value="byText">BY TEXT</option>
+            //     <option value="byVar">BY VARIABLE</option>
+            //   </select>
 
-              <input
-                type="text"
-                className="assert-input assert-attribute-name"
-                value={attr.name}
-                readOnly
-                disabled
-                title={attr.name}
-              />
+            //   <input
+            //     type="text"
+            //     className="assert-input assert-attribute-name"
+            //     value={attr.name}
+            //     readOnly
+            //     disabled
+            //     title={attr.name}
+            //   />
 
-              <button
-                className="assert-toggle-button-neg-pos"
-                title={attr.isNegative ? "Assert not equals" : "Assert equals"}
-                onClick={() =>
-                  updateAttribute(index, "isNegative", !attr.isNegative)
-                }
-              >
-                {attr.isNegative ? "≠" : "="}
-              </button>
-
-              <input
-                type="text"
-                className="assert-input assert-attribute-value"
-                value={attr.value}
-                readOnly
-                disabled
-              />
-              <button
-                className="assert-toggle-button-neg-pos"
-                title={
-                  attr.isSubstringMatch ? "Substring match" : "Exact match"
-                }
-                onClick={() =>
-                  updateAttribute(
-                    index,
-                    "isSubstringMatch",
-                    !attr.isSubstringMatch
-                  )
-                }
-              >
-                {attr.isSubstringMatch ? "contains" : "exact"}
-              </button>
-              <button
-                className="assert-toggle-button-neg-pos"
-                title={attr.isSoftAssert ? "Soft Match" : "Match"}
-                onClick={() =>
-                  updateAttribute(index, "isSoftAssert", !attr.isSoftAssert)
-                }
-              >
-                {attr.isSoftAssert ? "sMatch" : "match"}
-              </button>
-            </div>
+            //   <button
+            //     className="assert-toggle-button-neg-pos"
+            //     title={attr.isNegative ? "Assert not equals" : "Assert equals"}
+            //     onClick={() =>
+            //       updateAttribute(index, "isNegative", !attr.isNegative)
+            //     }
+            //   >
+            //     {attr.isNegative ? "≠" : "="}
+            //   </button>
+            //   {method === "byText" ? (
+            //     <input
+            //       type="text"
+            //       className="assert-input assert-attribute-value"
+            //       value={attr.value}
+            //       readOnly
+            //       disabled
+            //     />
+            //   ) : (
+            //     <ExistingVarNamesList
+            //       selectedVarIndex={attr.selectedVarIndex}
+            //       setSelectedVarIndex={(newIndex) =>
+            //         updateAttribute(index, "selectedVarIndex", newIndex)
+            //       }
+            //       existingVarNames={attr.existingVarNames}
+            //       setExistingVarNames={(newNames) =>
+            //         updateAttribute(index, "existingVarNames", newNames)
+            //       }
+            //     />
+            //   )}
+            //   <button
+            //     className="assert-toggle-button-neg-pos"
+            //     title={
+            //       attr.isSubstringMatch ? "Substring match" : "Exact match"
+            //     }
+            //     onClick={() =>
+            //       updateAttribute(
+            //         index,
+            //         "isSubstringMatch",
+            //         !attr.isSubstringMatch
+            //       )
+            //     }
+            //   >
+            //     {attr.isSubstringMatch ? "contains" : "exact"}
+            //   </button>
+            //   <button
+            //     className="assert-toggle-button-neg-pos"
+            //     title={attr.isSoftAssert ? "Soft Match" : "Match"}
+            //     onClick={() =>
+            //       updateAttribute(index, "isSoftAssert", !attr.isSoftAssert)
+            //     }
+            //   >
+            //     {attr.isSoftAssert ? "sMatch" : "match"}
+            //   </button>
+            // </div>
           ))}
         </div>
       )}

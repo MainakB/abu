@@ -50,11 +50,11 @@
     if (hrefValue) {
       selectors.href = hrefValue;
     }
-    if (el.id && window.__isHumanReadable(el.id)) {
+    if (el.id && isHumanReadable(el.id)) {
       selectors.id = `${el.id}`;
     }
 
-    if (el.name && window.__isHumanReadable(el.name)) {
+    if (el.name && isHumanReadable(el.name)) {
       selectors.name = `${el.name}`;
     }
 
@@ -66,6 +66,36 @@
     return { selectors, attributes };
   };
 
+  function isHumanReadable(value) {
+    if (!value || typeof value !== "string") return false;
+
+    const trimmed = value.trim();
+
+    // Rule 1: reject if contains underscore
+    if (trimmed.includes("_")) return false;
+
+    // Rule 2: reject UUIDs
+    const uuidPattern =
+      /^[a-f0-9]{8}-?[a-f0-9]{4}-?[a-f0-9]{4}-?[a-f0-9]{4}-?[a-f0-9]{12}$/i;
+    if (uuidPattern.test(trimmed)) return false;
+
+    // Rule 3: reject if contains numbers
+    if (/\d/.test(trimmed)) return false;
+
+    // Rule 4: recursively validate each space-separated word
+    if (trimmed.includes(" ")) {
+      return trimmed.split(/\s+/).every(isHumanReadable);
+    }
+
+    // Rule 5: recursively validate each dash-separated part
+    if (trimmed.includes("-")) {
+      return trimmed.split("-").every(isHumanReadable);
+    }
+
+    // Final fallback: allow only if it's pure alphabetic
+    return /^[A-Za-z]{2,}$/.test(trimmed);
+  }
+
   const getUniqueClass = (el) => {
     if (!el || typeof el.className !== "string") return null;
     if (!el.className) return null;
@@ -74,7 +104,7 @@
       .filter((c) => c && !c.includes(" "));
 
     return classes.length === 1
-      ? window.__isHumanReadable(`${classes[0]}`)
+      ? isHumanReadable(`${classes[0]}`)
         ? `${classes[0]}`
         : null
       : null;
@@ -106,10 +136,7 @@
 
     const atrValues = [];
 
-    id &&
-      id !== "" &&
-      window.__isHumanReadable(id) &&
-      atrValues.push(`@id='${id}'`);
+    id && id !== "" && isHumanReadable(id) && atrValues.push(`@id='${id}'`);
     className && className !== "" && atrValues.push(`@class='${className}'`);
     ariaLabel &&
       ariaLabel !== "" &&

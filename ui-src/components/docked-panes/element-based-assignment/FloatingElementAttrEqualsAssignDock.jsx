@@ -135,7 +135,11 @@ export default function FloatingElementAttrEqualsAssignDock({
         <div className="assert-dock-header">
           <strong>
             Is Element Attribute Equals/Contains
-            <span className="info-tooltip-icon" title="Returns true or false">
+            <span
+              className="info-tooltip-icon"
+              title="Returns true or false"
+              style={{ marginLeft: "3px" }}
+            >
               ⓘ
             </span>
           </strong>

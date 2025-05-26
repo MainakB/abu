@@ -1771,9 +1771,14 @@ export const ACTION_HANDLERS = {
   [FUNCTIONMAPPER.MATCHATTRIBUTEEQUALS.key]: (arg, idx) => {
     const loc = constructLocators(arg, idx);
     const matchType = arg.isSoftAssert ? "sMatch" : "match";
+    const isByVarMatch = arg.matchType === "byText" ? false : true;
+    const expectedText = isByVarMatch
+      ? arg.expectedAttribute
+      : `"${arg.expectedAttribute}"`;
+
     return [
       {
-        step: `And ${matchType} ${FUNCTIONMAPPER.MATCHATTRIBUTEEQUALS.name}({po:"${loc.locKeyName}", atr:"${arg.attributeAssertPropName}"}) == "${arg.expectedAttribute}"`,
+        step: `And ${matchType} ${FUNCTIONMAPPER.MATCHATTRIBUTEEQUALS.name}({po:"${loc.locKeyName}", atr:"${arg.attributeAssertPropName}"}) == ${expectedText}`,
         locator: loc.result,
       },
       loc.newIdx,
@@ -1782,9 +1787,13 @@ export const ACTION_HANDLERS = {
   [FUNCTIONMAPPER.MATCHATTRIBUTENOTEQUALS.key]: (arg, idx) => {
     const loc = constructLocators(arg, idx);
     const matchType = arg.isSoftAssert ? "sMatch" : "match";
+    const isByVarMatch = arg.matchType === "byText" ? false : true;
+    const expectedText = isByVarMatch
+      ? arg.expectedAttribute
+      : `"${arg.expectedAttribute}"`;
     return [
       {
-        step: `And ${matchType} ${FUNCTIONMAPPER.MATCHATTRIBUTENOTEQUALS.name}({po:"${loc.locKeyName}", atr:"${arg.attributeAssertPropName}"}) != "${arg.expectedAttribute}"`,
+        step: `And ${matchType} ${FUNCTIONMAPPER.MATCHATTRIBUTENOTEQUALS.name}({po:"${loc.locKeyName}", atr:"${arg.attributeAssertPropName}"}) != ${expectedText}`,
         locator: loc.result,
       },
       loc.newIdx,
@@ -1793,9 +1802,13 @@ export const ACTION_HANDLERS = {
   [FUNCTIONMAPPER.MATCHATTRIBUTECONTAINS.key]: (arg, idx) => {
     const loc = constructLocators(arg, idx);
     const matchType = arg.isSoftAssert ? "sMatch" : "match";
+    const isByVarMatch = arg.matchType === "byText" ? false : true;
+    const expectedText = isByVarMatch
+      ? arg.expectedAttribute
+      : `"${arg.expectedAttribute}"`;
     return [
       {
-        step: `And ${matchType} ${FUNCTIONMAPPER.MATCHATTRIBUTECONTAINS.name}({po:"${loc.locKeyName}", atr:"${arg.attributeAssertPropName}"}) contains "${arg.expectedAttribute}"`,
+        step: `And ${matchType} ${FUNCTIONMAPPER.MATCHATTRIBUTECONTAINS.name}({po:"${loc.locKeyName}", atr:"${arg.attributeAssertPropName}"}) contains ${expectedText}`,
         locator: loc.result,
       },
       loc.newIdx,
@@ -1804,9 +1817,13 @@ export const ACTION_HANDLERS = {
   [FUNCTIONMAPPER.MATCHATTRIBUTENOTCONTAINS.key]: (arg, idx) => {
     const loc = constructLocators(arg, idx);
     const matchType = arg.isSoftAssert ? "sMatch" : "match";
+    const isByVarMatch = arg.matchType === "byText" ? false : true;
+    const expectedText = isByVarMatch
+      ? arg.expectedAttribute
+      : `"${arg.expectedAttribute}"`;
     return [
       {
-        step: `And ${matchType} ${FUNCTIONMAPPER.MATCHATTRIBUTENOTCONTAINS.name}({po:"${loc.locKeyName}", atr:"${arg.attributeAssertPropName}"}) not contains "${arg.expectedAttribute}"`,
+        step: `And ${matchType} ${FUNCTIONMAPPER.MATCHATTRIBUTENOTCONTAINS.name}({po:"${loc.locKeyName}", atr:"${arg.attributeAssertPropName}"}) not contains ${expectedText}`,
         locator: loc.result,
       },
       loc.newIdx,

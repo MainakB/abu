@@ -209,7 +209,9 @@ export default function FloatingElementTextMatchDock({
         onConfirm={handleConfirm}
         disableAutoFocus={true}
         disabled={
-          (matchByType.byText && expected.trim() === "") ||
+          (matchByType.byText &&
+            typeof expected === "string" &&
+            expected.trim() === "") ||
           (matchByType.byVar && !existingVarNames[selectedVarIndex])
         }
         isNegative={isNegative}

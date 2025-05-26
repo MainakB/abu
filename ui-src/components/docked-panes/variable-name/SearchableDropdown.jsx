@@ -5,6 +5,7 @@ export default function SearchableDropdown({
   options = [],
   selectedIndex,
   setSelectedIndex,
+  hideLabel,
   label = "Variable Name",
 }) {
   const [query, setQuery] = useState("");
@@ -36,7 +37,7 @@ export default function SearchableDropdown({
 
   return (
     <div className="searchable-dropdown" ref={containerRef}>
-      <label>{label}</label>
+      {!hideLabel && <label>{label}</label>}
       <div className="dropdown-control" onClick={() => setOpen(!open)}>
         <input
           ref={inputRef}

@@ -1,5 +1,5 @@
 // useModeSocket.js
-import { useEffect } from "react";
+import { useEffect,useCallback } from "react";
 
 export function useModeSocket(onPause) {
   useEffect(() => {
@@ -21,4 +21,22 @@ export function useModeSocket(onPause) {
       socket.close();
     };
   }, []);
+}
+
+export function useAttributeUpdater(setAttributes) {
+  return useCallback(
+    (index, field, value) => {
+      setAttributes((prev) => {
+        const newAttributes = [...prev];
+        const updatedAttr = { ...newAttributes[index] };
+
+        if (updatedAttr[field] === value) return prev;
+
+        updatedAttr[field] = value;
+        newAttributes[index] = updatedAttr;
+        return newAttributes;
+      });
+    },
+    [setAttributes]
+  );
 }
