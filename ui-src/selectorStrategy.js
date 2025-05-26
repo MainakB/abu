@@ -17,10 +17,12 @@
     // Preferred stable selectors
     selectors.id = el.id ? `${el.id}` : null;
     let xpathText = generateTextBasedXpath(el, elIndexValue);
+    let classNameBasedXpath = getUniqueClassBasedXpath(el, elIndexValue);
     selectors.xpath = [
       getPathTo(el),
       generateXPath(el),
       ...(xpathText ? [xpathText] : []),
+      ...(classNameBasedXpath ? [classNameBasedXpath] : []),
     ];
     selectors.css = getCssSelector(el);
     selectors.name = el.name ? `${el.name}` : null;
@@ -33,7 +35,6 @@
     selectors.role = el.getAttribute("role")
       ? `${el.getAttribute("role")}`
       : null;
-    selectors.className = getUniqueClass(el);
     selectors.href =
       el.tagName.toLowerCase() === "a" ? `${el.getAttribute("href")}` : null;
     const iFramesPath = getIframePath(el);
@@ -51,6 +52,20 @@
       .split(" ")
       .filter((c) => c && !c.includes(" "));
     return classes.length === 1 ? `${classes[0]}` : null;
+  };
+
+  const getUniqueClassBasedXpath = (el, idx) => {
+    if (!el || typeof el.className !== "string") return null;
+    if (!el.className) return null;
+    const classes = el.className
+      .split(" ")
+      .filter((c) => c && !c.includes(" "));
+    const classNameValue = classes.length === 1 ? `${classes[0]}` : null;
+    if (!classNameValue) return null;
+    const elTag = el.tagName.toLowerCase();
+    const locator = `.//${elTag}[@class=${classNameValue}]`;
+
+    return idx > 0 ? `(${locator})[${idx + 1}]` : locator;
   };
 
   function getElementIdx(elt) {

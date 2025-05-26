@@ -7,6 +7,7 @@ import chalk from "chalk";
 import { fileURLToPath } from "url";
 
 import { RecorderConfig } from "../servers/RecorderConfig.js";
+import { getProjectLocators } from "../servers/lookupExistingLocators.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -151,12 +152,13 @@ async function getCliOptions() {
   return result;
 }
 
-const waitForServer = async (debugMode, timeoutMs = 15000) => {
+const waitForServer = async (debugMode, customer, timeoutMs = 15000) => {
   const url = "http://localhost:3111/api/health";
   const start = Date.now();
+  const maxIdx = await getProjectLocators(customer);
   while (Date.now() - start < timeoutMs) {
     try {
-      const res = await fetch(url);
+      const res = await fetch(`${url}?maxIdx=${maxIdx}`);
       if (res.ok) return;
     } catch (err) {
       if (debugMode) console.warn("⏳ Waiting for server to be ready...");
@@ -187,7 +189,7 @@ export const startAndSaveCliConfig = async () => {
 };
 
 export const initRecorderConfig = async (recorderConfig) => {
-  await waitForServer(recorderConfig.debug);
+  await waitForServer(recorderConfig.debug, recorderConfig.customerName);
   await fetch("http://localhost:3111/api/recorder/config", {
     method: "POST",
     headers: { "Content-Type": "application/json" },

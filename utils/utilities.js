@@ -206,8 +206,8 @@
       return Array.from(el.childNodes)
         .filter((n) => n.nodeType === Node.TEXT_NODE)
         .map((n) => n.textContent.trim())
-        .join(" ")
-        .trim();
+        .join(" ");
+    // .trim();
     return null;
   };
 

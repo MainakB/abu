@@ -38,6 +38,9 @@ app.use((req, res, next) => {
 });
 
 app.get("/api/health", (req, res) => {
+  const maxIdxInquery = parseInt(req.query.maxIdx, 10);
+  locIndex = maxIdxInquery && !isNaN(maxIdxInquery) ? maxIdxInquery : locIndex;
+
   res.send("ok");
 });
 
@@ -335,6 +338,7 @@ const writeLiveToFile = (action, fileName, ai) => {
 };
 
 const writeLocatorObject = (locatorId, locatorBlock, fileName) => {
+  if (!(locatorId && locatorBlock && Object.keys(locatorBlock).length)) return;
   const filePath = getFilePath(fileName, true);
   // const dir = path.dirname(filePath);
   // if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });

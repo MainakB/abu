@@ -326,22 +326,37 @@ const constructLocators = (arg, locatorIndex) => {
     locator,
   };
 
-  const locPresent = lookupLocatorHash(locObjectCreated);
+  const locObjectCreatedCloned = { ...locObjectCreated };
+  if (
+    locObjectCreatedCloned.locator &&
+    Array.isArray(locObjectCreatedCloned.locator)
+  ) {
+    locObjectCreatedCloned.locator = locObjectCreatedCloned.locator.map(
+      (item) => {
+        if (typeof item === "object" && item !== null) {
+          const { locatorType, ...rest } = item;
+          return rest;
+        }
+        return item;
+      }
+    );
+  }
+
+  const locPresent = lookupLocatorHash(locObjectCreatedCloned.locator);
+  let shouldSkipLocCreation = false;
   if (locPresent) {
     locKeyName = locPresent;
     locNameUpdated = true;
+    shouldSkipLocCreation = true;
   } else {
-    writeLocatorHash(locKeyName, locObjectCreated);
+    writeLocatorHash(locKeyName, locObjectCreatedCloned.locator);
   }
-  const result = {
+
+  let result = {
     [locKeyName]: { ...locObjectCreated },
-    // {
-    //   poParentObject: "__filename",
-    //   description: `${arg.tagName} tag${descText}`,
-    //   locator,
-    // },
   };
   let newIdx = locatorIndex + (locNameUpdated ? 0 : 1);
+  result = shouldSkipLocCreation ? {} : result;
   return { result, newIdx, locKeyName };
 };
 
