@@ -273,6 +273,7 @@
         e.target,
         el.tagName.toLowerCase()
       );
+      console.log("Got back el index: ", elIndex);
       elIndexValue = elIndex;
     }
 
@@ -790,19 +791,210 @@
     }
   };
 
+  // window.__searchElIndexByOccurence = (target, tagType) => {
+  //   try {
+  //     if (!target || !tagType) return { elIndex: -1 };
+  //     const textValue = window.__getTextValueOfEl(target);
+  //     const index = getVisibleIndex(target, textValue, tagType);
+  //     return {
+  //       elIndex: index,
+  //     };
+  //   } catch (err) {
+  //     console.error("__searchElIndexByOccurence failed:", err);
+  //     return {
+  //       elIndex: -1,
+  //     };
+  //   }
+  // };
+
   window.__searchElIndexByOccurence = (target, tagType) => {
-    try {
-      if (!target || !tagType) return { elIndex: -1 };
-      const textValue = window.__getTextValueOfEl(target);
-      const index = getVisibleIndex(target, textValue, tagType);
-      return {
-        elIndex: index,
-      };
-    } catch (err) {
-      console.error("__searchElIndexByOccurence failed:", err);
-      return {
-        elIndex: -1,
-      };
+    const textNormalized = (s) => (s ? s.replace(/\s+/g, " ").trim() : null);
+
+    function getTextValueOfEl(el) {
+      if (el && el.childNodes && Array.from(el.childNodes).length) {
+        const res = Array.from(el.childNodes)
+          .filter((n) => n.nodeType === Node.TEXT_NODE)
+          .map(
+            (n) =>
+              (n.textContent && n.textContent.trim()) ||
+              (n.title && n.title.trim()) ||
+              (n.placeholder && n.placeholder.trim())
+          )
+          .join(" ");
+        return res;
+        //   console.log("In if block return ", res);
+        // return (
+        //   (el.firstChild &&
+        //     el.firstChild.nodeValue &&
+        //     el.firstChild.nodeValue.trim()) ||
+        //   (el.title && el.title.trim()) ||
+        //   (el.placeholder && el.placeholder.trim()) ||
+        //   null
+        // );
+      }
+
+      return (
+        (el.textContent && el.textContent.trim()) ||
+        (el.title && el.title.trim()) ||
+        (el.placeholder && el.placeholder.trim()) ||
+        null
+      );
     }
+
+    function getUniqueClass(el) {
+      if (!el || typeof el.className !== "string") return null;
+      if (!el.className) return null;
+      const classes = el.className
+        .split(" ")
+        .filter((c) => c && !c.includes(" "));
+
+      return classes.length === 1
+        ? isHumanReadable(`${classes[0]}`)
+          ? `${classes[0]}`
+          : null
+        : null;
+    }
+
+    const toUse = {
+      id: { use: false, value: (e, t) => e.id === t.id },
+      className: { use: false, value: (e, t) => e.className === t.className },
+      ariaLabel: {
+        use: false,
+        value: (e, t) =>
+          e.getAttribute("aria-label") === t.getAttribute("aria-label"),
+      },
+      name: {
+        use: false,
+        value: (e, t) => e.getAttribute("name") === t.getAttribute("name"),
+      },
+      title: {
+        use: false,
+        value: (e, t) => e.getAttribute("title") === t.getAttribute("title"),
+      },
+      ariaDescBy: {
+        use: false,
+        value: (e, t) =>
+          e.getAttribute("aria-describedby") ===
+          t.getAttribute("aria-describedby"),
+      },
+      placeHolder: {
+        use: false,
+        value: (e, t) =>
+          e.getAttribute("placeholder") === t.getAttribute("placeholder"),
+      },
+      role: {
+        use: false,
+        value: (e, t) => e.getAttribute("role") === t.getAttribute("role"),
+      },
+    };
+
+    function checkIfCondMeet(e, t) {
+      const results = [];
+      toUse.id.use && results.push(toUse.id.value(e, t));
+
+      toUse.className.use && results.push(toUse.className.value(e, t));
+
+      toUse.ariaLabel.use && results.push(toUse.ariaLabel.value(e, t));
+      toUse.name.use && results.push(toUse.name.value(e, t));
+      toUse.title.use && results.push(toUse.title.value(e, t));
+
+      toUse.ariaDescBy.use && results.push(toUse.ariaDescBy.value(e, t));
+
+      toUse.placeHolder.use && results.push(toUse.placeHolder.value(e, t));
+      toUse.role.use && results.push(toUse.role.value(e, t));
+
+      const res = results.every(Boolean);
+      return res;
+    }
+
+    function getElVisibleIndex(target, textValue, tagType = "input") {
+      let visibleElements = Array.from(document.querySelectorAll(tagType));
+
+      const ariaLabel = target.getAttribute("aria-label");
+      const name = target.getAttribute("name");
+      const title = target.getAttribute("title");
+      const ariaDescBy = target.getAttribute("aria-describedby");
+      const placeHolder = target.getAttribute("placeholder");
+      const role = target.getAttribute("role");
+      const id = target.id;
+      const className = getUniqueClass(target);
+
+      if (id && id !== "" && isHumanReadable(id)) {
+        toUse.id.use = true;
+      }
+
+      if (className && className !== "" && isHumanReadable(className)) {
+        toUse.className.use = true;
+      }
+
+      if (ariaLabel && ariaLabel !== "" && isHumanReadable(ariaLabel)) {
+        toUse.ariaLabel.use = true;
+      }
+
+      if (name && name !== "" && isHumanReadable(name)) {
+        toUse.name.use = true;
+      }
+
+      if (title && title !== "") {
+        toUse.title.use = true;
+      }
+
+      if (ariaDescBy && ariaDescBy !== "") {
+        toUse.ariaDescBy.use = true;
+      }
+
+      if (placeHolder && placeHolder !== "") {
+        toUse.placeHolder.use = true;
+      }
+
+      if (role && role !== "") {
+        toUse.role.use = true;
+      }
+
+      console.log("1::: ", visibleElements.length, textValue);
+      console.log("1a::: ", textNormalized(textValue));
+      if (textValue && typeof textValue === "string") {
+        visibleElements = visibleElements.filter((el) => {
+          // checkIfCondMeet(el, target) &&
+          console.log(
+            "Text values to check: ",
+            textNormalized(getTextValueOfEl(el)) === textNormalized(textValue)
+          );
+          return (
+            textNormalized(getTextValueOfEl(el)) === textNormalized(textValue)
+          );
+        });
+      }
+      console.log(
+        "2::: ",
+        visibleElements.length,
+        visibleElements.length ? isVisible(visibleElements[0]) : "abc"
+      );
+
+      visibleElements = visibleElements
+        .filter((el) => checkIfCondMeet(el, target))
+        .filter(isVisible);
+
+      console.log("3::: ", visibleElements.length);
+      return visibleElements.length > 1 ? visibleElements.indexOf(target) : -1;
+    }
+
+    function searchElIdx(target, tagType) {
+      try {
+        if (!target || !tagType) return { elIndex: -1 };
+        const textValue = getTextValueOfEl(target);
+
+        const index = getElVisibleIndex(target, textValue, tagType);
+        return {
+          elIndex: index,
+        };
+      } catch (err) {
+        console.error("searchElIdx failed:", err);
+        return {
+          elIndex: -1,
+        };
+      }
+    }
+    return searchElIdx(target, tagType);
   };
 })();

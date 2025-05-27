@@ -19,13 +19,14 @@
     let xpathText = generateTextBasedXpath(el, elIndexValue);
     let classNameBasedXpath = getUniqueClassBasedXpath(el, elIndexValue);
     let attrBasedXpaths = getAttributeBasedXpaths(el, elIndexValue);
-    selectors.xpath = [
-      getPathTo(el),
+    const allxpaths = new Set([
       ...(attrBasedXpaths ? attrBasedXpaths : []),
+      getPathTo(el),
       generateXPath(el),
       ...(xpathText ? [xpathText] : []),
       ...(classNameBasedXpath ? [classNameBasedXpath] : []),
-    ];
+    ]);
+    selectors.xpath = Array.from(allxpaths);
     selectors.css = getCssSelector(el);
 
     const testIdValue = el.getAttribute("data-testid");
@@ -121,7 +122,7 @@
     const elTag = el.tagName.toLowerCase();
     const locator = `.//${elTag}[@class=${classNameValue}]`;
 
-    return idx > 0 ? `(${locator})[${idx + 1}]` : locator;
+    return idx > -1 ? `(${locator})[${idx + 1}]` : locator;
   };
 
   const getAttributeBasedXpaths = (el, idx) => {
@@ -141,7 +142,10 @@
     ariaLabel &&
       ariaLabel !== "" &&
       atrValues.push(`@aria-label='${ariaLabel}'`);
-    name && name !== "" && atrValues.push(`@name='${name}'`);
+    name &&
+      name !== "" &&
+      isHumanReadable(name) &&
+      atrValues.push(`@name='${name}'`);
     title && title !== "" && atrValues.push(`@title='${title}'`);
     ariaDescBy &&
       ariaDescBy !== "" &&
@@ -162,7 +166,7 @@
       }
     }
     const finalizedXapath = `.//${tagName}[${attrDesc}]`;
-    return idx > 0
+    return idx > -1
       ? [`(.//${tagName}[${attrDesc}])[${idx + 1}]`, finalizedXapath]
       : [finalizedXapath];
   };
@@ -198,7 +202,7 @@
       if (!elText || elText === "") return null;
       if (elText && elText !== "") {
         let className = getUniqueClass(el);
-        let id = el.id;
+        let id = el.id && isHumanReadable(el.id) ? el.id : null;
         if (id) {
           textValue = `.//${el.tagName?.toLowerCase()}[@id='${id}' and text()='${elText}']`;
         } else if (className) {
@@ -208,7 +212,9 @@
         }
       }
     } catch (e) {}
-    return elIndexValue > 0 ? `(${textValue})[${elIndexValue + 1}]` : textValue;
+    return elIndexValue > -1
+      ? `(${textValue})[${elIndexValue + 1}]`
+      : textValue;
   };
 
   const getShadowRoot = (el) => {
